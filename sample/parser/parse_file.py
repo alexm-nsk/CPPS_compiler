@@ -208,7 +208,7 @@ def parse_file(input_text):
                 # calculate the offset number of lines where errors occured:
 
                 line_offset   = text[:start].count("\n")
-                #   we get length of text between closest newline preceding
+                #   we get the length of text between closest newline preceding
                 #   the current function block:
                 column_offset = len( (text[:start].split("\n"))[-1] )
 
