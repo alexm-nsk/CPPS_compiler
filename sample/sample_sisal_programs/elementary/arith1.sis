@@ -1,0 +1,7 @@
+function foo(a:integer; b:integer; c:integer  returns integer, integer)
+   a+b+c, a-b-c
+end function
+
+function main(returns integer, integer)
+	foo(1,2,3)
+end function

@@ -1,0 +1,8 @@
+function Main(M, N : integer returns integer, integer)
+  let 
+    X1 := if M <= N then M elseif M = N then 0 else N end if;
+    X2 := if M <= N then N elseif M = N then 0 else M end if
+  in
+    X1, X2
+  end let
+end function

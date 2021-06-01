@@ -1,0 +1,3 @@
+function Main(M, N : integer returns integer, integer)
+  M+N, M-N
+end function

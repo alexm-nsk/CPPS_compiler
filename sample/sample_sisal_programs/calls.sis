@@ -1,0 +1,11 @@
+function min(M, N : integer returns integer)
+  M
+end function
+
+function max(M, N : integer returns integer)
+  N
+end function
+
+function Main(M, N : integer returns integer, integer)
+  min(M, N), max(M, N)
+end function

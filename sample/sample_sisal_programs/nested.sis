@@ -1,0 +1,12 @@
+function Main(M, N : integer returns integer, integer)
+  let 
+    X1 := if M <= N then M elseif M = N then 0 else N end if;
+    X2 := for i in 1, M
+                repeat
+                  R := i + 0
+                returns sum of R
+              end for
+  in
+    X1, X2
+  end let
+end function

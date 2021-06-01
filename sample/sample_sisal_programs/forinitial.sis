@@ -1,0 +1,9 @@
+function Main( M : integer returns integer)
+  for i in 1, M
+  initial
+    R := 1
+  repeat
+    R := old R + i
+  returns sum of R
+  end for
+end function

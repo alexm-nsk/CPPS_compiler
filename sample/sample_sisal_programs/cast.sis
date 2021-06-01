@@ -1,0 +1,3 @@
+function Main( M, N, K : integer returns real)
+    10
+end function

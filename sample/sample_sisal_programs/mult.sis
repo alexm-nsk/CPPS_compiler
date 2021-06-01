@@ -1,0 +1,15 @@
+function Main(A,B:array of array of integer; M,N,K:integer returns array of array of integer, integer )
+  let
+    X := for i in 1, M
+            returns array of
+              for j in 1, N
+                returns array of
+                  for k in 1, K
+                    returns sum of A[i][k] * B[k][j]
+                  end for
+              end for
+            end for
+       in
+         X, M + N + K
+       end let
+end function
