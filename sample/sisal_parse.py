@@ -41,6 +41,7 @@ def main(args):
         try:
             file_contents = open(input_file_name, "r").read()
         except:
+            # TODO make sure to isolate I/O error from malformed commandline parameters
             print ("error reading %s" % input_file_name)
             return 1
 

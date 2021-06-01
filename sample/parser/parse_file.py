@@ -56,16 +56,15 @@ def unwrap_list(list_):
     return list_
 
 #----------------------------------------------------
+#
 # TreeVisitor class that allows us to go through
 # everything the parser has found
-# We go through separate strings containing each
-# function
+#
+# We go through separate strings containing each function
+#
 #----------------------------------------------------
 
 class TreeVisitor(NodeVisitor):
-
-    def visit_identifier(self, node, visited_children):
-        return node.text
 
     # rule: type_list     = type (_ "," _ type)*
     # rule: type          = ("array" _ "[" _ type  _"]") / std_type
@@ -121,6 +120,27 @@ class TreeVisitor(NodeVisitor):
             return unpack_rec_list(visited_children[0][2])
         else:
             return None
+
+    # rule: bin = operand _ bin_op _ operand
+    def visit_bin(self, node, visited_children):
+    
+#        node_id = self.get_node_id()
+
+        left, _ ,op, _ ,right = visited_children
+        left  = left[0]
+        right = right[0]
+        op    = op[0].text
+        
+        print (left, op)
+        return node
+    
+    # rule: number             = ~"[0-9]+"
+    def visit_number(self, node, visited_children):
+        # all we need
+        return node.text
+
+    def visit_identifier(self, node, visited_children):
+        return node.text
 
     #----------------------------------------------------
     #

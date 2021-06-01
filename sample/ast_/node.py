@@ -25,20 +25,24 @@
 class Node:
 
     def __init__(self):
-        
+
         self.location
         self.nodes
         self.edges
         self.name
-    
-        pass
+        self.out_ports
+        self.in_ports
+        self.id
+
+        self.params
+        self.function_name
 
     def emit_obj(self):
         pass
-        
+
     def emit_json(self):
         pass
-        
+
     def emit_cpp(self):
         pass
 
