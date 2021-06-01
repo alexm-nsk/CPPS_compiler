@@ -16,7 +16,7 @@ setup(
     long_description=readme,
     author='Alex Malishev',
     author_email='alex.m.work@yandex.ru',
-    url='https://github.com/alexm',
+    url='https://github.com/alexm-nsk',
     license=license,
     packages=find_packages(exclude=('tests', 'docs'))
 )

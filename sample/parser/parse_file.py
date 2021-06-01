@@ -143,7 +143,7 @@ class TreeVisitor(NodeVisitor):
         body          = visited_children[13][0]
 
         #print ("body:",body)
-        print (f"name: {function_name}\nargs: {args}\nret_type: {ret_type}\n")
+        #print (f"name: {function_name}\nargs: {args}\nret_type: {ret_type}\n")
 
         return node
 
@@ -234,7 +234,7 @@ def parse_file(input_text):
     for parsed_function in parsed_functions:
         IRs.append( function_tree_visitor.translate(  parsed_function  ) )
 
-    #return IRs
+#    return IRs
 
 
 def main(args):

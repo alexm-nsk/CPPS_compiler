@@ -39,7 +39,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'sample'
+project = u'Cloud Sisal Compiler'
 copyright = u'2021, Alexander Malishev'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -182,7 +182,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'sample.tex', u'sample Documentation',
+  ('index', 'CPPS_doc.tex', u'CPPS Documentation',
    u'Alexander Malishev', 'manual'),
 ]
 
@@ -212,7 +212,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'sample', u'sample Documentation',
+    ('index', 'CPPS_doc', u'CPPS Documentation',
      [u'Alexander Malishev'], 1)
 ]
 
@@ -226,8 +226,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'sample', u'sample Documentation',
-   u'Alexander Malishev', 'sample', 'One line description of project.',
+  ('index', 'CPPS_doc', u'CPPS Documentation',
+   u'Alexander Malishev', 'CPPS_doc', 'One line description of project.',
    'Miscellaneous'),
 ]
 
