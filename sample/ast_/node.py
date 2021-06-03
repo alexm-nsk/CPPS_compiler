@@ -22,20 +22,22 @@
 #
 #
 
+# props to cover
+# ~ self.props.location
+# ~ self.props.nodes
+# ~ self.props.edges
+# ~ self.props.name
+# ~ self.props.out_ports
+# ~ self.props.in_ports
+# ~ self.props.id
+# ~ self.props.params
+# ~ self.props.function_name
+
 class Node:
 
-    def __init__(self):
-
-        self.location
-        self.nodes
-        self.edges
-        self.name
-        self.out_ports
-        self.in_ports
-        self.id
-
-        self.params
-        self.function_name
+    def __init__(self, **kwargs):
+        # TODO consider list of allowed props (https://stackoverflow.com/questions/8187082/how-can-you-set-class-attributes-from-variable-arguments-kwargs-in-python)
+        self.__dict__.update(kwargs)
 
     def emit_obj(self):
         pass

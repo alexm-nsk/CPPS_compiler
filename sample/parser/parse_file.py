@@ -121,19 +121,32 @@ class TreeVisitor(NodeVisitor):
         else:
             return None
 
+    def visit_bin_op(self, node, visited_children):
+        return node.text
     # rule: bin = operand _ bin_op _ operand
-    def visit_bin(self, node, visited_children):
-    
-#        node_id = self.get_node_id()
+    def visit_algebraic(self, node, visited_children):
+        if len(visited_children) == 1:
+            return visited_children[0][0]
+        else:
 
-        left, _ ,op, _ ,right = visited_children
-        left  = left[0]
-        right = right[0]
-        op    = op[0].text
-        
-        print (left, op)
-        return node
-    
+            retval = visited_children[0]
+            
+            for r in visited_children[1]:
+                retval.append(r[-3])
+                retval.extend(r[-1])
+            print (retval)
+            return {"type":"algebraic", "expression" : retval}
+
+    # rule: call               = !("function" _) identifier _ lpar _ args_list _ rpar
+    def visit_call(self, node, visited_children):
+        args = unwrap_list(unpack_rec_list(visited_children[5]))
+
+        #TODO count args, create ports for them, connect them with edges
+        function_name = visited_children[1]#["identifier"]
+
+        #print (args)
+        return {"functionName" : function_name, "args" : args}
+
     # rule: number             = ~"[0-9]+"
     def visit_number(self, node, visited_children):
         # all we need
@@ -147,12 +160,12 @@ class TreeVisitor(NodeVisitor):
     #----------------------------------------------------
 
     # rule: function     = _ "function" _ identifier _
-    #                lpar _
-    #                function_arguments _
-    #                function_retvals _
-    #                rpar
-    #                _ exp _
-    #                "end function" _
+    #                            lpar _
+    #                            function_arguments _
+    #                            function_retvals _
+    #                            rpar
+    #                            _ exp _
+    #                         "end function" _
 
     def visit_function(self, node, visited_children):
 
@@ -165,7 +178,7 @@ class TreeVisitor(NodeVisitor):
         #print ("body:",body)
         #print (f"name: {function_name}\nargs: {args}\nret_type: {ret_type}\n")
 
-        return node
+        return [function_name, args, ret_type, body]
 
     #----------------------------------------------------
     #
@@ -176,12 +189,13 @@ class TreeVisitor(NodeVisitor):
         condition_node = unwrap_list( visited_children[2]  )
         then_node      = unwrap_list( visited_children[6]  )
         else_node      = unwrap_list( visited_children[10] )
+        #print({"cond " : condition_node, "then" : then_node, "else": else_node})
         return {"cond " : condition_node, "then" : then_node, "else": else_node}
 
     #----------------------------------------------------
     #
     #----------------------------------------------------
-    # this passes any nodes for which we don't have a visit_smth(...) method defined
+    # this passes through any nodes for which we don't have a visit_smth(...) method defined
     def generic_visit(self, node, visited_children):
         return visited_children or node
 
@@ -210,7 +224,7 @@ def parse_file(input_text):
 
 
     # parse functions separately:
-    
+
     parsed_functions = []
 
     for function_text in function_matches:
@@ -248,13 +262,13 @@ def parse_file(input_text):
                 print (str(e))
 
     # translate functions separately:
-    
+
     IRs = []
 
     for parsed_function in parsed_functions:
         IRs.append( function_tree_visitor.translate(  parsed_function  ) )
 
-#    return IRs
+    #return IRs
 
 
 def main(args):
