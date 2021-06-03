@@ -121,8 +121,10 @@ class TreeVisitor(NodeVisitor):
         else:
             return None
 
+    # just return the operation's string
     def visit_bin_op(self, node, visited_children):
         return node.text
+        
     # rule: bin = operand _ bin_op _ operand
     def visit_algebraic(self, node, visited_children):
         if len(visited_children) == 1:
@@ -135,7 +137,7 @@ class TreeVisitor(NodeVisitor):
                 retval.append(r[-3])
                 retval.extend(r[-1])
             print (retval)
-            return {"type":"algebraic", "expression" : retval}
+            return retval
 
     # rule: call               = !("function" _) identifier _ lpar _ args_list _ rpar
     def visit_call(self, node, visited_children):
@@ -195,6 +197,10 @@ class TreeVisitor(NodeVisitor):
     #----------------------------------------------------
     #
     #----------------------------------------------------
+    def visit_brackets_algebraic(self, node, visited_children):
+        return visited_children[2]
+        return "brackets %s" % str(visited_children[2]) 
+        
     # this passes through any nodes for which we don't have a visit_smth(...) method defined
     def generic_visit(self, node, visited_children):
         return visited_children or node
