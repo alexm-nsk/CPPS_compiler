@@ -39,13 +39,12 @@ def set_priorities(expression, callback):
                       else len(expression) 
                       for o in low])
         
-        if (index >= len(expression)):
-            print ("all that's left", expression)
+        if (index >= len(expression)):            
             return callback(*tuple(expression))
         
         print (index)
         op = expression[index]
-        print ( op)
+        print (op)
         
         if not op in expression: return expression
         

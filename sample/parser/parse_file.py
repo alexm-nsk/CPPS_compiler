@@ -34,6 +34,8 @@ from ast_.edge import Edge
 
 from sisal_type.sisal_type import *
 
+import parser.arithmetic_helpers
+
 # a quick debugging thing to stop the program on the spot
 def exit():
     import sys
@@ -50,7 +52,10 @@ def unpack_rec_list(node):
 # get to the contents of [[[...[ ... ]]
 def unwrap_list(list_):
 
-    while type(list_) == list and type(list_[0]) == list:
+    #while type(list_) == list and type(list_[0]) == list:
+     #   list_ = list_[0]
+
+    while type(list_) == list and len(list_) <=1 :
         list_ = list_[0]
 
     return list_
@@ -142,11 +147,10 @@ class TreeVisitor(NodeVisitor):
     # rule: call               = !("function" _) identifier _ lpar _ args_list _ rpar
     def visit_call(self, node, visited_children):
         args = unwrap_list(unpack_rec_list(visited_children[5]))
-
-        #TODO count args, create ports for them, connect them with edges
+                
         function_name = visited_children[1]#["identifier"]
 
-        #print (args)
+        print ("args:", args)
         return {"functionName" : function_name, "args" : args}
 
     # rule: number             = ~"[0-9]+"
@@ -175,7 +179,7 @@ class TreeVisitor(NodeVisitor):
         args          = visited_children[7]
         ret_type      = visited_children[9]
 
-        body          = visited_children[13][0]
+        body          = visited_children[13]
 
         #print ("body:",body)
         #print (f"name: {function_name}\nargs: {args}\nret_type: {ret_type}\n")
@@ -200,6 +204,9 @@ class TreeVisitor(NodeVisitor):
     def visit_brackets_algebraic(self, node, visited_children):
         return visited_children[2]
         return "brackets %s" % str(visited_children[2]) 
+
+    def visit_exp(self, node, visited_children):
+        return visited_children[0]
         
     # this passes through any nodes for which we don't have a visit_smth(...) method defined
     def generic_visit(self, node, visited_children):
