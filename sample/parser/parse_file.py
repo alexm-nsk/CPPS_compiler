@@ -50,15 +50,15 @@ def unpack_rec_list(node):
 
 #--------------------------------------------------------------------------------
 # get to the contents of [[[...[ ... ]]
-def unwrap_list(list_):
+# ~ def unwrap_list(list_):
 
-    #while type(list_) == list and type(list_[0]) == list:
-     #   list_ = list_[0]
+    # ~ #while type(list_) == list and type(list_[0]) == list:
+     # ~ #   list_ = list_[0]
 
-    while type(list_) == list and len(list_) <=1 :
-        list_ = list_[0]
+    # ~ while type(list_) == list and len(list_) <=1 :
+        # ~ list_ = list_[0]
 
-    return list_
+    # ~ return list_
 
 #----------------------------------------------------
 #
@@ -146,7 +146,7 @@ class TreeVisitor(NodeVisitor):
 
     # rule: call               = !("function" _) identifier _ lpar _ args_list _ rpar
     def visit_call(self, node, visited_children):
-        args = unwrap_list(unpack_rec_list(visited_children[5]))
+        args = unpack_rec_list(visited_children[5])
                 
         function_name = visited_children[1]#["identifier"]
 
@@ -178,7 +178,6 @@ class TreeVisitor(NodeVisitor):
         function_name = visited_children[3]
         args          = visited_children[7]
         ret_type      = visited_children[9]
-
         body          = visited_children[13]
 
         #print ("body:",body)
@@ -192,10 +191,10 @@ class TreeVisitor(NodeVisitor):
     # rule: if_else       = "if" _ exp _ "then" _ exp _ "else" _ exp _ "end if"
 
     def visit_if_else(self, node, visited_children):
-        condition_node = unwrap_list( visited_children[2]  )
-        then_node      = unwrap_list( visited_children[6]  )
-        else_node      = unwrap_list( visited_children[10] )
-        #print({"cond " : condition_node, "then" : then_node, "else": else_node})
+        condition_node =  visited_children[2]  
+        then_node      =  visited_children[6]  
+        else_node      =  visited_children[10] 
+        print({"cond " : condition_node, "then" : then_node, "else": else_node})
         return {"cond " : condition_node, "then" : then_node, "else": else_node}
 
     #----------------------------------------------------
