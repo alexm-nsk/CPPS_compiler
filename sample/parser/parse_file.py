@@ -35,38 +35,15 @@ from ast_.edge import *
 from sisal_type.sisal_type import *
 
 from parser.arithmetic_helpers import set_priorities
-from parser.ports import *
+from parser.ports      import *
 from parser.parameters import *
-
-# a quick debugging thing to stop the program on the spot
-def exit():
-    import sys
-    sys.exit(0)
 
 # connect recursive objects like
 #       args_groups_list = arg_def_group (_ ";" _ arg_def_group)*
 # into one array-list
 
 def unpack_rec_list(node):
-    return [node[0]]    +    [r[-1] for r in node[1]]
-
-#--------------------------------------------------------------------------------
-
-def get_location(node,  line_offset, column_offset):
-    
-    text = node.full_text
-    
-    start_row    = text[:node.start].count("\n") + 1 # lines have to start from "1"
-    start_column = len (  (text[:node.start].split("\n"))[-1]  )
-        
-    if start_row == 1: start_column += column_offset
-
-    end_row      = text[:node.end].count("\n") + 1  # lines have to start from "1"
-    end_column   = len (  (text[:node.end].split("\n"))[-1]  )
-    
-    if end_row == 1: end_row += column_offset
-
-    return "{}:{}-{}:{}".format(start_row + line_offset, start_column, end_row + line_offset, end_column)
+    return [node[0]] + [r[-1] for r in node[1]]
 
 #----------------------------------------------------
 #
@@ -78,11 +55,23 @@ def get_location(node,  line_offset, column_offset):
 #----------------------------------------------------
 
 class TreeVisitor(NodeVisitor):
-    
-    def get_location(self, node):        
-        return get_location(node, self.line_offset, self.column_offset)
 
-    
+    def get_location(self, node):
+        text = node.full_text
+
+        start_row    = text[:node.start].count("\n") + 1 # lines have to start from "1"
+        start_column = len (  (text[:node.start].split("\n"))[-1]  )
+
+        if start_row == 1: start_column += self.column_offset
+
+        end_row      = text[:node.end].count("\n") + 1  # lines have to start from "1"
+        end_column   = len (  (text[:node.end].split("\n"))[-1]  )
+
+        if end_row == 1: end_row += self.column_offset
+
+        return "{}:{}-{}:{}".format(start_row + self.line_offset, start_column, end_row + self.line_offset, end_column)
+
+
     # rule: type_list     = type (_ "," _ type)*
     # rule: type          = ("array" _ "[" _ type  _"]") / std_type
     def visit_type(self, node, visited_children):
@@ -124,10 +113,9 @@ class TreeVisitor(NodeVisitor):
     # rule: args_groups_list = (arg_def_group (_ ";" _ arg_def_group)*) / _
     def visit_args_groups_list(self, node, visited_children):
 
-        if len(visited_children) > 1:
-            return unpack_rec_list(visited_children)
-        else:
-            return visited_children[0]
+        args_groups = unpack_rec_list(visited_children)
+        return args_groups
+
 
     # rule: function_retvals   = ("returns" _ type_list) / _
     def visit_function_retvals(self, node, visited_children):
@@ -151,7 +139,7 @@ class TreeVisitor(NodeVisitor):
             for r in visited_children[1]:
                 retval.append(r[-3])
                 retval.extend(r[-1])
-        
+
         return retval
 
     # rule: call               = !("function" _) identifier _ lpar _ args_list _ rpar
@@ -170,7 +158,7 @@ class TreeVisitor(NodeVisitor):
         return node.text
 
     def visit_identifier(self, node, visited_children):
-        return node.text
+        return dict(name = node.text, location = self.get_location(node))
 
     #----------------------------------------------------
     #
@@ -183,18 +171,24 @@ class TreeVisitor(NodeVisitor):
     #                            rpar
     #                            _ exp _
     #                         "end function" _
-    
-    def visit_function(self, node, visited_children):
 
+    def visit_function(self, node, visited_children):
+        #if the function has parameters, generate corresponding IR-piece
+        name = visited_children[3]["name"] #this is an identifier,  so we get it's name
+        
         params = dict(
-                        functionName = visited_children[3],
-                        args         = visited_children[7],
+                        functionName = name,
+                        
                         ret_type     = visited_children[9],
                         nodes        = visited_children[13],
                         location     = self.get_location(node)
                       )
         
-        return Function(**params)
+        function = Function(**params)        
+        args = gen_params( visited_children[7] , function.node_id ) if visited_children[7] else None
+        function.args = args
+        
+        return function
 
 
     #----------------------------------------------------
@@ -257,7 +251,7 @@ def parse_file(input_text):
         text  = function_text.group(0)
         start = function_text.start()
         end   = function_text.end()
-        
+
         function_line_offset = input_text[:start].count("\n")
         function_column_offset = len (  (input_text[:start].split("\n"))[-1]  )
 

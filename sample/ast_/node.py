@@ -44,7 +44,7 @@ class Node:
     
     def __init__(self, *args, **kwargs):
         
-        self.id = Node.get_node_id()       
+        self.node_id = Node.get_node_id()       
         # TODO consider list of allowed props (https://stackoverflow.com/questions/8187082/how-can-you-set-class-attributes-from-variable-arguments-kwargs-in-python)
         self.__dict__.update(kwargs)
 
