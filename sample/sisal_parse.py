@@ -47,7 +47,8 @@ def main(args):
 
         try:
             output = parse(file_contents)
-            print (output)
+            for function in output["functions"]:
+                print (str(function)+"\n\n\n" )
             
         except Exception as e:
             # ~ print (str(e))

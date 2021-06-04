@@ -41,10 +41,8 @@ def set_priorities(expression, callback):
         
         if (index >= len(expression)):            
             return callback(expression)
-        
-        #print (index)
+
         op = expression[index]
-        #print (op)
         
         if not op in expression: return expression
         

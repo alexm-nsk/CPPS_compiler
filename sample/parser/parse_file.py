@@ -34,7 +34,9 @@ from ast_.edge import *
 
 from sisal_type.sisal_type import *
 
-from parser.arithmetic_helpers import set_priorities# as set_priorities
+from parser.arithmetic_helpers import set_priorities
+from parser.ports import *
+from parser.parameters import *
 
 # a quick debugging thing to stop the program on the spot
 def exit():
@@ -76,6 +78,10 @@ def get_location(node,  line_offset, column_offset):
 #----------------------------------------------------
 
 class TreeVisitor(NodeVisitor):
+    
+    def get_location(self, node):        
+        return get_location(node, self.line_offset, self.column_offset)
+
     
     # rule: type_list     = type (_ "," _ type)*
     # rule: type          = ("array" _ "[" _ type  _"]") / std_type
@@ -177,17 +183,17 @@ class TreeVisitor(NodeVisitor):
     #                            rpar
     #                            _ exp _
     #                         "end function" _
-
+    
     def visit_function(self, node, visited_children):
 
         params = dict(
-                        function_name = visited_children[3],
-                        args          = visited_children[7],
-                        ret_type      = visited_children[9],
-                        nodes         = visited_children[13],
-                        location      = get_location(node, self.line_offset, self.column_offset)
+                        functionName = visited_children[3],
+                        args         = visited_children[7],
+                        ret_type     = visited_children[9],
+                        nodes        = visited_children[13],
+                        location     = self.get_location(node)
                       )
-        #print (self.line_offset, self.column_offset)
+        
         return Function(**params)
 
 
@@ -290,7 +296,7 @@ def parse_file(input_text):
     for parsed_function in parsed_functions:
         IRs.append( function_tree_visitor.translate(  parsed_function["text"] , parsed_function["line_offset"], parsed_function["column_offset"] ) )
 
-    return IRs
+    return {"functions":IRs}
 
 
 def main(args):
