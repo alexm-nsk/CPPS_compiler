@@ -35,7 +35,8 @@
 
 class Node:
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
+        #print ("super %s" % kwargs)
         # TODO consider list of allowed props (https://stackoverflow.com/questions/8187082/how-can-you-set-class-attributes-from-variable-arguments-kwargs-in-python)
         self.__dict__.update(kwargs)
 
@@ -50,3 +51,11 @@ class Node:
 
     def emit_llvm(self):
         pass
+
+class Function(Node):
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(**kwargs)
+        
+    def __repr__(self):
+        return (str(self.__dict__))

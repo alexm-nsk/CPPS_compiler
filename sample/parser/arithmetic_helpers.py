@@ -34,23 +34,23 @@ def set_priorities(expression, callback):
             return expression[0]
             
         # gets a low priority binary operation (like "+") closest  to
-        # the beginning of the string, or input length if there are none left
+        # the beginning of input, or input length if there are none left
         index = min ([expression.index(o) if o in expression 
                       else len(expression) 
                       for o in low])
         
         if (index >= len(expression)):            
-            return callback(*tuple(expression))
+            return callback(expression)
         
-        print (index)
+        #print (index)
         op = expression[index]
-        print (op)
+        #print (op)
         
         if not op in expression: return expression
         
         left  = split(expression[:index])
         right = split(expression[index+1:])
         
-        return callback(left,op, right)
+        return callback([left,op, right])
     
     return split(expression)

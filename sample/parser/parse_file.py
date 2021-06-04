@@ -29,12 +29,12 @@ from parsimonious.nodes      import NodeVisitor
 from parsimonious.exceptions import ParseError
 
 # "ast_" is used instead of "ast" to avoid conflicts
-from ast_.node import Node
-from ast_.edge import Edge
+from ast_.node import *
+from ast_.edge import *
 
 from sisal_type.sisal_type import *
 
-import parser.arithmetic_helpers
+from parser.arithmetic_helpers import set_priorities# as set_priorities
 
 # a quick debugging thing to stop the program on the spot
 def exit():
@@ -49,16 +49,18 @@ def unpack_rec_list(node):
     return [node[0]]    +    [r[-1] for r in node[1]]
 
 #--------------------------------------------------------------------------------
-# get to the contents of [[[...[ ... ]]
-# ~ def unwrap_list(list_):
 
-    # ~ #while type(list_) == list and type(list_[0]) == list:
-     # ~ #   list_ = list_[0]
+def get_location(node):
 
-    # ~ while type(list_) == list and len(list_) <=1 :
-        # ~ list_ = list_[0]
+    text = node.full_text
 
-    # ~ return list_
+    start_row    = text[:node.start].count("\n") + 1 # lines have to start from "1"
+    start_column = len (  (text[:node.start].split("\n"))[-1]  )
+
+    end_row      = text[:node.end].count("\n") + 1   # lines have to start from "1"
+    end_column   = len (  (text[:node.end].split("\n"))[-1]  )
+
+    return "{}:{}-{}:{}".format(start_row, start_column, end_row, end_column)
 
 #----------------------------------------------------
 #
@@ -129,28 +131,28 @@ class TreeVisitor(NodeVisitor):
     # just return the operation's string
     def visit_bin_op(self, node, visited_children):
         return node.text
-        
-    # rule: bin = operand _ bin_op _ operand
+
+    # rule: algebraic          = (operand) (_ bin_op _ algebraic)*
     def visit_algebraic(self, node, visited_children):
+        #set_priorities
         if len(visited_children) == 1:
             return visited_children[0][0]
         else:
-
             retval = visited_children[0]
-            
             for r in visited_children[1]:
                 retval.append(r[-3])
                 retval.extend(r[-1])
-            print (retval)
+            #print (retval)
             return retval
 
     # rule: call               = !("function" _) identifier _ lpar _ args_list _ rpar
     def visit_call(self, node, visited_children):
+
         args = unpack_rec_list(visited_children[5])
-                
+
         function_name = visited_children[1]#["identifier"]
 
-        print ("args:", args)
+        #print ("args:", args)
         return {"functionName" : function_name, "args" : args}
 
     # rule: number             = ~"[0-9]+"
@@ -175,15 +177,16 @@ class TreeVisitor(NodeVisitor):
 
     def visit_function(self, node, visited_children):
 
-        function_name = visited_children[3]
-        args          = visited_children[7]
-        ret_type      = visited_children[9]
-        body          = visited_children[13]
+        params = dict(
+                        function_name = visited_children[3],
+                        args          = visited_children[7],
+                        ret_type      = visited_children[9],
+                        nodes         = visited_children[13],
+                        location      = get_location(node)
+                      )
 
-        #print ("body:",body)
-        #print (f"name: {function_name}\nargs: {args}\nret_type: {ret_type}\n")
+        return Function(**params)
 
-        return [function_name, args, ret_type, body]
 
     #----------------------------------------------------
     #
@@ -191,10 +194,10 @@ class TreeVisitor(NodeVisitor):
     # rule: if_else       = "if" _ exp _ "then" _ exp _ "else" _ exp _ "end if"
 
     def visit_if_else(self, node, visited_children):
-        condition_node =  visited_children[2]  
-        then_node      =  visited_children[6]  
-        else_node      =  visited_children[10] 
-        print({"cond " : condition_node, "then" : then_node, "else": else_node})
+        condition_node = visited_children[2]
+        then_node      = visited_children[6]
+        else_node      = visited_children[10]
+        #print({"cond " : condition_node, "then" : then_node, "else": else_node})
         return {"cond " : condition_node, "then" : then_node, "else": else_node}
 
     #----------------------------------------------------
@@ -202,11 +205,11 @@ class TreeVisitor(NodeVisitor):
     #----------------------------------------------------
     def visit_brackets_algebraic(self, node, visited_children):
         return visited_children[2]
-        return "brackets %s" % str(visited_children[2]) 
+        return "brackets %s" % str(visited_children[2])
 
     def visit_exp(self, node, visited_children):
         return visited_children[0]
-        
+
     # this passes through any nodes for which we don't have a visit_smth(...) method defined
     def generic_visit(self, node, visited_children):
         return visited_children or node
@@ -280,7 +283,7 @@ def parse_file(input_text):
     for parsed_function in parsed_functions:
         IRs.append( function_tree_visitor.translate(  parsed_function  ) )
 
-    #return IRs
+    return IRs
 
 
 def main(args):
