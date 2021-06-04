@@ -11,6 +11,6 @@ function SampleFib(returns integer)
 end function
 
 
-function Main()
+ function Main()
     Fib(1)
 end function

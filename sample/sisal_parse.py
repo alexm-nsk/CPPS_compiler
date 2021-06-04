@@ -48,6 +48,7 @@ def main(args):
         try:
             output = parse(file_contents)
             print (output)
+            
         except Exception as e:
             # ~ print (str(e))
             raise e

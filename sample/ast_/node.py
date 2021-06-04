@@ -34,9 +34,17 @@
 # ~ self.props.function_name
 
 class Node:
-
+    
+    node_counter = 0
+    
+    def get_node_id():
+        
+        Node.node_counter += 1        
+        return "node" + str(Node.node_counter)
+    
     def __init__(self, *args, **kwargs):
-        #print ("super %s" % kwargs)
+        
+        self.id = Node.get_node_id()       
         # TODO consider list of allowed props (https://stackoverflow.com/questions/8187082/how-can-you-set-class-attributes-from-variable-arguments-kwargs-in-python)
         self.__dict__.update(kwargs)
 
@@ -53,6 +61,14 @@ class Node:
         pass
 
 class Function(Node):
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(**kwargs)
+        
+    def __repr__(self):
+        return (str(self.__dict__))
+        
+class Bin(Node):
     
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)

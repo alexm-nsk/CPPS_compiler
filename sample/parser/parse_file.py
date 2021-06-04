@@ -50,17 +50,21 @@ def unpack_rec_list(node):
 
 #--------------------------------------------------------------------------------
 
-def get_location(node):
-
+def get_location(node,  line_offset, column_offset):
+    
     text = node.full_text
-
+    
     start_row    = text[:node.start].count("\n") + 1 # lines have to start from "1"
     start_column = len (  (text[:node.start].split("\n"))[-1]  )
+        
+    if start_row == 1: start_column += column_offset
 
-    end_row      = text[:node.end].count("\n") + 1   # lines have to start from "1"
+    end_row      = text[:node.end].count("\n") + 1  # lines have to start from "1"
     end_column   = len (  (text[:node.end].split("\n"))[-1]  )
+    
+    if end_row == 1: end_row += column_offset
 
-    return "{}:{}-{}:{}".format(start_row, start_column, end_row, end_column)
+    return "{}:{}-{}:{}".format(start_row + line_offset, start_column, end_row + line_offset, end_column)
 
 #----------------------------------------------------
 #
@@ -72,7 +76,7 @@ def get_location(node):
 #----------------------------------------------------
 
 class TreeVisitor(NodeVisitor):
-
+    
     # rule: type_list     = type (_ "," _ type)*
     # rule: type          = ("array" _ "[" _ type  _"]") / std_type
     def visit_type(self, node, visited_children):
@@ -114,10 +118,9 @@ class TreeVisitor(NodeVisitor):
     # rule: args_groups_list = (arg_def_group (_ ";" _ arg_def_group)*) / _
     def visit_args_groups_list(self, node, visited_children):
 
-        if len(visited_children)>1:
+        if len(visited_children) > 1:
             return unpack_rec_list(visited_children)
         else:
-
             return visited_children[0]
 
     # rule: function_retvals   = ("returns" _ type_list) / _
@@ -136,21 +139,21 @@ class TreeVisitor(NodeVisitor):
     def visit_algebraic(self, node, visited_children):
         #set_priorities
         if len(visited_children) == 1:
-            return visited_children[0][0]
+            retval = visited_children[0][0]
         else:
             retval = visited_children[0]
             for r in visited_children[1]:
                 retval.append(r[-3])
                 retval.extend(r[-1])
-            #print (retval)
-            return retval
+        
+        return retval
 
     # rule: call               = !("function" _) identifier _ lpar _ args_list _ rpar
     def visit_call(self, node, visited_children):
 
         args = unpack_rec_list(visited_children[5])
 
-        function_name = visited_children[1]#["identifier"]
+        function_name = visited_children[1]
 
         #print ("args:", args)
         return {"functionName" : function_name, "args" : args}
@@ -182,9 +185,9 @@ class TreeVisitor(NodeVisitor):
                         args          = visited_children[7],
                         ret_type      = visited_children[9],
                         nodes         = visited_children[13],
-                        location      = get_location(node)
+                        location      = get_location(node, self.line_offset, self.column_offset)
                       )
-
+        #print (self.line_offset, self.column_offset)
         return Function(**params)
 
 
@@ -214,7 +217,9 @@ class TreeVisitor(NodeVisitor):
     def generic_visit(self, node, visited_children):
         return visited_children or node
 
-    def translate(self, parsed_data):
+    def translate(self, parsed_data, line_offset, column_offset):
+        self.line_offset   = line_offset
+        self.column_offset = column_offset
         IR = super().visit(parsed_data)
 
         return IR
@@ -243,13 +248,15 @@ def parse_file(input_text):
     parsed_functions = []
 
     for function_text in function_matches:
-
         text  = function_text.group(0)
         start = function_text.start()
         end   = function_text.end()
+        
+        function_line_offset = input_text[:start].count("\n")
+        function_column_offset = len (  (input_text[:start].split("\n"))[-1]  )
 
         try:
-            parsed_functions.append ( grammar.parse(text) )
+            parsed_functions.append ( {"text" : grammar.parse(text) , "line_offset" : function_line_offset, "column_offset" : function_column_offset} )
         except Exception as e:
 
             if type(e) == ParseError:
@@ -281,7 +288,7 @@ def parse_file(input_text):
     IRs = []
 
     for parsed_function in parsed_functions:
-        IRs.append( function_tree_visitor.translate(  parsed_function  ) )
+        IRs.append( function_tree_visitor.translate(  parsed_function["text"] , parsed_function["line_offset"], parsed_function["column_offset"] ) )
 
     return IRs
 
