@@ -45,7 +45,7 @@ def gen_params(params, nodeId = "NOT PROVIDED!"):
 
     ret_val = []
     for group in params:
-        ret_val.append([
+        ret_val.extend([
             [var["name"],
                 dict(
                     nodeId = nodeId, 

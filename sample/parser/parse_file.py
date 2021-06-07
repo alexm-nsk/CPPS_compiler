@@ -177,16 +177,15 @@ class TreeVisitor(NodeVisitor):
         name = visited_children[3]["name"] #this is an identifier,  so we get it's name
         
         params = dict(
-                        functionName = name,
-                        
+                        functionName = name,                        
                         ret_type     = visited_children[9],
                         nodes        = visited_children[13],
                         location     = self.get_location(node)
                       )
         
         function = Function(**params)        
-        args = gen_params( visited_children[7] , function.node_id ) if visited_children[7] else None
-        function.args = args
+        params = gen_params( visited_children[7] , function.node_id ) if visited_children[7] else None
+        function.params = params
         
         return function
 

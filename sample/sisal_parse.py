@@ -48,8 +48,11 @@ def main(args):
         try:
             output = parse(file_contents)
             for function in output["functions"]:
-                print (str(function)+"\n\n\n" )
-            
+                #print (str(function)+"\n\n\n" )
+                if function.params:
+                    for p in function.params:
+                        print (p)
+
         except Exception as e:
             # ~ print (str(e))
             raise e
