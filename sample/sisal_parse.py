@@ -25,6 +25,7 @@
 from parser.parse_file import parse_file
 
 import re
+import os, json
 
 
 def parse(input_text):
@@ -47,11 +48,14 @@ def main(args):
 
         try:
             output = parse(file_contents)
+
+            #print (output)
+
+            # ~ formatted = json.dumps(output)
+            # ~ os.system ("echo '%s' | jq" % formatted)
             for function in output["functions"]:
-                #print (str(function)+"\n\n\n" )
-                if function.params:
-                    for p in function.params:
-                        print (p)
+                print (str(function)+"\n\n\n" )
+
 
         except Exception as e:
             # ~ print (str(e))

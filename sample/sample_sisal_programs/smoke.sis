@@ -1,4 +1,4 @@
-function Fib( M,n  : integer;  R:array[array[real]] returns array[real])
+function Fib( M,n  : integer;  R:real returns real)
   if M < 2 then
     M + (1 +1 )*3
   else
@@ -11,6 +11,6 @@ function SampleFib(returns integer)
 end function
 
 
-function Main()
+function Main(a: integer)
     Fib(1)
 end function

@@ -82,7 +82,7 @@ class TreeVisitor(NodeVisitor):
             return node.text
         elif child_type == list:
             item_type = visited_children[0][4]
-            return SisalArray(item_type)
+            return str(SisalArray(item_type))
 
     # rule: std_type      = "integer" / "real"
     def visit_std_type(self, node, visited_children):
@@ -127,7 +127,9 @@ class TreeVisitor(NodeVisitor):
 
     # just return the operation's string
     def visit_bin_op(self, node, visited_children):
-        return node.text
+        #print ("Binary: ",node.text ,self.get_location(node))
+        return dict(location  = self.get_location(node),
+                    operation = node.text)
 
     # rule: algebraic          = (operand) (_ bin_op _ algebraic)*
     def visit_algebraic(self, node, visited_children):
@@ -139,8 +141,11 @@ class TreeVisitor(NodeVisitor):
             for r in visited_children[1]:
                 retval.append(r[-3])
                 retval.extend(r[-1])
-
+        #print (retval)
         return retval
+        # ~ return dict (name = "algebraic",
+                     # ~ expression = retval
+                    # ~ )
 
     # rule: call               = !("function" _) identifier _ lpar _ args_list _ rpar
     def visit_call(self, node, visited_children):
@@ -175,10 +180,11 @@ class TreeVisitor(NodeVisitor):
     def visit_function(self, node, visited_children):
         #if the function has parameters, generate corresponding IR-piece
         name = visited_children[3]["name"] #this is an identifier,  so we get it's name
+        ret_type = visited_children[9],
         
         params = dict(
+                        name         = "Lambda",
                         functionName = name,                        
-                        ret_type     = visited_children[9],
                         nodes        = visited_children[13],
                         location     = self.get_location(node)
                       )
@@ -196,10 +202,11 @@ class TreeVisitor(NodeVisitor):
     # rule: if_else       = "if" _ exp _ "then" _ exp _ "else" _ exp _ "end if"
 
     def visit_if_else(self, node, visited_children):
+        
         condition_node = visited_children[2]
         then_node      = visited_children[6]
         else_node      = visited_children[10]
-        #print({"cond " : condition_node, "then" : then_node, "else": else_node})
+        
         return {"cond " : condition_node, "then" : then_node, "else": else_node}
 
     #----------------------------------------------------
@@ -207,7 +214,6 @@ class TreeVisitor(NodeVisitor):
     #----------------------------------------------------
     def visit_brackets_algebraic(self, node, visited_children):
         return visited_children[2]
-        return "brackets %s" % str(visited_children[2])
 
     def visit_exp(self, node, visited_children):
         return visited_children[0]
@@ -216,7 +222,7 @@ class TreeVisitor(NodeVisitor):
     def generic_visit(self, node, visited_children):
         return visited_children or node
 
-    def translate(self, parsed_data, line_offset, column_offset):
+    def parse(self, parsed_data, line_offset, column_offset):
         self.line_offset   = line_offset
         self.column_offset = column_offset
         IR = super().visit(parsed_data)
@@ -287,7 +293,8 @@ def parse_file(input_text):
     IRs = []
 
     for parsed_function in parsed_functions:
-        IRs.append( function_tree_visitor.translate(  parsed_function["text"] , parsed_function["line_offset"], parsed_function["column_offset"] ) )
+        parsed = function_tree_visitor.parse(  parsed_function["text"] , parsed_function["line_offset"], parsed_function["column_offset"] )
+        IRs.append( parsed.to_JSON() )
 
     return {"functions":IRs}
 

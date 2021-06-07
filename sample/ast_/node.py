@@ -70,6 +70,9 @@ class Function(Node):
         
     def __str__(self):
         return (str(self.__dict__))
+    
+    def to_JSON(self):
+        return (self.__dict__)
         
 class Bin(Node):
     
