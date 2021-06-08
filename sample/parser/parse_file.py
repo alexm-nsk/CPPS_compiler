@@ -119,7 +119,10 @@ class TreeVisitor(NodeVisitor):
     def visit_function_retvals(self, node, visited_children):
 
         if (visited_children != [None]):
-            return unpack_rec_list(visited_children[0][2])
+            #print ("RetTypes", unpack_rec_list(visited_children[0][2]))
+            ret_types = unpack_rec_list(visited_children[0][2])
+            
+            return ret_types
         else:
             return None
 
@@ -176,16 +179,20 @@ class TreeVisitor(NodeVisitor):
     def visit_function(self, node, visited_children):
 
         #if the function has parameters, generate corresponding IR-piece
-        name          = visited_children[3]["name"] #this is an identifier,  so we get it's name
-        ret_type      = visited_children[9],
-        function_body = visited_children[13]
-
+        name          = visited_children[ 3 ]["name"] #this is an identifier,  so we get it's name
+        ret_types     = visited_children[ 9  ],
+        if ret_types:
+           ret_types = ret_types[0] # TODO this is a crutch, fix this
+            
+        function_body = visited_children[ 13 ]
+        
         params = dict(
-                        name         = "Lambda",
+                        name          = "Lambda",
                         function_name = name,
-                        nodes        = [ function_body ],
-                        location     = self.get_location(node),
-                        params       = visited_children[7]
+                        nodes         = [ function_body ],
+                        location      = self.get_location(node),
+                        params        = visited_children[7],
+                        ret_types     = ret_types
                       )
 
         function = Function(**params)
