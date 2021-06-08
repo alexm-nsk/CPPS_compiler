@@ -154,7 +154,6 @@ class TreeVisitor(NodeVisitor):
 
         function_name = visited_children[1]
 
-        #print ("args:", args)
         return {"functionName" : function_name, "args" : args}
 
     # rule: number             = ~"[0-9]+"
@@ -185,7 +184,7 @@ class TreeVisitor(NodeVisitor):
         params = dict(
                         name         = "Lambda",
                         functionName = name,                        
-                        nodes        = visited_children[13],
+                        nodes        = [ visited_children[13] ],
                         location     = self.get_location(node)
                       )
         
@@ -206,8 +205,11 @@ class TreeVisitor(NodeVisitor):
         condition_node = visited_children[2]
         then_node      = visited_children[6]
         else_node      = visited_children[10]
-        
-        return {"cond " : condition_node, "then" : then_node, "else": else_node}
+        branches = {"cond " : condition_node, "then" : then_node, "else": else_node}
+        return dict(
+                    name     = "If",
+                    branches = branches
+                    )
 
     #----------------------------------------------------
     #
