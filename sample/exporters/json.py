@@ -24,6 +24,26 @@
 
 # Implements exporting Node and it's descendants into JSON IR
 
+def function_gen_params(params, nodeId = "NOT PROVIDED!"):
+
+    ret_val = []
+    for group in params:
+        ret_val.extend([
+            [var["name"],
+                dict(
+                    nodeId = nodeId,
+                    type = dict(location = var["location"], name = group["type_name"])
+                )
+            ]
+            for var in group["var_names"]
+        ])
+    return ret_val
+
+
+def function_gen_out_ports(params):
+    print ("making ports...")
+    print (params)
+
 field_sub_table = dict(
 
     function_name = "functionName",
@@ -35,45 +55,10 @@ field_sub_table = dict(
 
 )
 
-# ~ "params": [
-# ~ [
-  # ~ "M",
-  # ~ {
-    # ~ "nodeId": "node1",
-    # ~ "type": {
-      # ~ "location": "1:18-1:25",
-      # ~ "name": "integer"
-    # ~ },
-    # ~ "index": 0
-  # ~ }
-# ~ ]
-# ~ ],
-
-
-def gen_params(params, nodeId = "NOT PROVIDED!"):
-
-    ret_val = []
-    for group in params:
-        ret_val.extend([
-            [var["name"],
-                dict(
-                    nodeId = nodeId, 
-                    type = dict(location = var["location"], name = group["type_name"])
-                )
-            ]
-            for var in group["var_names"]
-        ])
-    return ret_val
-
-def function_make_out_ports(function):
-    print ("making ports...")
-    #print (function.params)
-
 def export_function_to_json(function):
     #function_make_out_ports(self)
-           
+
     ret_val = {}
-    ret_val["params"] = gen_params( function.params , function.node_id ) if function.params else None
 
     for field, value in function.__dict__.items():
         IR_name          = field_sub_table[field] if field in field_sub_table else field
@@ -84,6 +69,9 @@ def export_function_to_json(function):
     except:
         print ("JSON not implemented for %s yet!" % type(function.nodes[0]))
 
+    ret_val["params"] = function_gen_params( function.params , function.node_id ) if function.params else None
+    
+    ret_val["ports"] = function_gen_out_ports(function.params)
     return ret_val
 
 
@@ -94,8 +82,8 @@ def export_if_to_json(function):
     for field, value in function.__dict__.items():
         IR_name          = field_sub_table[field] if field in field_sub_table else field
         ret_val[IR_name] = value
-        
+
     ret_val["name"] = field_sub_table[ret_val["name"]]
-    
+
     # ~ print (ret_val)
     return ret_val

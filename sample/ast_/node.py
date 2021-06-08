@@ -33,22 +33,20 @@
 # ~ self.props.params
 # ~ self.props.function_name
 
-
 from exporters.json    import *
-from parser.ports      import *
 
 class Node:
-    
+
     node_counter = 0
-    
+
     def get_node_id():
-        
-        Node.node_counter += 1        
+
+        Node.node_counter += 1
         return "node" + str(Node.node_counter)
-    
+
     def __init__(self, *args, **kwargs):
-        
-        self.node_id = Node.get_node_id()       
+
+        self.node_id = Node.get_node_id()
         # TODO consider list of allowed props (https://stackoverflow.com/questions/8187082/how-can-you-set-class-attributes-from-variable-arguments-kwargs-in-python)
         self.__dict__.update(kwargs)
 
@@ -64,42 +62,33 @@ class Node:
     def emit_llvm(self):
         pass
 
-
-class Function(Node):
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(**kwargs)
-        
     def __repr__(self):
         return (str(self.__dict__))
-        
+
     def __str__(self):
         return (str(self.__dict__))
-    
+
+
+class Function(Node):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(**kwargs)
+
     def emit_json(self):
         return (export_function_to_json(self))
 
-        
+
 class Bin(Node):
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
-        
-    def __repr__(self):
-        return (str(self.__dict__))
 
-        
+
 class If(Node):
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
         self.name = "if_"
-        
-    def __repr__(self):
-        return (str(self.__dict__))
-        
-    def __str__(self):
-        return (str(self.__dict__))
-    
+
     def emit_json(self):
         return (export_if_to_json(self))

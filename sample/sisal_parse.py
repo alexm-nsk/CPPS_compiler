@@ -49,7 +49,7 @@ def main(args):
         try:
             output = parse(file_contents)
 
-            print (output)
+           # print (output)
 
             #formatted = json.dumps(output)
             #os.system ("echo '%s' | jq" % formatted)
