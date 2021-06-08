@@ -35,8 +35,6 @@ from ast_.edge import *
 from sisal_type.sisal_type import *
 
 from parser.arithmetic_helpers import set_priorities
-from parser.ports      import *
-from parser.parameters import *
 
 # connect recursive objects like
 #       args_groups_list = arg_def_group (_ ";" _ arg_def_group)*
@@ -133,7 +131,7 @@ class TreeVisitor(NodeVisitor):
 
     # rule: algebraic          = (operand) (_ bin_op _ algebraic)*
     def visit_algebraic(self, node, visited_children):
-        #set_priorities
+
         if len(visited_children) == 1:
             retval = visited_children[0][0]
         else:
@@ -141,11 +139,10 @@ class TreeVisitor(NodeVisitor):
             for r in visited_children[1]:
                 retval.append(r[-3])
                 retval.extend(r[-1])
-        #print (retval)
-        return retval
-        # ~ return dict (name = "algebraic",
-                     # ~ expression = retval
-                    # ~ )
+
+        return dict (name = "algebraic",
+                     expression = retval
+                    )
 
     # rule: call               = !("function" _) identifier _ lpar _ args_list _ rpar
     def visit_call(self, node, visited_children):
@@ -177,39 +174,42 @@ class TreeVisitor(NodeVisitor):
     #                         "end function" _
 
     def visit_function(self, node, visited_children):
+
         #if the function has parameters, generate corresponding IR-piece
-        name = visited_children[3]["name"] #this is an identifier,  so we get it's name
-        ret_type = visited_children[9],
-        
+        name          = visited_children[3]["name"] #this is an identifier,  so we get it's name
+        ret_type      = visited_children[9],
+        function_body = visited_children[13]
+
         params = dict(
                         name         = "Lambda",
-                        functionName = name,                        
-                        nodes        = [ visited_children[13] ],
-                        location     = self.get_location(node)
+                        function_name = name,
+                        nodes        = [ function_body ],
+                        location     = self.get_location(node),
+                        params       = visited_children[7]
                       )
-        
-        function = Function(**params)        
-        params = gen_params( visited_children[7] , function.node_id ) if visited_children[7] else None
-        function.params = params
-        
+
+        function = Function(**params)
+
         return function
 
 
     #----------------------------------------------------
     #
     #----------------------------------------------------
-    # rule: if_else       = "if" _ exp _ "then" _ exp _ "else" _ exp _ "end if"
+    # rule: if       = "if" _ exp _ "then" _ exp _ "else" _ exp _ "end if"
 
-    def visit_if_else(self, node, visited_children):
-        
+    def visit_if(self, node, visited_children):
+
         condition_node = visited_children[2]
         then_node      = visited_children[6]
         else_node      = visited_children[10]
-        branches = {"cond " : condition_node, "then" : then_node, "else": else_node}
-        return dict(
-                    name     = "If",
-                    branches = branches
-                    )
+
+        branches = {"then" : then_node, "else_": else_node}
+
+        return If(**dict(
+                        branches  = branches,
+                        condition =  condition_node,
+                    ))
 
     #----------------------------------------------------
     #
@@ -296,7 +296,7 @@ def parse_file(input_text):
 
     for parsed_function in parsed_functions:
         parsed = function_tree_visitor.parse(  parsed_function["text"] , parsed_function["line_offset"], parsed_function["column_offset"] )
-        IRs.append( parsed.to_JSON() )
+        IRs.append( parsed.emit_json() )
 
     return {"functions":IRs}
 

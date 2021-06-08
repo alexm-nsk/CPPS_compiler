@@ -26,32 +26,3 @@
 # used in parser tree to parameters in IR-form
 
 
-      # ~ "params": [
-        # ~ [
-          # ~ "M",
-          # ~ {
-            # ~ "nodeId": "node1",
-            # ~ "type": {
-              # ~ "location": "1:18-1:25",
-              # ~ "name": "integer"
-            # ~ },
-            # ~ "index": 0
-          # ~ }
-        # ~ ]
-      # ~ ],
-
-
-def gen_params(params, nodeId = "NOT PROVIDED!"):
-
-    ret_val = []
-    for group in params:
-        ret_val.extend([
-            [var["name"],
-                dict(
-                    nodeId = nodeId, 
-                    type = dict(location = var["location"], name = group["type_name"])
-                )
-            ]
-            for var in group["var_names"]
-        ])
-    return ret_val

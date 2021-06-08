@@ -33,6 +33,10 @@
 # ~ self.props.params
 # ~ self.props.function_name
 
+
+from exporters.json    import *
+from parser.ports      import *
+
 class Node:
     
     node_counter = 0
@@ -60,6 +64,7 @@ class Node:
     def emit_llvm(self):
         pass
 
+
 class Function(Node):
     
     def __init__(self, *args, **kwargs):
@@ -71,8 +76,9 @@ class Function(Node):
     def __str__(self):
         return (str(self.__dict__))
     
-    def to_JSON(self):
-        return (self.__dict__)
+    def emit_json(self):
+        return (export_function_to_json(self))
+
         
 class Bin(Node):
     
@@ -81,3 +87,19 @@ class Bin(Node):
         
     def __repr__(self):
         return (str(self.__dict__))
+
+        
+class If(Node):
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(**kwargs)
+        self.name = "if_"
+        
+    def __repr__(self):
+        return (str(self.__dict__))
+        
+    def __str__(self):
+        return (str(self.__dict__))
+    
+    def emit_json(self):
+        return (export_if_to_json(self))
