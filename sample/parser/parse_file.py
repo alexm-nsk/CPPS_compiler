@@ -101,7 +101,6 @@ class TreeVisitor(NodeVisitor):
 
     # rule: arg_def_list  = identifier (_ "," _ identifier)*
     def visit_arg_def_list(self, node, visited_children):
-
         return unpack_rec_list(visited_children)
 
     # rule: arg_def_group = arg_def_list _ ":" _ type

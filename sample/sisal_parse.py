@@ -33,6 +33,7 @@ def parse(input_text):
 
 
 def main(args):
+    
     print ("_"*50, "\n\n\n")
     if ( len( args ) < 2 ):
         print ( "usage: python parse source_code.sis" )
@@ -49,12 +50,12 @@ def main(args):
         try:
             output = parse(file_contents)
 
-           # print (output)
+            #print (output)
 
             #formatted = json.dumps(output)
             #os.system ("echo '%s' | jq" % formatted)
 
-#            for function in output["functions"]: print ( str(function) + "\n\n\n" )
+            for function in output["functions"]: print ( str(function) + "\n\n\n" )
 
         except Exception as e:
             # ~ print (str(e))

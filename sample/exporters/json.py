@@ -133,5 +133,4 @@ def export_if_to_json(function):
 
     ret_val["name"] = field_sub_table[ret_val["name"]]
 
-    # ~ print (ret_val)
     return ret_val

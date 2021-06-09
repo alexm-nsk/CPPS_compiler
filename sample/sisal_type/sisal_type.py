@@ -27,13 +27,13 @@ built_in_types = ["integer", "real"]
 class SisalType:
     pass
     
-class Integer(SisalType):
+# ~ class Integer(SisalType):
     
-    def __init__(self):
-        pass
+    # ~ def __init__(self):
+        # ~ pass
         
-    def __repr__(self):
-        return "Integer"
+    # ~ def __repr__(self):
+        # ~ return "Integer"
 
 class SisalArray:
     
