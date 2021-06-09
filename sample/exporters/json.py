@@ -65,14 +65,16 @@ def function_gen_out_ports(function):
 
     #print ("making out ports...")
 
-    for r in ret_types:
+    for n, r in enumerate(ret_types):
 
         ret_val += [dict(
                         nodeId = function.node_id,
-                        type = dict(location = r["location"], name = r["type_name"])
+                        type = dict(location = r["location"], name = r["type_name"]),
+                        index = n
                     )]
-
-    #print(ret_val)
+    
+    print(ret_val)
+    
     return ret_val
 
 # ~ "inPorts": [
@@ -119,6 +121,8 @@ def export_function_to_json(function):
 
     ret_val["outPorts"] = function_gen_out_ports(function)
     ret_val["inPorts"]  = function_gen_in_ports (function)
+    #print (ret_val)
+    
     return ret_val
 
 

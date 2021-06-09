@@ -75,7 +75,7 @@ class Function(Node):
         super().__init__(**kwargs)
 
     def emit_json(self):
-        return (export_function_to_json(self))
+        return export_function_to_json(self)
 
 
 class Bin(Node):
