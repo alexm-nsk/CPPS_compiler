@@ -24,6 +24,8 @@
 
 # Implements exporting Node and it's descendants into JSON IR
 
+#---------------------------------------------------------------------------------------------
+
 def function_gen_params(function):
 
     params = function.params
@@ -36,24 +38,13 @@ def function_gen_params(function):
             [var["name"],
                 dict(
                     nodeId = nodeId,
-                    type = dict(location = var["location"], name = group["type_name"])
+                    type = dict(location = var["location"], name = group["type"]["type_name"])
                 )
             ]
-            for var in group["var_names"]
+            for var in group["vars"]
         ])
     return ret_val
 
-
- # ~ "outPorts": [
-        # ~ {
-          # ~ "nodeId": "node1",
-          # ~ "type": {
-            # ~ "location": "1:19-1:26",
-            # ~ "name": "integer"
-          # ~ },
-          # ~ "index": 0
-        # ~ }
-      # ~ ],
 
 def function_gen_out_ports(function):
 
@@ -63,8 +54,6 @@ def function_gen_out_ports(function):
 
     ret_val = []
 
-    #print ("making out ports...")
-
     for n, r in enumerate(ret_types):
 
         ret_val += [dict(
@@ -72,24 +61,31 @@ def function_gen_out_ports(function):
                         type = dict(location = r["location"], name = r["type_name"]),
                         index = n
                     )]
-    
-    print(ret_val)
-    
+
     return ret_val
 
-# ~ "inPorts": [
-        # ~ {
-          # ~ "nodeId": "node1",
-          # ~ "type": {
-            # ~ "location": "1:19-1:26",
-            # ~ "name": "integer"
-          # ~ },
-          # ~ "index": 0
-        # ~ }
-      # ~ ],
 
-def function_gen_in_ports(params):
-    print ("making in ports...")
+def function_gen_in_ports(function):
+
+    arg_types = function.params
+
+    if not arg_types:
+        return []
+
+    ret_val = []
+
+    for arg_group in arg_types:
+
+        for var in arg_group["vars"]:
+
+            ret_val += [dict(
+                            nodeId = function.node_id,
+                            type = dict(location = var["location"],
+                                        name     = arg_group["type"]["type_name"]),
+                            index = len(ret_val)
+                        )]
+
+    return ret_val
 
 
 field_sub_table = dict(
@@ -104,7 +100,6 @@ field_sub_table = dict(
 )
 
 def export_function_to_json(function):
-    #function_make_out_ports(self)
 
     ret_val = {}
 
@@ -121,9 +116,11 @@ def export_function_to_json(function):
 
     ret_val["outPorts"] = function_gen_out_ports(function)
     ret_val["inPorts"]  = function_gen_in_ports (function)
-    #print (ret_val)
-    
+
     return ret_val
+
+
+#---------------------------------------------------------------------------------------------
 
 
 def export_if_to_json(function):

@@ -106,10 +106,10 @@ class TreeVisitor(NodeVisitor):
 
     # rule: arg_def_group = arg_def_list _ ":" _ type
     def visit_arg_def_group(self, node, visited_children):
-        type_name = visited_children[4]
+        type_ = visited_children[4]
         var_names = visited_children[0]
 
-        return {"type_name" :type_name, "var_names" : var_names}
+        return {"type" :type_, "vars" : var_names}
 
     # rule: args_groups_list = (arg_def_group (_ ";" _ arg_def_group)*) / _
     def visit_args_groups_list(self, node, visited_children):
