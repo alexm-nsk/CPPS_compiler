@@ -24,9 +24,13 @@
 
 # Implements exporting Node and it's descendants into JSON IR
 
-def function_gen_params(params, nodeId = "NOT PROVIDED!"):
+def function_gen_params(function):
+
+    params = function.params
+    nodeId = function.node_id
 
     ret_val = []
+
     for group in params:
         ret_val.extend([
             [var["name"],
@@ -51,19 +55,25 @@ def function_gen_params(params, nodeId = "NOT PROVIDED!"):
         # ~ }
       # ~ ],
 
-def function_gen_out_ports(ret_types):
+def function_gen_out_ports(function):
+
+    ret_types = function.ret_types
     if not ret_types:
         return []
 
     ret_val = []
 
-    print ("making out ports...")
+    #print ("making out ports...")
 
     for r in ret_types:
-        # TODO put locations into retvals!
-        retval += []
 
-    print()
+        ret_val += [dict(
+                        nodeId = function.node_id,
+                        type = dict(location = r["location"], name = r["type_name"])
+                    )]
+
+    #print(ret_val)
+    return ret_val
 
 # ~ "inPorts": [
         # ~ {
@@ -78,10 +88,6 @@ def function_gen_out_ports(ret_types):
 
 def function_gen_in_ports(params):
     print ("making in ports...")
-    #print (params)
-
-    print()
-
 
 
 field_sub_table = dict(
@@ -109,10 +115,10 @@ def export_function_to_json(function):
     except:
         print ("JSON not implemented for %s yet!" % type(function.nodes[0]))
 
-    ret_val["params"]   = function_gen_params( function.params , function.node_id ) if function.params else None
+    ret_val["params"]   = function_gen_params( function ) if function.params else None
 
-    ret_val["outPorts"] = function_gen_out_ports(function.ret_types)
-    ret_val["inPorts"]  = function_gen_in_ports (function.params)
+    ret_val["outPorts"] = function_gen_out_ports(function)
+    ret_val["inPorts"]  = function_gen_in_ports (function)
     return ret_val
 
 

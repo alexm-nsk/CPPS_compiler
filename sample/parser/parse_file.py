@@ -76,15 +76,18 @@ class TreeVisitor(NodeVisitor):
 
         child_type = type(visited_children[0])
 
-        if child_type == str:
-            return node.text
+        if child_type == dict:
+            return visited_children[0]
+
         elif child_type == list:
             item_type = visited_children[0][4]
-            return str(SisalArray(item_type))
+            #return str()
+            return {"type_name" : SisalArray(item_type), "location": self.get_location(node)}
 
     # rule: std_type      = "integer" / "real"
     def visit_std_type(self, node, visited_children):
-        return node.text
+
+        return {"type_name" : node.text, "location": self.get_location(node)}
 
     def visit__(self, node, visited_children):
         return None
@@ -117,11 +120,9 @@ class TreeVisitor(NodeVisitor):
 
     # rule: function_retvals   = ("returns" _ type_list) / _
     def visit_function_retvals(self, node, visited_children):
-
         if (visited_children != [None]):
-            #print ("RetTypes", unpack_rec_list(visited_children[0][2]))
             ret_types = unpack_rec_list(visited_children[0][2])
-            
+
             return ret_types
         else:
             return None
@@ -183,9 +184,9 @@ class TreeVisitor(NodeVisitor):
         ret_types     = visited_children[ 9  ],
         if ret_types:
            ret_types = ret_types[0] # TODO this is a crutch, fix this
-            
+
         function_body = visited_children[ 13 ]
-        
+
         params = dict(
                         name          = "Lambda",
                         function_name = name,
