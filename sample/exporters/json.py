@@ -25,6 +25,7 @@
 # Implements exporting Node and it's descendants into JSON IR
 
 #---------------------------------------------------------------------------------------------
+# TODO use decorators for field name substitusions
 
 def function_gen_params(function):
 
@@ -99,6 +100,7 @@ field_sub_table = dict(
 
 )
 
+
 def export_function_to_json(function):
 
     ret_val = {}
@@ -107,10 +109,11 @@ def export_function_to_json(function):
         IR_name          = field_sub_table[field] if field in field_sub_table else field
         ret_val[IR_name] = value
 
+    ret_val["nodes"] = function.nodes[0].emit_json()
     try:
-        ret_val["nodes"] = function.nodes[0].emit_json()
+        pass
     except:
-        print ("JSON not implemented for %s yet!" % type(function.nodes[0]))
+        print ("JSON not implemented for %s yet! Node contents: %s" % (type(function.nodes[0]), function.nodes[0]), "\n")
 
     ret_val["params"]   = function_gen_params( function ) if function.params else None
 
@@ -123,14 +126,57 @@ def export_function_to_json(function):
 #---------------------------------------------------------------------------------------------
 
 
-def export_if_to_json(function):
+def export_if_to_json(node):
 
     ret_val = {}
 
-    for field, value in function.__dict__.items():
+    for field, value in node.__dict__.items():
         IR_name          = field_sub_table[field] if field in field_sub_table else field
         ret_val[IR_name] = value
 
     ret_val["name"] = field_sub_table[ret_val["name"]]
 
+    return ret_val
+
+
+#---------------------------------------------------------------------------------------------
+# ~ {
+  # ~ "name": "FunctionCall",
+  # ~ "location": "5:8-5:15",
+  # ~ "outPorts": [
+    # ~ {
+      # ~ "nodeId": "node9",
+      # ~ "type": {
+        # ~ "location": "1:35-1:42",
+        # ~ "name": "integer"
+      # ~ },
+      # ~ "index": 0
+    # ~ }
+  # ~ ],
+  # ~ "inPorts": [
+    # ~ {
+      # ~ "nodeId": "node9",
+      # ~ "type": {
+        # ~ "location": "1:19-1:26",
+        # ~ "name": "integer"
+      # ~ },
+      # ~ "index": 0
+    # ~ }
+  # ~ ],
+  # ~ "id": "node9",
+  # ~ "callee": "Fib"
+# ~ },
+
+def export_call_to_json (node):
+    print (node)
+    ret_val = {}
+    for field, value in node.__dict__.items():
+        IR_name          = field_sub_table[field] if field in field_sub_table else field
+        ret_val[IR_name] = value
+
+    ret_val = dict( id       = node.node_id,
+                    callee   = node.function_name['name'],
+                    location = node.location,
+                    name     = "FunctionCall"
+                   )
     return ret_val

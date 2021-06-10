@@ -83,6 +83,13 @@ class Bin(Node):
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
 
+class Call(Node):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(**kwargs)        
+
+    def emit_json(self):        
+        return export_call_to_json(self)
 
 class If(Node):
 

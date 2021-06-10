@@ -134,9 +134,10 @@ class TreeVisitor(NodeVisitor):
 
     # rule: algebraic          = (operand) (_ bin_op _ algebraic)*
     def visit_algebraic(self, node, visited_children):
-
-        if len(visited_children) == 1:
-            retval = visited_children[0][0]
+        
+        if issubclass(type(visited_children[0][0]), Node):
+            
+            return visited_children[0][0]
         else:
             retval = visited_children[0]
             for r in visited_children[1]:
@@ -153,8 +154,10 @@ class TreeVisitor(NodeVisitor):
         args = unpack_rec_list(visited_children[5])
 
         function_name = visited_children[1]
-
-        return {"functionName" : function_name, "args" : args}
+        
+        ret_val = Call(**{"function_name" : function_name, "args" : args, "location" : self.get_location(node)})
+        
+        return ret_val
 
     # rule: number             = ~"[0-9]+"
     def visit_number(self, node, visited_children):
