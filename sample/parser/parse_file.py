@@ -82,7 +82,7 @@ class TreeVisitor(NodeVisitor):
         elif child_type == list:
             item_type = visited_children[0][4]
             #return str()
-            return {"type_name" : SisalArray(item_type), "location": self.get_location(node)}
+            return {"type_name" : f"Array[{item_type}]", "location": self.get_location(node)}
 
     # rule: std_type      = "integer" / "real"
     def visit_std_type(self, node, visited_children):
