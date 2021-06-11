@@ -119,7 +119,6 @@ class TreeVisitor(NodeVisitor):
         args_groups = unpack_rec_list(visited_children)
         return args_groups
 
-
     # rule: function_retvals   = ("returns" _ type_list) / _
     def visit_function_retvals(self, node, visited_children):
         if (visited_children != [None]):

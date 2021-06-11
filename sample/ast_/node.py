@@ -70,9 +70,13 @@ class Node:
 
 
 class Function(Node):
-
+    
+    #static field storing name - function node pairs
+    functions = {}
+    
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
+        Function.functions[self.function_name] = self
 
     def emit_json(self):
         return export_function_to_json(self)
