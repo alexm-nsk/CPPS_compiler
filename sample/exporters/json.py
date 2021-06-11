@@ -173,8 +173,9 @@ def export_if_to_json(node):
 
 
 def export_call_to_json (node):
-    #print (node)
+    
     ret_val = {}
+    
     for field, value in node.__dict__.items():
         IR_name          = field_sub_table[field] if field in field_sub_table else field
         ret_val[IR_name] = value
@@ -192,6 +193,4 @@ def export_call_to_json (node):
                     in_Ports = function_gen_in_ports(called_function),
                     out_Ports= function_gen_out_ports(called_function),
                    )
-    #print (node.function_name['name'],ret_val,"\n")
-    #print (ast_.node.Function.functions)
     return ret_val
