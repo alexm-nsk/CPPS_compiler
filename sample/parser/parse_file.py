@@ -286,10 +286,10 @@ def parse_file(input_text):
                 # since we separated the source code into function texts, we need to
                 # calculate the offset number of lines where errors occured:
 
-                line_offset   = text[:start].count("\n")
+                line_offset   = input_text[:start].count("\n")
                 #   we get the length of text between closest newline preceding
                 #   the current function block:
-                column_offset = len( (text[:start].split("\n"))[-1] )
+                column_offset = 0#len( (text[:start].split("\n"))[-1] )
 
                 # get ther hopefully informative piece of text near the problematic place:
                 piece = e.text[e.pos : min (len (e.text), e.pos + 10)]

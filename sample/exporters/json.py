@@ -171,7 +171,7 @@ def export_if_to_json(node):
 # ~ },
 
 def export_call_to_json (node):
-    print (node)
+    #print (node)
     ret_val = {}
     for field, value in node.__dict__.items():
         IR_name          = field_sub_table[field] if field in field_sub_table else field
