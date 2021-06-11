@@ -67,7 +67,10 @@ class TreeVisitor(NodeVisitor):
 
         if end_row == 1: end_row += self.column_offset
 
-        return "{}:{}-{}:{}".format(start_row + self.line_offset, start_column, end_row + self.line_offset, end_column)
+        return "{}:{}-{}:{}".format(start_row + self.line_offset,
+                                    start_column,
+                                    end_row + self.line_offset,
+                                    end_column)
 
 
     # rule: type_list     = type (_ "," _ type)*
@@ -82,12 +85,12 @@ class TreeVisitor(NodeVisitor):
         elif child_type == list:
             item_type = visited_children[0][4]
             #return str()
-            return {"type_name" : f"Array[{item_type}]", "location": self.get_location(node)}
+            return dict(type_name = f"Array[{item_type}]", location = self.get_location(node))
 
     # rule: std_type      = "integer" / "real"
     def visit_std_type(self, node, visited_children):
 
-        return {"type_name" : node.text, "location": self.get_location(node)}
+        return dict(type_name = node.text, location = self.get_location(node))
 
     def visit__(self, node, visited_children):
         return None
@@ -108,7 +111,7 @@ class TreeVisitor(NodeVisitor):
         type_ = visited_children[4]
         var_names = visited_children[0]
 
-        return {"type" :type_, "vars" : var_names}
+        return dict(type = type_, vars = var_names)
 
     # rule: args_groups_list = (arg_def_group (_ ";" _ arg_def_group)*) / _
     def visit_args_groups_list(self, node, visited_children):
@@ -134,9 +137,9 @@ class TreeVisitor(NodeVisitor):
 
     # rule: algebraic          = (operand) (_ bin_op _ algebraic)*
     def visit_algebraic(self, node, visited_children):
-        
+
         if issubclass(type(visited_children[0][0]), Node):
-            
+
             return visited_children[0][0]
         else:
             retval = visited_children[0]
@@ -154,9 +157,12 @@ class TreeVisitor(NodeVisitor):
         args = unpack_rec_list(visited_children[5])
 
         function_name = visited_children[1]
-        
-        ret_val = Call(**{"function_name" : function_name, "args" : args, "location" : self.get_location(node)})
-        
+
+        ret_val = Call(**dict(function_name = function_name,
+                              args = args,
+                              location = self.get_location(node))
+                          )
+
         return ret_val
 
     # rule: number             = ~"[0-9]+"

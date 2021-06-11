@@ -39,7 +39,8 @@ def function_gen_params(function):
             [var["name"],
                 dict(
                     nodeId = nodeId,
-                    type = dict(location = var["location"], name = group["type"]["type_name"])
+                    type = dict(location = var["location"], 
+                                name = group["type"]["type_name"])
                 )
             ]
             for var in group["vars"]
@@ -59,7 +60,8 @@ def function_gen_out_ports(function):
 
         ret_val += [dict(
                         nodeId = function.node_id,
-                        type = dict(location = r["location"], name = r["type_name"]),
+                        type = dict(location = r["location"], 
+                                    name = r["type_name"]),
                         index = n
                     )]
 
@@ -113,7 +115,8 @@ def export_function_to_json(function):
     try:
         pass
     except:
-        print ("JSON not implemented for %s yet! Node contents: %s" % (type(function.nodes[0]), function.nodes[0]), "\n")
+        print ("JSON not implemented for %s yet! Node contents: %s" 
+                                % (type(function.nodes[0]), function.nodes[0]), "\n")
 
     ret_val["params"]   = function_gen_params( function ) if function.params else None
 
