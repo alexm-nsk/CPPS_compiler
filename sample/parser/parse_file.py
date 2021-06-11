@@ -220,7 +220,7 @@ class TreeVisitor(NodeVisitor):
         then_node      = visited_children[6]
         else_node      = visited_children[10]
 
-        branches = {"then" : then_node, "else_": else_node}
+        branches = dict(then = then_node, else_ = else_node)
 
         return If(**dict(
                         branches  = branches,
