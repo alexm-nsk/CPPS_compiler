@@ -136,19 +136,22 @@ class TreeVisitor(NodeVisitor):
 
     # rule: algebraic          = (operand) (_ bin_op _ algebraic)*
     def visit_algebraic(self, node, visited_children):
-
+        print ("vc:",visited_children[0][0],"\n")
         if issubclass(type(visited_children[0][0]), Node):
-
+            #print ("subclass")
             return visited_children[0][0]
         else:
-            retval = visited_children[0]
+            expression = visited_children[0]
             for r in visited_children[1]:
-                retval.append(r[-3])
-                retval.extend(r[-1])
-
-        return dict (name = "algebraic",
-                     expression = retval
+                expression.append(r[-3])
+                expression.append(r[-1][0])
+                
+        ret_val = dict (name = "algebraic",
+                     expression = expression,
+                     location = self.get_location(node)
                     )
+        print (expression, "\n")
+        return expression
 
     # rule: call               = !("function" _) identifier _ lpar _ args_list _ rpar
     def visit_call(self, node, visited_children):
@@ -167,7 +170,7 @@ class TreeVisitor(NodeVisitor):
     # rule: number             = ~"[0-9]+"
     def visit_number(self, node, visited_children):
         # all we need
-        return node.text
+        return dict(number = node.text, location = self.get_location(node))
 
     def visit_identifier(self, node, visited_children):
         return dict(name = node.text, location = self.get_location(node))

@@ -128,7 +128,45 @@ def export_function_to_json(function):
 
 
 #---------------------------------------------------------------------------------------------
-
+  # ~ {
+          # ~ "id": "node11",
+          # ~ "inPorts": [
+            # ~ {
+              # ~ "index": 0,
+              # ~ "nodeId": "node14",
+              # ~ "type": {
+                # ~ "location": "1:14-1:15",
+                # ~ "name": "integer"
+              # ~ }
+            # ~ }
+          # ~ ],
+          # ~ "location": "not applicable",
+          # ~ "name": "Then",
+          # ~ "nodes": [],
+          # ~ "outPorts": [
+            # ~ {
+              # ~ "index": 0,
+              # ~ "nodeId": "node14",
+              # ~ "type": {
+                # ~ "location": "not applicable",
+                # ~ "name": "integer"
+              # ~ }
+            # ~ }
+          # ~ ],
+          # ~ "params": [
+            # ~ [
+              # ~ "M",
+              # ~ {
+                # ~ "index": 0,
+                # ~ "nodeId": "node14",
+                # ~ "type": {
+                  # ~ "location": "1:14-1:15",
+                  # ~ "name": "integer"
+                # ~ }
+              # ~ }
+            # ~ ]
+          # ~ ]
+        # ~ },
 
 def export_if_to_json(node):
 
@@ -139,7 +177,22 @@ def export_if_to_json(node):
         ret_val[IR_name] = value
 
     ret_val["name"] = field_sub_table[ret_val["name"]]
-
+    
+    json_branches = []
+  #  print (ret_val["branches"])
+    for br_name, branch in ret_val["branches"].items():
+       # print (br_name)
+        #print (branch)
+        json_branches.append(dict(
+                                    name  = field_sub_table[br_name],
+                                    nodes = [],
+                                    
+                                    #TODO
+                                ))
+                                
+    ret_val["branches"] = json_branches
+    #print (ret_val)
+    
     return ret_val
 
 
@@ -183,6 +236,8 @@ def export_call_to_json (node):
     function_name = node.function_name['name']
     
     called_function = ast_.node.Function.functions[function_name]
+    
+    # ~ print (node.args)
     
     ret_val = dict( id       = node.node_id,
                     callee   = function_name,
