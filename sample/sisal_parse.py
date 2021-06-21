@@ -55,7 +55,7 @@ def main(args):
             #formatted = json.dumps(output)
             #os.system ("echo '%s' | jq" % formatted)
 
-            #for function in output["functions"]: print ( str(function) + "\n\n\n" )
+            for function in output["functions"]: print ( str(function) + "\n\n\n" )
 
         except Exception as e:
             # ~ print (str(e))

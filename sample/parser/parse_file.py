@@ -54,6 +54,9 @@ def unpack_rec_list(node):
 
 class TreeVisitor(NodeVisitor):
 
+    #nodes = []
+    nodes = {}
+    
     def get_location(self, node):
         text = node.full_text
 
@@ -136,7 +139,7 @@ class TreeVisitor(NodeVisitor):
 
     # rule: algebraic          = (operand) (_ bin_op _ algebraic)*
     def visit_algebraic(self, node, visited_children):
-        print ("vc:",visited_children[0][0],"\n")
+        #print ("vc:",visited_children[0][0],"\n")
         if issubclass(type(visited_children[0][0]), Node):
             #print ("subclass")
             return visited_children[0][0]
@@ -150,7 +153,7 @@ class TreeVisitor(NodeVisitor):
                      expression = expression,
                      location = self.get_location(node)
                     )
-        print (expression, "\n")
+        #print (expression, "\n")
         return expression
 
     # rule: call               = !("function" _) identifier _ lpar _ args_list _ rpar
