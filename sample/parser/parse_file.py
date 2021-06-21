@@ -155,11 +155,12 @@ class TreeVisitor(NodeVisitor):
         else:
             return visited_children[0]
             
-        #tail[-1] = tail[-1]
+        tail[-1] = tail[-1][0]
         
-        ret_val = visited_children[0] + tail
+        ret_val = {"name":"algebaraic", "expression": visited_children[0] + tail}
 
-        print (ret_val)
+        pprint.pprint (ret_val)
+        print()
         return ret_val
 
     # rule: call               = !("function" _) identifier _ lpar _ args_list _ rpar
