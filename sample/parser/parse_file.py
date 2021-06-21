@@ -56,7 +56,7 @@ class TreeVisitor(NodeVisitor):
 
     #nodes = []
     nodes = {}
-    
+
     def get_location(self, node):
         text = node.full_text
 
@@ -96,6 +96,11 @@ class TreeVisitor(NodeVisitor):
         return dict(type_name = node.text, location = self.get_location(node))
 
     def visit__(self, node, visited_children):
+        #print ("got whitespace!!!", node)
+        return None
+        
+    def visit_empty(self, node, visited_children):
+        print ("got whitespace!!!", node)
         return None
 
     #----------------------------------------------------
@@ -137,24 +142,37 @@ class TreeVisitor(NodeVisitor):
         return dict(location  = self.get_location(node),
                     operation = node.text)
 
-    # rule: algebraic          = (operand) (_ bin_op _ algebraic)*
+    # rule: algebraic          = (operand) (_ bin_op _ operand)*
     def visit_algebraic(self, node, visited_children):
-        #print ("vc:",visited_children[0][0],"\n")
+        #print(issubclass(type(visited_children[0][0]), Node))
+        #all_nodes = unpack_rec_list(visited_children)
+        #print(all_nodes)
+        print ("1:", visited_children[0])
+        print ()
+        
+        if type(visited_children[1]) == list:
+            tail =  [value for value in visited_children[1][0] if value != None]
+        else:
+            tail = None
+            
+        print ("2:", tail)
+        print ("\n\n\n")
         if issubclass(type(visited_children[0][0]), Node):
-            #print ("subclass")
+         #   print (type(visited_children[0][0]))
             return visited_children[0][0]
         else:
             expression = visited_children[0]
             for r in visited_children[1]:
                 expression.append(r[-3])
                 expression.append(r[-1][0])
-                
+
         ret_val = dict (name = "algebraic",
-                     expression = expression,
-                     location = self.get_location(node)
-                    )
-        #print (expression, "\n")
-        return expression
+                         expression = expression,
+                         location = self.get_location(node)
+                       )
+        #print (ret_val, "\n")
+
+        return ret_val
 
     # rule: call               = !("function" _) identifier _ lpar _ args_list _ rpar
     def visit_call(self, node, visited_children):
@@ -167,7 +185,7 @@ class TreeVisitor(NodeVisitor):
                               args = args,
                               location = self.get_location(node))
                           )
-
+        #print (ret_val)
         return ret_val
 
     # rule: number             = ~"[0-9]+"
@@ -194,9 +212,9 @@ class TreeVisitor(NodeVisitor):
 
         #if the function has parameters, generate corresponding IR-piece
         name          = visited_children[ 3 ]["name"] #this is an identifier,  so we get it's name
-        ret_types     = visited_children[ 9  ],
+        ret_types     = visited_children[ 9 ],
         if ret_types:
-           ret_types = ret_types[0] # TODO this is a crutch, fix this
+           ret_types = ret_types[0] # TODO this is a crutch (although a fully functional one), fix this
 
         function_body = visited_children[ 13 ]
 
@@ -243,6 +261,7 @@ class TreeVisitor(NodeVisitor):
 
     # this passes through any nodes for which we don't have a visit_smth(...) method defined
     def generic_visit(self, node, visited_children):
+
         return visited_children or node
 
     def parse(self, parsed_data, line_offset, column_offset):
@@ -251,7 +270,6 @@ class TreeVisitor(NodeVisitor):
         IR = super().visit(parsed_data)
 
         return IR
-
 
 #-----------------------------------------------------------------------
 #
