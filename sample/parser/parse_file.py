@@ -23,6 +23,9 @@
 #
 
 import re
+import pprint
+
+pp = pprint.PrettyPrinter(indent = 4, depth = 6)
 
 from parsimonious.grammar    import Grammar
 from parsimonious.nodes      import NodeVisitor
@@ -144,34 +147,19 @@ class TreeVisitor(NodeVisitor):
 
     # rule: algebraic          = (operand) (_ bin_op _ operand)*
     def visit_algebraic(self, node, visited_children):
-        #print(issubclass(type(visited_children[0][0]), Node))
-        #all_nodes = unpack_rec_list(visited_children)
-        #print(all_nodes)
-        print ("1:", visited_children[0])
-        print ()
-        
+               
         if type(visited_children[1]) == list:
-            tail =  [value for value in visited_children[1][0] if value != None]
+            tail =  [value for value in visited_children[1][0] if value]
+            if len(visited_children[1])>1:
+                tail += [value for value in visited_children[1][1] if value]
         else:
-            tail = None
+            return visited_children[0]
             
-        print ("2:", tail)
-        print ("\n\n\n")
-        if issubclass(type(visited_children[0][0]), Node):
-         #   print (type(visited_children[0][0]))
-            return visited_children[0][0]
-        else:
-            expression = visited_children[0]
-            for r in visited_children[1]:
-                expression.append(r[-3])
-                expression.append(r[-1][0])
+        #tail[-1] = tail[-1]
+        
+        ret_val = visited_children[0] + tail
 
-        ret_val = dict (name = "algebraic",
-                         expression = expression,
-                         location = self.get_location(node)
-                       )
-        #print (ret_val, "\n")
-
+        print (ret_val)
         return ret_val
 
     # rule: call               = !("function" _) identifier _ lpar _ args_list _ rpar

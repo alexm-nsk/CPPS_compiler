@@ -79,7 +79,10 @@ class Function(Node):
         Function.functions[self.function_name] = self
 
     def emit_json(self):
-        return export_function_to_json(self)
+        try:
+            return export_function_to_json(self)
+        except:
+            return "Error converting to JSON"
 
 
 class Bin(Node):
