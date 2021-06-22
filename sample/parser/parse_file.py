@@ -155,13 +155,18 @@ class TreeVisitor(NodeVisitor):
         else:
             return visited_children[0]
             
-        tail[-1] = tail[-1][0]
+        #tail[-1] = tail[-1][0]
         
-        ret_val = {"name":"algebaraic", "expression": visited_children[0] + tail}
+        ret_val = {"name":"algebaraic", "expression": [visited_children[0]] + tail}
 
         pprint.pprint (ret_val)
         print()
         return ret_val
+
+    # exp (_ "," _ exp)*
+    def visit_args_list(self, node, visited_children):
+        #print ("args", visited_children)
+        return visited_children
 
     # rule: call               = !("function" _) identifier _ lpar _ args_list _ rpar
     def visit_call(self, node, visited_children):
@@ -246,6 +251,9 @@ class TreeVisitor(NodeVisitor):
         return visited_children[2]
 
     def visit_exp(self, node, visited_children):
+        return visited_children[0]
+        
+    def visit_operand(self, node, visited_children):
         return visited_children[0]
 
     # this passes through any nodes for which we don't have a visit_smth(...) method defined
