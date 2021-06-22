@@ -109,6 +109,7 @@ class TreeVisitor(NodeVisitor):
     #----------------------------------------------------
     # these methods address parsing of function arguments:
     #----------------------------------------------------
+    
     # rule: function_arguments = args_groups_list / _
     def visit_function_arguments(self, node, visited_children):
         return visited_children[0]
@@ -168,7 +169,7 @@ class TreeVisitor(NodeVisitor):
         #print ("args", visited_children)
         return visited_children
 
-    # rule: call               = !("function" _) identifier _ lpar _ args_list _ rpar
+    # !("function" _) identifier _ lpar _ args_list _ rpar
     def visit_call(self, node, visited_children):
 
         args = unpack_rec_list(visited_children[5])
@@ -247,6 +248,7 @@ class TreeVisitor(NodeVisitor):
     #----------------------------------------------------
     #
     #----------------------------------------------------
+    
     def visit_brackets_algebraic(self, node, visited_children):
         return visited_children[2]
 
