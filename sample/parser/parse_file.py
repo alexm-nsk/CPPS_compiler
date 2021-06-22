@@ -57,8 +57,6 @@ def unpack_rec_list(node):
 
 class TreeVisitor(NodeVisitor):
 
-    #nodes = []
-    nodes = {}
 
     def get_location(self, node):
         text = node.full_text
@@ -90,7 +88,6 @@ class TreeVisitor(NodeVisitor):
 
         elif child_type == list:
             item_type = visited_children[0][4]
-            #return str()
             return dict(type_name = f"Array[{item_type}]", location = self.get_location(node))
 
     # rule: std_type      = "integer" / "real"
@@ -99,11 +96,9 @@ class TreeVisitor(NodeVisitor):
         return dict(type_name = node.text, location = self.get_location(node))
 
     def visit__(self, node, visited_children):
-        #print ("got whitespace!!!", node)
         return None
         
     def visit_empty(self, node, visited_children):
-        print ("got whitespace!!!", node)
         return None
 
     #----------------------------------------------------
@@ -163,7 +158,6 @@ class TreeVisitor(NodeVisitor):
 
     # exp (_ "," _ exp)*
     def visit_args_list(self, node, visited_children):
-        #print ("args", visited_children)
         return visited_children
 
     # !("function" _) identifier _ lpar _ args_list _ rpar
@@ -177,12 +171,10 @@ class TreeVisitor(NodeVisitor):
                               args = args,
                               location = self.get_location(node))
                           )
-        #print (ret_val)
         return ret_val
 
     # rule: number             = ~"[0-9]+"
     def visit_number(self, node, visited_children):
-        # all we need
         return dict(number = node.text, location = self.get_location(node))
 
     def visit_identifier(self, node, visited_children):
