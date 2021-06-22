@@ -27,15 +27,14 @@ from parser.parse_file import parse_file
 import re
 import os, json
 
-
 def parse(input_text):
     return parse_file(input_text)
 
 
 def main(args):
-    
+
     print ("_"*50, "\n\n\n")
-    
+
     if ( len( args ) < 2 ):
         print ( "usage: python parse source_code.sis" )
     else:

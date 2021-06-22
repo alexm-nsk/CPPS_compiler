@@ -36,7 +36,7 @@
 from exporters.json    import *
 
 class Node:
-
+    nodes = {}
     node_counter = 0
 
     def get_node_id():
@@ -49,6 +49,7 @@ class Node:
         self.node_id = Node.get_node_id()
         # TODO consider list of allowed props (https://stackoverflow.com/questions/8187082/how-can-you-set-class-attributes-from-variable-arguments-kwargs-in-python)
         self.__dict__.update(kwargs)
+        Node.nodes[self.node_id] = self
 
     def emit_obj(self):
         pass
