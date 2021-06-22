@@ -159,8 +159,6 @@ class TreeVisitor(NodeVisitor):
         
         ret_val = {"name":"algebaraic", "expression": expression}
 
-        #pprint.pprint (ret_val)
-        #print()
         return Algebraic(expression = expression)
 
     # exp (_ "," _ exp)*

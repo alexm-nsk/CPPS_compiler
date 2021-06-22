@@ -185,7 +185,7 @@ def export_if_to_json(node):
         #print (branch)
         json_branches.append(dict(
                                     name  = field_sub_table[br_name],
-                                    nodes = branch.emit_json(),
+                                    nodes = [branch.emit_json()],
                                     
                                     #TODO
                                 ))
