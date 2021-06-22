@@ -151,18 +151,17 @@ class TreeVisitor(NodeVisitor):
                
         if type(visited_children[1]) == list:
             tail =  [value for value in visited_children[1][0] if value]
-            if len(visited_children[1])>1:
+            if len(visited_children[1]) > 1:
                 tail += [value for value in visited_children[1][1] if value]
         else:
             return visited_children[0]
-            
-        #tail[-1] = tail[-1][0]
+        expression = [visited_children[0]] + tail
         
-        ret_val = {"name":"algebaraic", "expression": [visited_children[0]] + tail}
+        ret_val = {"name":"algebaraic", "expression": expression}
 
-        pprint.pprint (ret_val)
-        print()
-        return ret_val
+        #pprint.pprint (ret_val)
+        #print()
+        return Algebraic(expression = expression)
 
     # exp (_ "," _ exp)*
     def visit_args_list(self, node, visited_children):
@@ -189,7 +188,7 @@ class TreeVisitor(NodeVisitor):
         return dict(number = node.text, location = self.get_location(node))
 
     def visit_identifier(self, node, visited_children):
-        return dict(name = node.text, location = self.get_location(node))
+        return Identifier(name = node.text, location = self.get_location(node))
 
     #----------------------------------------------------
     #
@@ -206,7 +205,7 @@ class TreeVisitor(NodeVisitor):
     def visit_function(self, node, visited_children):
 
         #if the function has parameters, generate corresponding IR-piece
-        name          = visited_children[ 3 ]["name"] #this is an identifier,  so we get it's name
+        name          = visited_children[ 3 ].name #this is an identifier,  so we get it's name
         ret_types     = visited_children[ 9 ],
         if ret_types:
            ret_types = ret_types[0] # TODO this is a crutch (although a fully functional one), fix this

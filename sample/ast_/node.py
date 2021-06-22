@@ -79,10 +79,10 @@ class Function(Node):
         Function.functions[self.function_name] = self
 
     def emit_json(self):
-        try:
             return export_function_to_json(self)
-        except:
-            return "Error converting to JSON"
+        # ~ try:
+        # ~ except:
+            # ~ return "Error converting to JSON"
 
 
 class Bin(Node):
@@ -106,3 +106,21 @@ class If(Node):
 
     def emit_json(self):
         return (export_if_to_json(self))
+
+class Algebraic(Node):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(**kwargs)
+        self.name = "algebraic"
+
+    def emit_json(self):
+        return (export_algebraic_to_json(self))
+
+class Identifier(Node):
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(**kwargs)
+        self.name = "identifier"
+
+    def emit_json(self):
+        return (export_identifier_to_json(self))

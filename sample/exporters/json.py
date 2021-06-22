@@ -37,10 +37,10 @@ def function_gen_params(function):
 
     for group in params:
         ret_val.extend([
-            [var["name"],
+            [var.name,
                 dict(
                     nodeId = nodeId,
-                    type = dict(location = var["location"], 
+                    type = dict(location = var.location, 
                                 name = group["type"]["type_name"])
                 )
             ]
@@ -84,7 +84,7 @@ def function_gen_in_ports(function):
 
             ret_val += [dict(
                             nodeId = function.node_id,
-                            type = dict(location = var["location"],
+                            type = dict(location = var.location,
                                         name     = arg_group["type"]["type_name"]),
                             index = len(ret_val)
                         )]
@@ -181,11 +181,11 @@ def export_if_to_json(node):
     json_branches = []
   #  print (ret_val["branches"])
     for br_name, branch in ret_val["branches"].items():
-       # print (br_name)
+        #print (br_name)
         #print (branch)
         json_branches.append(dict(
                                     name  = field_sub_table[br_name],
-                                    nodes = [],
+                                    nodes = branch.emit_json(),
                                     
                                     #TODO
                                 ))
@@ -233,7 +233,7 @@ def export_call_to_json (node):
         IR_name          = field_sub_table[field] if field in field_sub_table else field
         ret_val[IR_name] = value
         
-    function_name = node.function_name['name']
+    function_name = node.function_name.name
     
     called_function = ast_.node.Function.functions[function_name]
     
@@ -249,3 +249,9 @@ def export_call_to_json (node):
                     out_Ports= function_gen_out_ports(called_function),
                    )
     return ret_val
+
+def export_algebraic_to_json (node):
+    return "Algebraic"
+    
+def export_identifier_to_json (node):
+    return "Identifier"
