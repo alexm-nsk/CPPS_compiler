@@ -280,19 +280,83 @@ def export_identifier_to_json (node):
 # ~ }
 
 def export_literal_to_json (node):
+    
     return dict(
                     id = node.node_id,
                     location = node.location,
-                    outPorts = [                dict(index = 0,
-                                                     nodeId = node.node_id,
-                                                     type = dict(
-                                                            location = "not applicable",
-                                                            name     = "integer" #TODO put the type here
-                                                            )
+                    outPorts = [
+                                    dict(
+                                            index = 0,
+                                            nodeId = node.node_id,
+                                            type = dict(
+                                                        location = "not applicable",
+                                                        name     = "integer" #TODO put the type here
                                                     )
+                                        )
                                 ],
                     value = node.value,                    
                 )
+                
+# ~ {
+# ~ "id": "node2",
+# ~ "inPorts": [
+  # ~ {
+    # ~ "index": 0,
+    # ~ "nodeId": "node2",
+    # ~ "type": {
+      # ~ "location": "not applicable",
+      # ~ "name": "integer"
+    # ~ }
+  # ~ },
+  # ~ {
+    # ~ "index": 1,
+    # ~ "nodeId": "node2",
+    # ~ "type": {
+      # ~ "location": "not applicable",
+      # ~ "name": "integer"
+    # ~ }
+  # ~ }
+# ~ ],
+# ~ "location": "2:5-2:10",
+# ~ "name": "Binary",
+# ~ "operator": "<",
+# ~ "outPorts": [
+  # ~ {
+    # ~ "index": 0,
+    # ~ "nodeId": "node2",
+    # ~ "type": {
+      # ~ "location": "not applicable",
+      # ~ "name": "boolean"
+    # ~ }
+  # ~ }
+# ~ ]
+# ~ },
+
+operator_type_map = {
+    "<" : "boolean",
+    ">" : "boolean",
+    "+" : "integer",
+    "-" : "integer",    
+}
 
 def export_bin_to_json (node):
-    return node.operator
+     return dict(
+                    id = node.node_id,
+                    name = "Binary",
+                    operator = node.operator,
+                    location = node.location,
+                    
+                    inPorts  = [dict (index = n, nodeId = node.node_id, type = {"location":"not applicable", "name" : operator_type_map[node.operator]})
+                                for n in range(2)],
+                                
+                    outPorts = [
+                                    dict(
+                                            index = 0,
+                                            nodeId = node.node_id,
+                                            type = dict(
+                                                        location = "not applicable",
+                                                        name     = "integer" #TODO put the type here
+                                                    )
+                                        )
+                                ],
+                )
