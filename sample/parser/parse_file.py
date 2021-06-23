@@ -43,8 +43,10 @@ from parser.arithmetic_helpers import set_priorities
 #       args_groups_list = arg_def_group (_ ";" _ arg_def_group)*
 # into one array-list
 
+
 def unpack_rec_list(node):
     return [node[0]] + [r[-1] for r in node[1]]
+
 
 #----------------------------------------------------
 #
@@ -54,6 +56,7 @@ def unpack_rec_list(node):
 # We go through separate strings containing each function
 #
 #----------------------------------------------------
+
 
 class TreeVisitor(NodeVisitor):
 
@@ -130,7 +133,6 @@ class TreeVisitor(NodeVisitor):
     def visit_function_retvals(self, node, visited_children):
         if (visited_children != [None]):
             ret_types = unpack_rec_list(visited_children[0][2])
-
             return ret_types
         else:
             return None
@@ -298,9 +300,9 @@ def parse_file(input_text):
                 # calculate the offset number of lines where errors occured:
 
                 line_offset   = input_text[:start].count("\n")
-                #   we get the length of text between closest newline preceding
-                #   the current function block:
-                column_offset = 0#len( (text[:start].split("\n"))[-1] )
+                #   we get the length of text between current symbol and 
+                #   the closest newline ("\n") preceding the current function block:
+                column_offset = 0
 
                 # get ther hopefully informative piece of text near the problematic place:
                 piece = e.text[e.pos : min (len (e.text), e.pos + 10)]

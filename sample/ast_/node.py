@@ -45,11 +45,11 @@ class Node:
         return "node" + str(Node.node_counter)
 
     def __init__(self, *args, **kwargs):
-
-        self.node_id = Node.get_node_id()
+        if not ("no_id" in kwargs and kwargs["no_id"]):
+            self.node_id = Node.get_node_id()
+            Node.nodes[self.node_id] = self
         # TODO consider list of allowed props (https://stackoverflow.com/questions/8187082/how-can-you-set-class-attributes-from-variable-arguments-kwargs-in-python)
         self.__dict__.update(kwargs)
-        Node.nodes[self.node_id] = self
 
     def emit_obj(self):
         pass
@@ -120,8 +120,8 @@ class Algebraic(Node):
 class Identifier(Node):
     
     def __init__(self, *args, **kwargs):
-        super().__init__(**kwargs)
-        self.name = "identifier"
+        super().__init__(**kwargs, no_id = False)
+        #self.name = "identifier"        
 
     def emit_json(self):
         return (export_identifier_to_json(self))

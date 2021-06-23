@@ -28,6 +28,7 @@
 # TODO use decorators for field name substitusions
 import ast_.node
 
+
 def function_gen_params(function):
 
     params = function.params
@@ -245,8 +246,11 @@ def export_call_to_json (node):
                    )
     return ret_val
 
+
 def export_algebraic_to_json (node):
+    #print (node)
     return "Algebraic"
+
     
 def export_identifier_to_json (node):
     return "Identifier"
