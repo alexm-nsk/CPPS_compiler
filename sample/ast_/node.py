@@ -45,9 +45,13 @@ class Node:
         return "node" + str(Node.node_counter)
 
     def __init__(self, *args, **kwargs):
+
         if not ("no_id" in kwargs and kwargs["no_id"]):
             self.node_id = Node.get_node_id()
             Node.nodes[self.node_id] = self
+        
+        if "no_id" in kwargs: kwargs.pop("no_id")
+        
         # TODO consider list of allowed props (https://stackoverflow.com/questions/8187082/how-can-you-set-class-attributes-from-variable-arguments-kwargs-in-python)
         self.__dict__.update(kwargs)
 
@@ -91,6 +95,9 @@ class Bin(Node):
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
 
+    def emit_json(self):
+        return (export_bin_to_json(self))
+
 class Call(Node):
 
     def __init__(self, *args, **kwargs):
@@ -125,3 +132,11 @@ class Identifier(Node):
 
     def emit_json(self):
         return (export_identifier_to_json(self))
+        
+class Literal(Node):
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(**kwargs)
+
+    def emit_json(self):
+        return (export_literal_to_json(self))

@@ -140,8 +140,8 @@ class TreeVisitor(NodeVisitor):
     # just return the operation's string
     def visit_bin_op(self, node, visited_children):
         #print ("Binary: ",node.text ,self.get_location(node))
-        return dict(location  = self.get_location(node),
-                    operation = node.text)
+        return Bin(location  = self.get_location(node),
+                    operator = node.text)
 
     # rule: algebraic          = (operand) (_ bin_op _ operand)*
     def visit_algebraic(self, node, visited_children):
@@ -152,7 +152,11 @@ class TreeVisitor(NodeVisitor):
                 tail += [value for value in visited_children[1][1] if value]
         else:
             return visited_children[0]
+        
+        
         expression = [visited_children[0]] + tail
+
+        #print (expression)
         
         ret_val = {"name":"algebaraic", "expression": expression}
 
@@ -175,9 +179,9 @@ class TreeVisitor(NodeVisitor):
                           )
         return ret_val
 
-    # rule: number             = ~"[0-9]+"
-    def visit_number(self, node, visited_children):
-        return dict(number = node.text, location = self.get_location(node))
+    # rule: number_literal_int             = ~"[0-9]+"
+    def visit_number_literal_int(self, node, visited_children):
+        return Literal(value = node.text, location = self.get_location(node))
 
     def visit_identifier(self, node, visited_children):
         return Identifier(name = node.text, location = self.get_location(node))
@@ -247,6 +251,9 @@ class TreeVisitor(NodeVisitor):
         return visited_children[0]
         
     def visit_operand(self, node, visited_children):
+        return visited_children[0]
+
+    def visit_number_literal(self, node, visited_children):
         return visited_children[0]
 
     # this passes through any nodes for which we don't have a visit_smth(...) method defined

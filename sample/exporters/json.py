@@ -41,7 +41,7 @@ def function_gen_params(function):
             [var.name,
                 dict(
                     nodeId = nodeId,
-                    type = dict(location = var.location, 
+                    type = dict(location = var.location,
                                 name = group["type"]["type_name"])
                 )
             ]
@@ -62,7 +62,7 @@ def function_gen_out_ports(function):
 
         ret_val += [dict(
                         nodeId = function.node_id,
-                        type = dict(location = r["location"], 
+                        type = dict(location = r["location"],
                                     name = r["type_name"]),
                         index = n
                     )]
@@ -117,7 +117,7 @@ def export_function_to_json(function):
     try:
         pass
     except:
-        print ("JSON not implemented for %s yet! Node contents: %s" 
+        print ("JSON not implemented for %s yet! Node contents: %s"
                                 % (type(function.nodes[0]), function.nodes[0]), "\n")
 
     ret_val["params"]   = function_gen_params( function ) if function.params else None
@@ -178,19 +178,20 @@ def export_if_to_json(node):
         ret_val[IR_name] = value
 
     ret_val["name"] = field_sub_table[ret_val["name"]]
-    
+
     json_branches = []
 
     for br_name, branch in ret_val["branches"].items():
         json_branches.append(dict(
                                     name  = field_sub_table[br_name],
                                     nodes = [branch.emit_json()],
-                                    
+
                                     #TODO
                                 ))
-                                
-    ret_val["branches"] = json_branches
-    
+
+    ret_val["branches"]  = json_branches
+    ret_val["condition"] = node.condition.emit_json()
+
     return ret_val
 
 
@@ -224,17 +225,17 @@ def export_if_to_json(node):
 
 
 def export_call_to_json (node):
-    
+
     ret_val = {}
-    
+
     for field, value in node.__dict__.items():
         IR_name          = field_sub_table[field] if field in field_sub_table else field
         ret_val[IR_name] = value
-        
+
     function_name = node.function_name.name
-    
+
     called_function = ast_.node.Function.functions[function_name]
-    
+
     ret_val = dict( id       = node.node_id,
                     callee   = function_name,
                     location = node.location,
@@ -249,8 +250,49 @@ def export_call_to_json (node):
 
 def export_algebraic_to_json (node):
     #print (node)
+    for operand in node.expression:
+        print (operand.emit_json())
+    print ("\n\n")
+        # ~ try:
+        # ~ except Exception as e:
+            # ~ print ("\n\n\n", operand, str(e) ,"\n\n\n")
     return "Algebraic"
 
-    
+
 def export_identifier_to_json (node):
-    return "Identifier"
+    return node.name
+
+# ~ {
+  # ~ "id": "node6",
+  # ~ "location": "5:26-5:27",
+  # ~ "name": "Literal",
+  # ~ "outPorts": [
+    # ~ {
+      # ~ "index": 0,
+      # ~ "nodeId": "node6",
+      # ~ "type": {
+        # ~ "location": "not applicable",
+        # ~ "name": "integer"
+      # ~ }
+    # ~ }
+  # ~ ],
+  # ~ "value": 2
+# ~ }
+
+def export_literal_to_json (node):
+    return dict(
+                    id = node.node_id,
+                    location = node.location,
+                    outPorts = [                dict(index = 0,
+                                                     nodeId = node.node_id,
+                                                     type = dict(
+                                                            location = "not applicable",
+                                                            name     = "integer" #TODO put the type here
+                                                            )
+                                                    )
+                                ],
+                    value = node.value,                    
+                )
+
+def export_bin_to_json (node):
+    return node.operator
