@@ -34,7 +34,7 @@ def parse(input_text):
 
 def main(args):
 
-    print ("_"*50, "\n\n\n")
+    print ("_"*50, "\n")
 
     if ( len( args ) < 2 ):
         print ( "usage: python parse source_code.sis" )

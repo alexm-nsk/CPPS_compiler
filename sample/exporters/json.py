@@ -100,7 +100,7 @@ field_sub_table = dict(
     if_           = "If",
     then          = "Then",
     else_         = "Else",
-    condition     = "condition",
+    condition     = "Condition",
 
 )
 
@@ -251,7 +251,7 @@ def export_call_to_json (node):
 def export_algebraic_to_json (node):
     #print (node)
     #for operand in node.expression:        print (operand.emit_json())
-    print ("\n\n")
+    #print ("\n\n")
         # ~ try:
         # ~ except Exception as e:
             # ~ print ("\n\n\n", operand, str(e) ,"\n\n\n")
