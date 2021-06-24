@@ -291,6 +291,7 @@ def parse_file(input_text):
     parsed_functions = []
 
     for function_text in function_matches:
+        
         text  = function_text.group(0)
         start = function_text.start()
         end   = function_text.end()

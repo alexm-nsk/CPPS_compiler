@@ -28,6 +28,48 @@
 # TODO use decorators for field name substitusions
 import ast_.node
 
+# ~ [
+  # ~ {
+    # ~ "index": 0,
+    # ~ "nodeId": "node11",
+    # ~ "type": {
+      # ~ "location": "",
+      # ~ "name": "integer"
+    # ~ }
+  # ~ },
+  # ~ {
+    # ~ "index": 0,
+    # ~ "nodeId": "node11",
+    # ~ "type": {
+      # ~ "location": "",
+      # ~ "name": "integer"
+    # ~ }
+  # ~ }
+# ~ ]
+
+def make_json_edge(from_, to, src_index, dst_index, src_type = None, dst_type = None):
+    #TODO retrieve src and dst type from the nodes here
+
+    if src_type == None:
+        pass
+    if dst_type == None:
+        pass
+        
+    return [
+    
+            {
+                "index"  : src_index,
+                "nodeId" : from_,
+                "type"   : {"location" : "TODO", "name" : src_type}
+            },
+            
+            {
+                "index"  : dst_index,
+                "nodeId" : to,
+                "type"   : {"location" : "TODO", "name" : dst_type}
+            }
+            
+            ]
 
 def function_gen_params(function):
 
@@ -250,16 +292,52 @@ def export_call_to_json (node):
 
 def export_algebraic_to_json (node):
     #print (node)
-    #for operand in node.expression:        print (operand.emit_json())
-    #print ("\n\n")
-        # ~ try:
-        # ~ except Exception as e:
-            # ~ print ("\n\n\n", operand, str(e) ,"\n\n\n")
+    return_nodes = []
+    return_edges = []
+    exp = node.expression
+
+    def get_nodes(chunk):
+
+        for n, operator in enumerate(chunk[1::2]):
+            # the loop enumerates the list with even values skipped hence the index:
+            index = n * 2 + 1
+            left  = exp[ :index]
+            right = exp[index + 1: ]
+            
+            if len(left) == 1:
+                if (type(left[0]) == Identifier) : pass
+                #check if it's a literal or an identifier and make a proper edge
+                
+            op_json = operator.emit_json()
+            #TODO make edges
+            return_nodes.append(op_json)
+            
+            if(left):
+                left_node = get_nodes(left) 
+
+            if(right):
+                right_node = get_nodes(right)
+
+            # TODO add edges
+            return_edges.append(make_json_edge(left_node,  operator.node_id,0,0))
+            return_edges.append(make_json_edge(right_node, operator.node_id,0,1))
+            # ~ print (operator.emit_json())
+            # ~ print ("left: ", left)
+            # ~ print ("right: ", right)
+            # ~ print ("\n")
+            print ("id:", operator.node_id)
+
+            return operator.node_id
+
+    get_nodes(exp)
+
+    #print(return_nodes)
+    print("edges:", return_edges, "\n")
     return "Algebraic"
 
 
 def export_identifier_to_json (node):
-    return node.name
+    return "Identifier: " + node.name
 
 # ~ {
   # ~ "id": "node6",
@@ -279,7 +357,7 @@ def export_identifier_to_json (node):
 # ~ }
 
 def export_literal_to_json (node):
-    
+
     return dict(
                     id = node.node_id,
                     location = node.location,
@@ -293,9 +371,9 @@ def export_literal_to_json (node):
                                                     )
                                         )
                                 ],
-                    value = node.value,                    
+                    value = node.value,
                 )
-                
+
 # ~ {
 # ~ "id": "node2",
 # ~ "inPorts": [
@@ -335,7 +413,7 @@ operator_type_map = {
     "<" : "boolean",
     ">" : "boolean",
     "+" : "integer",
-    "-" : "integer",    
+    "-" : "integer",
 }
 
 def export_bin_to_json (node):
@@ -344,10 +422,10 @@ def export_bin_to_json (node):
                     name = "Binary",
                     operator = node.operator,
                     location = node.location,
-                    
+
                     inPorts  = [dict (index = n, nodeId = node.node_id, type = {"location":"not applicable", "name" : operator_type_map[node.operator]})
                                 for n in range(2)],
-                                
+
                     outPorts = [
                                     dict(
                                             index = 0,
