@@ -250,8 +250,7 @@ def export_call_to_json (node):
 
 def export_algebraic_to_json (node):
     #print (node)
-    for operand in node.expression:
-        print (operand.emit_json())
+    #for operand in node.expression:        print (operand.emit_json())
     print ("\n\n")
         # ~ try:
         # ~ except Exception as e:

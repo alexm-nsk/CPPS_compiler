@@ -26,6 +26,7 @@ from parser.parse_file import parse_file
 
 import re
 import os, json
+from ast_.node import *
 
 def parse(input_text):
     return parse_file(input_text)
@@ -60,7 +61,9 @@ def main(args):
         except Exception as e:
             # ~ print (str(e))
             raise e
-
+            
+        #for n, value in Node.nodes.items(): print (n, ":" , value)
+            
     return 0
 
 

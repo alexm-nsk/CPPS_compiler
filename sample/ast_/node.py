@@ -46,7 +46,7 @@ class Node:
 
     def __init__(self, *args, **kwargs):
 
-        if not ("no_id" in kwargs and kwargs["no_id"]):
+        if not ("no_id" in kwargs and not kwargs["no_id"]):
             self.node_id = Node.get_node_id()
             Node.nodes[self.node_id] = self
         
@@ -110,6 +110,11 @@ class If(Node):
 
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
+        self.condition.node_id  = Node.get_node_id()
+        #print (self.branches)
+        for name, branch in self.branches.items():
+            branch.node_id  = Node.get_node_id()
+            
         self.name = "if_"
 
     def emit_json(self):
@@ -118,7 +123,7 @@ class If(Node):
 class Algebraic(Node):
 
     def __init__(self, *args, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(**kwargs, no_id = False)
         self.name = "algebraic"
 
     def emit_json(self):
