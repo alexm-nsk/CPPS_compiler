@@ -53,11 +53,11 @@ def main(args):
 
             #print (output)
 
-            #formatted = json.dumps(output)
+            #formatted = json.dumps(output["functions"])
             #os.system ("echo '%s' | jq" % formatted)
 
             for function in output["functions"]: print ( str(function) + "\n\n\n" )
-
+            #for name, node in Node.nodes.items(): print (name, node)
         except Exception as e:
             # ~ print (str(e))
             raise e

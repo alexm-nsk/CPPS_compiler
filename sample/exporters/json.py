@@ -28,6 +28,11 @@
 # TODO use decorators for field name substitusions
 import ast_.node
 
+import pprint
+
+current_function = ""
+json_nodes = {}
+
 # ~ [
   # ~ {
     # ~ "index": 0,
@@ -51,24 +56,37 @@ def make_json_edge(from_, to, src_index, dst_index, src_type = None, dst_type = 
     #TODO retrieve src and dst type from the nodes here
 
     if src_type == None:
-        pass
+        try:
+            src_type = json_nodes[from_]["outPorts"][src_index]["type"]["name"]
+            print ("src:", src_type)
+        except Exception as e:
+            pass
+            print ("no src ", str(e))
+
     if dst_type == None:
-        pass
-        
+        try:
+            dst_type = json_nodes[to]["inPorts"][dst_index]["type"]["name"]
+            print ("dst:", dst_type)
+
+        except Exception as e:
+            pass
+            print ("no dst",str(e))
+
+
     return [
-    
+
             {
                 "index"  : src_index,
                 "nodeId" : from_,
                 "type"   : {"location" : "TODO", "name" : src_type}
             },
-            
+
             {
                 "index"  : dst_index,
                 "nodeId" : to,
                 "type"   : {"location" : "TODO", "name" : dst_type}
             }
-            
+
             ]
 
 def function_gen_params(function):
@@ -149,23 +167,25 @@ field_sub_table = dict(
 
 def export_function_to_json(function):
 
+    global current_function, json_nodes
+
+    current_function = function.node_id
     ret_val = {}
 
     for field, value in function.__dict__.items():
         IR_name          = field_sub_table[field] if field in field_sub_table else field
         ret_val[IR_name] = value
 
+    ret_val["outPorts"] = function_gen_out_ports(function)
+    ret_val["inPorts"]  = function_gen_in_ports (function)
+
+    json_nodes[function.node_id] = ret_val
+
     ret_val["nodes"] = function.nodes[0].emit_json()
-    try:
-        pass
-    except:
-        print ("JSON not implemented for %s yet! Node contents: %s"
-                                % (type(function.nodes[0]), function.nodes[0]), "\n")
 
     ret_val["params"]   = function_gen_params( function ) if function.params else None
 
-    ret_val["outPorts"] = function_gen_out_ports(function)
-    ret_val["inPorts"]  = function_gen_in_ports (function)
+    json_nodes[function.node_id].update ( ret_val )
 
     return ret_val
 
@@ -232,7 +252,10 @@ def export_if_to_json(node):
                                 ))
 
     ret_val["branches"]  = json_branches
-    ret_val["condition"] = node.condition.emit_json()
+    ret_val["Condition"] = node.condition.emit_json()
+    ret_val["id"] = node.node_id
+
+    json_nodes[node.node_id] = ret_val
 
     return ret_val
 
@@ -278,62 +301,68 @@ def export_call_to_json (node):
 
     called_function = ast_.node.Function.functions[function_name]
 
+    json_nodes[node.node_id] = dict(inPorts = function_gen_in_ports(called_function),
+                                    outPorts= function_gen_out_ports(called_function))
+
     ret_val = dict( id       = node.node_id,
                     callee   = function_name,
                     location = node.location,
                     name     = "FunctionCall",
                     # these have to be generated again,
                     # since we dont store them currently:
-                    in_Ports = function_gen_in_ports(called_function),
-                    out_Ports= function_gen_out_ports(called_function),
+                    #inPorts = function_gen_in_ports(called_function),
+                    #outPorts= function_gen_out_ports(called_function),
                    )
+
+    json_nodes[node.node_id].update ( ret_val )
     return ret_val
 
 
 def export_algebraic_to_json (node):
-    #print (node)
+
     return_nodes = []
     return_edges = []
     exp = node.expression
 
+    # recursively splits the algebraic expression until we have a few nodes connected with edges
+
     def get_nodes(chunk):
 
-        for n, operator in enumerate(chunk[1::2]):
-            # the loop enumerates the list with even values skipped hence the index:
-            index = n * 2 + 1
-            left  = exp[ :index]
-            right = exp[index + 1: ]
-            
-            if len(left) == 1:
-                if (type(left[0]) == Identifier) : pass
-                #check if it's a literal or an identifier and make a proper edge
-                
-            op_json = operator.emit_json()
-            #TODO make edges
-            return_nodes.append(op_json)
-            
-            if(left):
-                left_node = get_nodes(left) 
+        # if only an operand left:
+        if len(chunk) == 1:
+            operand = chunk[0]
 
-            if(right):
+            #return parent node's (?) node_id
+            if type(operand) == ast_.node.Identifier:
+                return current_function
+            else:
+                return operand.node_id
+
+        # if we still have some splitting to do:
+        else:
+
+            for n, operator in enumerate(chunk[1::2]):
+                # the loop enumerates the list with even values skipped hence the index:
+                index = n * 2 + 1
+
+                left  = exp[ :index]
+                right = exp[index + 1: ]
+
+                op_json = operator.emit_json()
+                return_nodes.append(op_json)
+
+                left_node = get_nodes(left)
                 right_node = get_nodes(right)
 
-            # TODO add edges
-            return_edges.append(make_json_edge(left_node,  operator.node_id,0,0))
-            return_edges.append(make_json_edge(right_node, operator.node_id,0,1))
-            # ~ print (operator.emit_json())
-            # ~ print ("left: ", left)
-            # ~ print ("right: ", right)
-            # ~ print ("\n")
-            print ("id:", operator.node_id)
+                return_edges.append(make_json_edge(left_node,  operator.node_id,0,0))
+                return_edges.append(make_json_edge(right_node, operator.node_id,0,1))
 
-            return operator.node_id
+                return operator.node_id
 
     get_nodes(exp)
-
-    #print(return_nodes)
-    print("edges:", return_edges, "\n")
-    return "Algebraic"
+    print ("Edges")
+    pprint.pprint(return_edges)
+    return dict(nodes = return_nodes, edges = return_edges)
 
 
 def export_identifier_to_json (node):
@@ -358,7 +387,7 @@ def export_identifier_to_json (node):
 
 def export_literal_to_json (node):
 
-    return dict(
+    ret_val = dict(
                     id = node.node_id,
                     location = node.location,
                     outPorts = [
@@ -373,6 +402,8 @@ def export_literal_to_json (node):
                                 ],
                     value = node.value,
                 )
+    json_nodes[node.node_id] = ret_val
+    return ret_val
 
 # ~ {
 # ~ "id": "node2",
@@ -417,7 +448,7 @@ operator_type_map = {
 }
 
 def export_bin_to_json (node):
-     return dict(
+    ret_val = dict(
                     id = node.node_id,
                     name = "Binary",
                     operator = node.operator,
@@ -437,3 +468,5 @@ def export_bin_to_json (node):
                                         )
                                 ],
                 )
+    json_nodes[node.node_id] = ret_val
+    return ret_val
