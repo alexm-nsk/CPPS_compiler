@@ -58,7 +58,7 @@ def make_json_edge(from_, to, src_index, dst_index, src_type = None, dst_type = 
     if src_type == None:
         try:
             src_type = json_nodes[from_]["outPorts"][src_index]["type"]["name"]
-            print ("src:", src_type)
+#            print ("src:", src_type)
         except Exception as e:
             pass
             print ("no src ", str(e))
@@ -66,7 +66,7 @@ def make_json_edge(from_, to, src_index, dst_index, src_type = None, dst_type = 
     if dst_type == None:
         try:
             dst_type = json_nodes[to]["inPorts"][dst_index]["type"]["name"]
-            print ("dst:", dst_type)
+ #           print ("dst:", dst_type)
 
         except Exception as e:
             pass
@@ -252,6 +252,8 @@ def export_if_to_json(node):
                                 ))
 
     ret_val["branches"]  = json_branches
+    
+    # case differences in "branches" and "Condition" are due to choice made for IR initially
     ret_val["Condition"] = node.condition.emit_json()
     ret_val["id"] = node.node_id
 
@@ -331,11 +333,11 @@ def export_algebraic_to_json (node):
         # if only an operand left:
         if len(chunk) == 1:
             operand = chunk[0]
-
             #return parent node's (?) node_id
             if type(operand) == ast_.node.Identifier:
                 return current_function
             else:
+                return_nodes.append(operand.emit_json())
                 return operand.node_id
 
         # if we still have some splitting to do:
@@ -360,8 +362,8 @@ def export_algebraic_to_json (node):
                 return operator.node_id
 
     get_nodes(exp)
-    print ("Edges")
-    pprint.pprint(return_edges)
+    #print ("Edges")
+    #pprint.pprint(return_edges)
     return dict(nodes = return_nodes, edges = return_edges)
 
 
