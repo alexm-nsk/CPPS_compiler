@@ -26,6 +26,9 @@
 
 #---------------------------------------------------------------------------------------------
 # TODO use decorators for field name substitusions
+# TODO everywhere "emit_json" is called check if it generated any edges and if so, add them
+# TODO suggestion to put "linearization" of subtrees in there also (node decides whether it should break up the node list)
+
 import ast_.node
 
 import pprint
