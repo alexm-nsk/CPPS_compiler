@@ -27,7 +27,7 @@
 #---------------------------------------------------------------------------------------------
 # TODO use decorators for field name substitusions
 # TODO everywhere "emit_json" is called check if it generated any edges and if so, add them
-# TODO suggestion to put "linearization" of subtrees in there also (node decides whether it should break up the node list)
+# TODO suggestion to put "linearization" of subtrees in there also (node decides whether it should break up the node list), make function that calls emit_json (node) and returns what's needed
 
 import ast_.node
 
@@ -61,7 +61,7 @@ def make_json_edge(from_, to, src_index, dst_index, src_type = None, dst_type = 
     if src_type == None:
         try:
             src_type = json_nodes[from_]["outPorts"][src_index]["type"]["name"]
-#            print ("src:", src_type)
+  #          print ("src:", src_type)
         except Exception as e:
             pass
             print ("no src ", str(e))
@@ -256,7 +256,7 @@ def export_if_to_json(node):
 
     ret_val["branches"]  = json_branches
     
-    # case differences in "branches" and "Condition" are due to choice made for IR initially
+    # case differences in "branches" and "Condition" are due to choice made for IR
     ret_val["Condition"] = node.condition.emit_json()
     ret_val["id"] = node.node_id
 
@@ -372,7 +372,7 @@ def export_algebraic_to_json (node):
 
 def export_identifier_to_json (node):
     # TODO check the case with loop to self in "then"
-    return dict(nodes = [], edges = "Edges Leading to scope's top")
+    return dict(nodes = [], edges = "Edges Leading to scope top")
 
 # ~ {
   # ~ "id": "node6",

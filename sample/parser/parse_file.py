@@ -312,7 +312,7 @@ def parse_file(input_text):
                 #   the closest newline ("\n") preceding the current function block:
                 column_offset = 0
 
-                # get ther hopefully informative piece of text near the problematic place:
+                # get the hopefully informative piece of text near the problematic place:
                 piece = e.text[e.pos : min (len (e.text), e.pos + 10)]
 
                 # put out our error message
