@@ -359,8 +359,8 @@ def export_algebraic_to_json (node):
                 left_node = get_nodes(left)
                 right_node = get_nodes(right)
 
-                return_edges.append(make_json_edge(left_node,  operator.node_id,0,0))
-                return_edges.append(make_json_edge(right_node, operator.node_id,0,1))
+                return_edges.append(make_json_edge(left_node,  operator.node_id, 0, 0))
+                return_edges.append(make_json_edge(right_node, operator.node_id, 0, 1))
 
                 return operator.node_id
 
@@ -371,7 +371,8 @@ def export_algebraic_to_json (node):
 
 
 def export_identifier_to_json (node):
-    return "Identifier: " + node.name
+    # TODO check the case with loop to self in "then"
+    return dict(nodes = [], edges = "Edges Leading to scope's top")
 
 # ~ {
   # ~ "id": "node6",
