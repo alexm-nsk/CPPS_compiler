@@ -145,7 +145,7 @@ field_sub_table = dict(
     if_           = "If",
     then          = "Then",
     else_         = "Else",
-    condition     = "Condition",
+    #condition     = "Condition",
 
 )
 
@@ -176,7 +176,8 @@ def export_function_to_json(function):
     ret_val["params"]   = function_gen_params( function ) if function.params else None
 
     json_nodes[function.node_id].update ( ret_val )
-
+    
+    # it's a top node, so no need, to return edges upstream
     return ret_val
 
 
@@ -205,7 +206,12 @@ def export_if_to_json(node):
     ret_val["branches"]  = json_branches
 
     # case differences in "branches" and "Condition" are due to choice made for IR
-    ret_val["Condition"] = node.condition.emit_json()
+    condition_children = node.condition.emit_json()
+    print (condition_children["edges"])
+    ret_val["condition"] = condition_children
+    #ret_val["condition"]["nodes"] = condition_children["nodes"]
+    #ret_val["condition"]["edges"] = condition_children["edges"]
+    
     ret_val["id"] = node.node_id
 
     json_nodes[node.node_id] = ret_val
@@ -259,7 +265,8 @@ def export_algebraic_to_json (node):
             if type(operand) == ast_.node.Identifier:
                 return current_function
             else:
-                return_nodes.append(operand.emit_json())
+                # TODO process edges too
+                return_nodes.append(operand.emit_json()["nodes"])
                 return operand.node_id
 
         # if we still have some splitting to do:
@@ -271,8 +278,8 @@ def export_algebraic_to_json (node):
 
                 left  = exp[ :index]
                 right = exp[index + 1: ]
-
-                op_json = operator.emit_json()
+                # TODO process edges too
+                op_json = operator.emit_json()["nodes"]
                 return_nodes.append(op_json)
 
                 left_node = get_nodes(left)
@@ -284,6 +291,8 @@ def export_algebraic_to_json (node):
                 return operator.node_id
 
     get_nodes(exp)
+    #print (return_edges)
+    #print (dict(nodes = return_nodes, edges = return_edges))
     return dict(nodes = return_nodes, edges = return_edges)
 
 
@@ -312,9 +321,16 @@ def export_literal_to_json (node):
     json_nodes[node.node_id] = ret_val
     return dict(nodes = [ret_val], edges = [])
 
-operator_type_map = {
+operator_out_type_map = {
     "<" : "boolean",
     ">" : "boolean",
+    "+" : "integer",
+    "-" : "integer",
+}
+
+operator_in_type_map = {
+    "<" : "integer",
+    ">" : "integer",
     "+" : "integer",
     "-" : "integer",
 }
@@ -326,7 +342,7 @@ def export_bin_to_json (node):
                     operator = node.operator,
                     location = node.location,
 
-                    inPorts  = [dict (index = n, nodeId = node.node_id, type = {"location":"not applicable", "name" : operator_type_map[node.operator]})
+                    inPorts  = [dict (index = n, nodeId = node.node_id, type = {"location":"not applicable", "name" : operator_in_type_map[node.operator]})
                                 for n in range(2)],
 
                     outPorts = [
@@ -335,7 +351,7 @@ def export_bin_to_json (node):
                                             nodeId = node.node_id,
                                             type = dict(
                                                         location = "not applicable",
-                                                        name     = "integer" #TODO put the type here
+                                                        name = operator_out_type_map[node.operator] #TODO put the type here
                                                     )
                                         )
                                 ],
