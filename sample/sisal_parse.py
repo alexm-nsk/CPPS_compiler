@@ -54,7 +54,7 @@ def main(args):
             #print (output)
 
             formatted = json.dumps(output["functions"][0])
-            print (formatted)
+            #print (formatted)
             os.system ("echo '%s' | jq" % formatted)
 
             #for function in output["functions"]: print ( str(function) + "\n\n\n" )

@@ -36,24 +36,6 @@ import pprint
 current_function = ""
 json_nodes = {}
 
-# ~ [
-  # ~ {
-    # ~ "index": 0,
-    # ~ "nodeId": "node11",
-    # ~ "type": {
-      # ~ "location": "",
-      # ~ "name": "integer"
-    # ~ }
-  # ~ },
-  # ~ {
-    # ~ "index": 0,
-    # ~ "nodeId": "node11",
-    # ~ "type": {
-      # ~ "location": "",
-      # ~ "name": "integer"
-    # ~ }
-  # ~ }
-# ~ ]
 
 def make_json_edge(from_, to, src_index, dst_index, src_type = None, dst_type = None):
     #TODO retrieve src and dst type from the nodes here
@@ -182,9 +164,14 @@ def export_function_to_json(function):
     ret_val["outPorts"] = function_gen_out_ports(function)
     ret_val["inPorts"]  = function_gen_in_ports (function)
 
+    ret_val.pop("ret_types")
+
     json_nodes[function.node_id] = ret_val
 
-    ret_val["nodes"] = function.nodes[0].emit_json()
+    children = function.nodes[0].emit_json()
+    
+    ret_val["nodes"] = children["nodes"]
+    ret_val["edges"] = children["edges"]
 
     ret_val["params"]   = function_gen_params( function ) if function.params else None
 
@@ -194,45 +181,6 @@ def export_function_to_json(function):
 
 
 #---------------------------------------------------------------------------------------------
-  # ~ {
-          # ~ "id": "node11",
-          # ~ "inPorts": [
-            # ~ {
-              # ~ "index": 0,
-              # ~ "nodeId": "node14",
-              # ~ "type": {
-                # ~ "location": "1:14-1:15",
-                # ~ "name": "integer"
-              # ~ }
-            # ~ }
-          # ~ ],
-          # ~ "location": "not applicable",
-          # ~ "name": "Then",
-          # ~ "nodes": [],
-          # ~ "outPorts": [
-            # ~ {
-              # ~ "index": 0,
-              # ~ "nodeId": "node14",
-              # ~ "type": {
-                # ~ "location": "not applicable",
-                # ~ "name": "integer"
-              # ~ }
-            # ~ }
-          # ~ ],
-          # ~ "params": [
-            # ~ [
-              # ~ "M",
-              # ~ {
-                # ~ "index": 0,
-                # ~ "nodeId": "node14",
-                # ~ "type": {
-                  # ~ "location": "1:14-1:15",
-                  # ~ "name": "integer"
-                # ~ }
-              # ~ }
-            # ~ ]
-          # ~ ]
-        # ~ },
 
 def export_if_to_json(node):
 
@@ -255,43 +203,17 @@ def export_if_to_json(node):
                                 ))
 
     ret_val["branches"]  = json_branches
-    
+
     # case differences in "branches" and "Condition" are due to choice made for IR
     ret_val["Condition"] = node.condition.emit_json()
     ret_val["id"] = node.node_id
 
     json_nodes[node.node_id] = ret_val
 
-    return ret_val
+    return dict(nodes = [ret_val], edges = [])
 
 
 #---------------------------------------------------------------------------------------------
-# ~ {
-  # ~ "name": "FunctionCall",
-  # ~ "location": "5:8-5:15",
-  # ~ "outPorts": [
-    # ~ {
-      # ~ "nodeId": "node9",
-      # ~ "type": {
-        # ~ "location": "1:35-1:42",
-        # ~ "name": "integer"
-      # ~ },
-      # ~ "index": 0
-    # ~ }
-  # ~ ],
-  # ~ "inPorts": [
-    # ~ {
-      # ~ "nodeId": "node9",
-      # ~ "type": {
-        # ~ "location": "1:19-1:26",
-        # ~ "name": "integer"
-      # ~ },
-      # ~ "index": 0
-    # ~ }
-  # ~ ],
-  # ~ "id": "node9",
-  # ~ "callee": "Fib"
-# ~ },
 
 
 def export_call_to_json (node):
@@ -313,15 +235,12 @@ def export_call_to_json (node):
                     callee   = function_name,
                     location = node.location,
                     name     = "FunctionCall",
-                    # these have to be generated again,
-                    # since we dont store them currently:
-                    #inPorts = function_gen_in_ports(called_function),
-                    #outPorts= function_gen_out_ports(called_function),
                    )
-
+    # TODO add edges (from arguments)
     json_nodes[node.node_id].update ( ret_val )
-    return ret_val
+    return dict(nodes = [ret_val], edges = [])
 
+#---------------------------------------------------------------------------------------------
 
 def export_algebraic_to_json (node):
 
@@ -365,31 +284,13 @@ def export_algebraic_to_json (node):
                 return operator.node_id
 
     get_nodes(exp)
-    #print ("Edges")
-    #pprint.pprint(return_edges)
     return dict(nodes = return_nodes, edges = return_edges)
 
 
 def export_identifier_to_json (node):
     # TODO check the case with loop to self in "then"
-    return dict(nodes = [], edges = "Edges Leading to scope top")
+    return dict(nodes = [], edges = "Edges Leading to scopes top")
 
-# ~ {
-  # ~ "id": "node6",
-  # ~ "location": "5:26-5:27",
-  # ~ "name": "Literal",
-  # ~ "outPorts": [
-    # ~ {
-      # ~ "index": 0,
-      # ~ "nodeId": "node6",
-      # ~ "type": {
-        # ~ "location": "not applicable",
-        # ~ "name": "integer"
-      # ~ }
-    # ~ }
-  # ~ ],
-  # ~ "value": 2
-# ~ }
 
 def export_literal_to_json (node):
 
@@ -409,42 +310,7 @@ def export_literal_to_json (node):
                     value = node.value,
                 )
     json_nodes[node.node_id] = ret_val
-    return ret_val
-
-# ~ {
-# ~ "id": "node2",
-# ~ "inPorts": [
-  # ~ {
-    # ~ "index": 0,
-    # ~ "nodeId": "node2",
-    # ~ "type": {
-      # ~ "location": "not applicable",
-      # ~ "name": "integer"
-    # ~ }
-  # ~ },
-  # ~ {
-    # ~ "index": 1,
-    # ~ "nodeId": "node2",
-    # ~ "type": {
-      # ~ "location": "not applicable",
-      # ~ "name": "integer"
-    # ~ }
-  # ~ }
-# ~ ],
-# ~ "location": "2:5-2:10",
-# ~ "name": "Binary",
-# ~ "operator": "<",
-# ~ "outPorts": [
-  # ~ {
-    # ~ "index": 0,
-    # ~ "nodeId": "node2",
-    # ~ "type": {
-      # ~ "location": "not applicable",
-      # ~ "name": "boolean"
-    # ~ }
-  # ~ }
-# ~ ]
-# ~ },
+    return dict(nodes = [ret_val], edges = [])
 
 operator_type_map = {
     "<" : "boolean",
@@ -475,4 +341,4 @@ def export_bin_to_json (node):
                                 ],
                 )
     json_nodes[node.node_id] = ret_val
-    return ret_val
+    return dict(nodes = [ret_val], edges = [])
