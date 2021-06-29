@@ -22,6 +22,8 @@
 #
 #
 
+# TODO: Expresssion groups (e.g. return values)
+
 import re
 import pprint
 
@@ -158,9 +160,9 @@ class TreeVisitor(NodeVisitor):
 
         #print (expression)
         
-        ret_val = {"name":"algebaraic", "expression": expression}
+        #ret_val = {"name":"algebaraic", "expression": expression}
 
-        return Algebraic(expression = expression)
+        return Algebraic(expression = expression, location = self.get_location(node))
 
     # exp (_ "," _ exp)*
     def visit_args_list(self, node, visited_children):
@@ -333,7 +335,7 @@ def parse_file(input_text):
 
     for parsed_function in parsed_functions:
         parsed = function_tree_visitor.parse(  parsed_function["text"] , parsed_function["line_offset"], parsed_function["column_offset"] )
-        IRs.append( parsed.emit_json() )
+        IRs.append( parsed.emit_json(None) )
 
     return {"functions":IRs}
 

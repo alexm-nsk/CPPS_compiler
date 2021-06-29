@@ -33,7 +33,7 @@ import ast_.node
 
 import pprint
 
-current_function = ""
+current_scope = ""
 json_nodes = {}
 
 
@@ -150,40 +150,40 @@ field_sub_table = dict(
 )
 
 
-def export_function_to_json(function):
+def export_function_to_json(function, parent_node):
 
-    global current_function, json_nodes
+    global current_scope, json_nodes
 
-    current_function = function.node_id
+    current_scope = function.node_id
     ret_val = {}
 
     for field, value in function.__dict__.items():
         IR_name          = field_sub_table[field] if field in field_sub_table else field
         ret_val[IR_name] = value
 
+    ret_val["params"]   = function_gen_params( function ) if function.params else None
     ret_val["outPorts"] = function_gen_out_ports(function)
     ret_val["inPorts"]  = function_gen_in_ports (function)
 
     ret_val.pop("ret_types")
 
     json_nodes[function.node_id] = ret_val
+    #print (json_nodes[function.node_id]["params"])
+    children = function.nodes[0].emit_json(function.node_id)
 
-    children = function.nodes[0].emit_json()
-    
     ret_val["nodes"] = children["nodes"]
     ret_val["edges"] = children["edges"]
 
-    ret_val["params"]   = function_gen_params( function ) if function.params else None
 
     json_nodes[function.node_id].update ( ret_val )
-    
+
     # it's a top node, so no need, to return edges upstream
     return ret_val
 
 
 #---------------------------------------------------------------------------------------------
 
-def export_if_to_json(node):
+def export_if_to_json(node, parent_node):
 
     ret_val = {}
 
@@ -196,25 +196,38 @@ def export_if_to_json(node):
     json_branches = []
 
     for br_name, branch in ret_val["branches"].items():
-        json_branches.append(dict(
+        json_branch   =    dict(
                                     name  = field_sub_table[br_name],
-                                    nodes = [branch.emit_json()],
-
+                                    id    = branch.node_id,
+                                    
                                     #TODO
-                                ))
+                                    inPorts = json_nodes[parent_node]["inPorts"],
+                                    outPorts = json_nodes[parent_node]["outPorts"]
+                                )
+
+        json_branches.append(json_branch)
+        json_nodes[branch.node_id] = json_branch
+        children = branch.emit_json(branch.node_id)
+        json_branch["nodes"] = children["nodes"]
+
+        if not "edges" in json_branch: json_branch["edges"] = []
+        json_branch["edges"].extend(children["edges"])
 
     ret_val["branches"]  = json_branches
 
-    # case differences in "branches" and "Condition" are due to choice made for IR
-    condition_children = node.condition.emit_json()
-    print (condition_children["edges"])
+    condition_children = node.condition.emit_json(node.node_id)
     ret_val["condition"] = condition_children
-    #ret_val["condition"]["nodes"] = condition_children["nodes"]
-    #ret_val["condition"]["edges"] = condition_children["edges"]
-    
+    ret_val["condition"].update(dict(
+                                        name       = "Condition",
+                                        id         = node.condition.node_id,
+                                        location   = node.condition.location,
+                                        # TODO copy it from the scope, or derive from used identifiers
+                                        parameters = json_nodes[current_scope]["params"],
+                                    ))
+
     ret_val["id"] = node.node_id
 
-    json_nodes[node.node_id] = ret_val
+    json_nodes[ node.node_id ] = ret_val
 
     return dict(nodes = [ret_val], edges = [])
 
@@ -222,7 +235,7 @@ def export_if_to_json(node):
 #---------------------------------------------------------------------------------------------
 
 
-def export_call_to_json (node):
+def export_call_to_json (node, parent_node):
 
     ret_val = {}
 
@@ -248,7 +261,7 @@ def export_call_to_json (node):
 
 #---------------------------------------------------------------------------------------------
 
-def export_algebraic_to_json (node):
+def export_algebraic_to_json (node, parent_node):
 
     return_nodes = []
     return_edges = []
@@ -263,10 +276,10 @@ def export_algebraic_to_json (node):
             operand = chunk[0]
             #return parent node's (?) node_id
             if type(operand) == ast_.node.Identifier:
-                return current_function
+                return current_scope
             else:
                 # TODO process edges too
-                return_nodes.append(operand.emit_json()["nodes"])
+                return_nodes.append(operand.emit_json(node.node_id)["nodes"])
                 return operand.node_id
 
         # if we still have some splitting to do:
@@ -279,7 +292,7 @@ def export_algebraic_to_json (node):
                 left  = exp[ :index]
                 right = exp[index + 1: ]
                 # TODO process edges too
-                op_json = operator.emit_json()["nodes"]
+                op_json = operator.emit_json(node.node_id)["nodes"]
                 return_nodes.append(op_json)
 
                 left_node = get_nodes(left)
@@ -296,12 +309,14 @@ def export_algebraic_to_json (node):
     return dict(nodes = return_nodes, edges = return_edges)
 
 
-def export_identifier_to_json (node):
+def export_identifier_to_json (node, parent_node):
     # TODO check the case with loop to self in "then"
-    return dict(nodes = [], edges = "Edges Leading to scopes top")
+    parent = json_nodes[ parent_node ]
+    parent["edges"] = [make_json_edge(current_scope,  parent["id"], 0, 0)]
+    return dict(nodes = [], edges = [])
 
 
-def export_literal_to_json (node):
+def export_literal_to_json (node, parent_node):
 
     ret_val = dict(
                     id = node.node_id,
@@ -335,7 +350,7 @@ operator_in_type_map = {
     "-" : "integer",
 }
 
-def export_bin_to_json (node):
+def export_bin_to_json (node, parent_node):
     ret_val = dict(
                     id = node.node_id,
                     name = "Binary",

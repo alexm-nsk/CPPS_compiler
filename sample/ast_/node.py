@@ -83,8 +83,8 @@ class Function(Node):
         super().__init__(**kwargs)
         Function.functions[self.function_name] = self
 
-    def emit_json(self):
-            return export_function_to_json(self)
+    def emit_json(self, parent_node):
+            return export_function_to_json(self, parent_node)
         # ~ try:
         # ~ except:
             # ~ return "Error converting to JSON"
@@ -95,16 +95,16 @@ class Bin(Node):
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
 
-    def emit_json(self):
-        return (export_bin_to_json(self))
+    def emit_json(self, parent_node):
+        return (export_bin_to_json(self, parent_node))
 
 class Call(Node):
 
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
 
-    def emit_json(self):
-        return export_call_to_json(self)
+    def emit_json(self, parent_node):
+        return export_call_to_json(self, parent_node)
 
 class If(Node):
 
@@ -117,8 +117,8 @@ class If(Node):
 
         self.name = "if_"
 
-    def emit_json(self):
-        return (export_if_to_json(self))
+    def emit_json(self, parent_node):
+        return (export_if_to_json(self, parent_node))
 
 class Algebraic(Node):
 
@@ -128,8 +128,8 @@ class Algebraic(Node):
         
         self.name = "algebraic"        
         
-    def emit_json(self):
-        return (export_algebraic_to_json(self))
+    def emit_json(self, parent_node):
+        return (export_algebraic_to_json(self, parent_node))
 
 class Identifier(Node):
 
@@ -137,13 +137,13 @@ class Identifier(Node):
         super().__init__(**kwargs, no_id = True)
         #self.name = "identifier"
 
-    def emit_json(self):
-        return (export_identifier_to_json(self))
+    def emit_json(self, parent_node):
+        return (export_identifier_to_json(self, parent_node))
 
 class Literal(Node):
 
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
 
-    def emit_json(self):
-        return (export_literal_to_json(self))
+    def emit_json(self, parent_node):
+        return (export_literal_to_json(self, parent_node))
