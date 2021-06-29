@@ -29,6 +29,8 @@
 # TODO everywhere "emit_json" is called check if it generated any edges and if so, add them
 # TODO suggestion to put "linearization" of subtrees in there also (node decides whether it should break up the node list), make function that calls emit_json (node) and returns what's needed
 
+#TODO redirect node in to out in "Then" (calculate port index from "parameters")
+
 import ast_.node
 
 import pprint
@@ -199,9 +201,7 @@ def export_if_to_json(node, parent_node):
         json_branch   =    dict(
                                     name  = field_sub_table[br_name],
                                     id    = branch.node_id,
-                                    
-                                    #TODO
-                                    inPorts = json_nodes[parent_node]["inPorts"],
+                                    inPorts  = json_nodes[parent_node]["inPorts"],
                                     outPorts = json_nodes[parent_node]["outPorts"]
                                 )
 
