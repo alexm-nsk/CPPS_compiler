@@ -256,18 +256,20 @@ def export_call_to_json (node, parent_node):
                     location = node.location,
                     name     = "FunctionCall",
                    )
-    args = []
-    edges = []
-    
-    for i, arg in enumerate(node.args):
-        args.append ( arg.emit_json(parent_node) )
-        #edges.append(make_json_edge(left_node,  operator.node_id, 0, 0))
-        
+    args_nodes = []
+    args_edges = []
 
+    for i, arg in enumerate(node.args):
+        children = arg.emit_json(parent_node)
+        args_nodes.extend ( children["nodes"] )
+        args_edges.extend ( children ["edges"] )
+        #edges.append(make_json_edge(left_node,  operator.node_id, 0, 0))
+
+    #print (args)
     # TODO add edges (from arguments)
     json_nodes[node.node_id].update ( ret_val )
-
-    return dict(nodes = [ret_val] + args, edges = [])
+    #print (args_nodes)
+    return dict(nodes = [ret_val] + args_nodes, edges = args_edges)
 
 
 #---------------------------------------------------------------------------------------------
@@ -291,7 +293,7 @@ def export_algebraic_to_json (node, parent_node):
                 return current_scope
             else:
                 # TODO process edges too
-                return_nodes.append(operand.emit_json(parent_node)["nodes"])
+                return_nodes.extend(operand.emit_json(parent_node)["nodes"])
                 return operand.node_id
 
         # if we still have some splitting to do:
@@ -301,11 +303,11 @@ def export_algebraic_to_json (node, parent_node):
                 # the loop enumerates the list with even values skipped hence the index:
                 index = n * 2 + 1
 
-                left  = exp[ :index]
-                right = exp[index + 1: ]
+                left  = chunk[ :index]
+                right = chunk[index + 1: ]
                 # TODO process edges too
                 op_json = operator.emit_json(parent_node)["nodes"]
-                return_nodes.append(op_json)
+                return_nodes.extend(op_json)
 
                 left_node = get_nodes(left)
                 right_node = get_nodes(right)
@@ -321,9 +323,9 @@ def export_algebraic_to_json (node, parent_node):
 
     if(not "edges" in json_nodes[parent_node]):
         json_nodes[parent_node]["edges"] = []
-        
+
     #json_nodes[parent_node]["edges"].append(final_edge)
-    
+    print(return_nodes)
     return dict(nodes = return_nodes, edges = return_edges + [final_edge])
 
 
