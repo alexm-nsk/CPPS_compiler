@@ -172,7 +172,7 @@ def export_function_to_json(function, parent_node):
     json_nodes[function.node_id] = ret_val
     #print (json_nodes[function.node_id]["params"])
     children = function.nodes[0].emit_json(function.node_id)
-
+    #children["nodes"]["parameters"] = retvals
     ret_val["nodes"] = children["nodes"]
     ret_val["edges"] = children["edges"]
 
@@ -202,7 +202,8 @@ def export_if_to_json(node, parent_node):
                                     name  = field_sub_table[br_name],
                                     id    = branch.node_id,
                                     inPorts  = json_nodes[parent_node]["inPorts"],
-                                    outPorts = json_nodes[parent_node]["outPorts"]
+                                    outPorts = json_nodes[parent_node]["outPorts"],
+                                    parameters = json_nodes[current_scope]["params"],
                                 )
 
         json_branches.append(json_branch)
@@ -311,8 +312,14 @@ def export_algebraic_to_json (node, parent_node):
 
 def export_identifier_to_json (node, parent_node):
     # TODO check the case with loop to self in "then"
+    #print (node.name)
     parent = json_nodes[ parent_node ]
-    parent["edges"] = [make_json_edge(current_scope,  parent["id"], 0, 0)]
+    #print (parent["parameters"])
+    for name, arg in parent["parameters"]:
+        if name == node.name:
+            edge = make_json_edge(parent["id"],  parent["id"], 0, 0)
+        
+    parent["edges"] = [edge]
     return dict(nodes = [], edges = [])
 
 
