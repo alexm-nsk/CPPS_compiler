@@ -22,18 +22,9 @@
 #
 #
 
-# props to cover
-# ~ self.props.location
-# ~ self.props.nodes
-# ~ self.props.edges
-# ~ self.props.name
-# ~ self.props.out_ports
-# ~ self.props.in_ports
-# ~ self.props.id
-# ~ self.props.params
-# ~ self.props.function_name
 
 from exporters.json    import *
+
 
 class Node:
     nodes = {}
@@ -85,9 +76,6 @@ class Function(Node):
 
     def emit_json(self, parent_node):
             return export_function_to_json(self, parent_node)
-        # ~ try:
-        # ~ except:
-            # ~ return "Error converting to JSON"
 
 
 class Bin(Node):
@@ -98,6 +86,7 @@ class Bin(Node):
     def emit_json(self, parent_node):
         return (export_bin_to_json(self, parent_node))
 
+
 class Call(Node):
 
     def __init__(self, *args, **kwargs):
@@ -105,6 +94,7 @@ class Call(Node):
 
     def emit_json(self, parent_node):
         return export_call_to_json(self, parent_node)
+
 
 class If(Node):
 
@@ -120,6 +110,7 @@ class If(Node):
     def emit_json(self, parent_node):
         return (export_if_to_json(self, parent_node))
 
+
 class Algebraic(Node):
 
     def __init__(self, *args, **kwargs):
@@ -131,6 +122,7 @@ class Algebraic(Node):
     def emit_json(self, parent_node):
         return (export_algebraic_to_json(self, parent_node))
 
+
 class Identifier(Node):
 
     def __init__(self, *args, **kwargs):
@@ -139,6 +131,7 @@ class Identifier(Node):
 
     def emit_json(self, parent_node):
         return (export_identifier_to_json(self, parent_node))
+
 
 class Literal(Node):
 

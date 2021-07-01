@@ -57,7 +57,7 @@ def make_json_edge(from_, to, src_index, dst_index, src_type = None, dst_type = 
 
         except Exception as e:
             pass
-            print ("no dst",str(e))
+            print ("no dst",str(e), from_, to)
 
 
     return [
@@ -163,16 +163,19 @@ def export_function_to_json(function, parent_node):
         ret_val[IR_name] = value
 
     ret_val["params"]   = function_gen_params( function ) if function.params else None
-    ret_val["outPorts"] = function_gen_out_ports(function)
+
     ret_val["inPorts"]  = function_gen_in_ports (function)
+    ret_val["outPorts"] = function_gen_out_ports(function)
 
     ret_val.pop("ret_types")
 
+    # register this node:
     json_nodes[function.node_id] = ret_val
+
     children = function.nodes[0].emit_json(function.node_id)
+
     ret_val["nodes"] = children["nodes"]
     ret_val["edges"] = children["edges"]
-
 
     json_nodes[function.node_id].update ( ret_val )
 
@@ -191,18 +194,26 @@ def export_if_to_json(node, parent_node):
         ret_val[IR_name] = value
 
     ret_val["name"] = field_sub_table[ret_val["name"]]
+    ret_val["id"]   = node.node_id
+
+    #make ports for the top node of our 'If'
+    ret_val["inPorts"]  = json_nodes[parent_node]["inPorts"]
+    ret_val["outPorts"] = json_nodes[parent_node]["outPorts"]
+
+    # register this node in the global dict:
+    json_nodes[ node.node_id ] = ret_val
+
+    # process the branches:____________________________________________________________________________
 
     json_branches = []
 
-    json_nodes[ node.node_id ] = ret_val
-
     for br_name, branch in ret_val["branches"].items():
         json_branch   =    dict(
-                                    name  = field_sub_table[br_name],
-                                    id    = branch.node_id,
+                                    name     = field_sub_table[br_name],
+                                    id       = branch.node_id,
                                     inPorts  = json_nodes[parent_node]["inPorts"],
                                     outPorts = json_nodes[parent_node]["outPorts"],
-                                    params = json_nodes[current_scope]["params"],
+                                    params   = json_nodes[current_scope]["params"],
                                 )
 
         json_branches.append(json_branch)
@@ -215,17 +226,19 @@ def export_if_to_json(node, parent_node):
 
     ret_val["branches"]  = json_branches
 
+    # process the condition:____________________________________________________________________________
+
     condition_children = node.condition.emit_json(node.node_id)
+
     ret_val["condition"] = condition_children
+
     ret_val["condition"].update(dict(
                                         name       = "Condition",
                                         id         = node.condition.node_id,
                                         location   = node.condition.location,
                                         # TODO copy it from the scope, or derive from used identifiers
-                                        params = json_nodes[current_scope]["params"],
+                                        params     = json_nodes[current_scope]["params"],
                                     ))
-
-    ret_val["id"] = node.node_id
 
     json_nodes[ node.node_id ].update( ret_val )
 
@@ -247,8 +260,8 @@ def export_call_to_json (node, parent_node):
 
     called_function = ast_.node.Function.functions[function_name]
 
-    json_nodes[node.node_id] = dict(inPorts = function_gen_in_ports(called_function),
-                                    outPorts= function_gen_out_ports(called_function))
+    json_nodes[node.node_id] = dict(inPorts  = function_gen_in_ports(called_function),
+                                    outPorts = function_gen_out_ports(called_function))
 
     ret_val = dict(
                     id       = node.node_id,
@@ -256,19 +269,17 @@ def export_call_to_json (node, parent_node):
                     location = node.location,
                     name     = "FunctionCall",
                    )
+
     args_nodes = []
     args_edges = []
 
     for i, arg in enumerate(node.args):
         children = arg.emit_json(parent_node)
-        args_nodes.extend ( children["nodes"] )
+        args_nodes.extend ( children ["nodes"] )
         args_edges.extend ( children ["edges"] )
-        #edges.append(make_json_edge(left_node,  operator.node_id, 0, 0))
 
-    #print (args)
-    # TODO add edges (from arguments)
     json_nodes[node.node_id].update ( ret_val )
-    #print (args_nodes)
+
     return dict(nodes = [ret_val] + args_nodes, edges = args_edges)
 
 
@@ -358,6 +369,7 @@ def export_literal_to_json (node, parent_node):
                                 ],
                     value = node.value,
                 )
+
     json_nodes[node.node_id] = ret_val
     return dict(nodes = [ret_val], edges = [])
 
