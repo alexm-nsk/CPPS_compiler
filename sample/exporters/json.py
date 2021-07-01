@@ -325,7 +325,6 @@ def export_algebraic_to_json (node, parent_node):
         json_nodes[parent_node]["edges"] = []
 
     #json_nodes[parent_node]["edges"].append(final_edge)
-    print(return_nodes)
     return dict(nodes = return_nodes, edges = return_edges + [final_edge])
 
 
