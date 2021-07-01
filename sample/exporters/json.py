@@ -40,39 +40,39 @@ current_scope = ""
 json_nodes = {}
 
 
-def make_json_edge(from_, to, src_index, dst_index, src_type = None, dst_type = None):
+def make_json_edge(from_, to, src_index, dst_index, parent = False):
     #TODO retrieve src and dst type from the nodes here
 
-    if src_type == None:
-        try:
-            src_type = json_nodes[from_]["outPorts"][src_index]["type"]["name"]
+    
+    try:
+        src_type = json_nodes[from_]["outPorts"][src_index]["type"]["name"]
+    except Exception as e:
+        print ("no src ", str(e))
 
-        except Exception as e:
-            pass
-            print ("no src ", str(e))
 
-    if dst_type == None:
-        try:
+    try:
+        if parent:
+            dst_type = json_nodes[to]["outPorts"][dst_index]["type"]["name"]
+        else:
             dst_type = json_nodes[to]["inPorts"][dst_index]["type"]["name"]
-
-        except Exception as e:
-            pass
-            print ("no dst",str(e), from_, to)
+            
+    except Exception as e:
+        print ("no dst",str(e), from_, to)
 
 
     return [
 
-            {
-                "index"  : src_index,
-                "nodeId" : from_,
-                "type"   : {"location" : "TODO", "name" : src_type}
-            },
+                {
+                    "index"  : src_index,
+                    "nodeId" : from_,
+                    "type"   : {"location" : "TODO", "name" : src_type}
+                },
 
-            {
-                "index"  : dst_index,
-                "nodeId" : to,
-                "type"   : {"location" : "TODO", "name" : dst_type}
-            }
+                {
+                    "index"  : dst_index,
+                    "nodeId" : to,
+                    "type"   : {"location" : "TODO", "name" : dst_type}
+                }
 
             ]
 
@@ -186,11 +186,13 @@ def export_function_to_json(function, parent_node):
 #---------------------------------------------------------------------------------------------
 
 def export_if_to_json(node, parent_node):
-
+    
     ret_val = {}
-
+    
+    # rename fields to name used in JSON IR using a rename dictionary (field_sub_table):
     for field, value in node.__dict__.items():
         IR_name          = field_sub_table[field] if field in field_sub_table else field
+        print (IR_name)
         ret_val[IR_name] = value
 
     ret_val["name"] = field_sub_table[ret_val["name"]]
@@ -242,7 +244,7 @@ def export_if_to_json(node, parent_node):
 
     json_nodes[ node.node_id ].update( ret_val )
 
-    return dict(nodes = [ret_val], edges = [])
+    return dict(nodes = [ret_val], edges = ret_val["edges"])
 
 
 #---------------------------------------------------------------------------------------------
@@ -279,7 +281,10 @@ def export_call_to_json (node, parent_node):
         args_edges.extend ( children ["edges"] )
 
     json_nodes[node.node_id].update ( ret_val )
-
+    
+    #if not json_nodes[parent_node].edges: json_nodes[parent_node].edges = []
+    json_nodes[parent_node]["edges"].append(make_json_edge(node.node_id, parent_node, 0, 0, True))
+    
     return dict(nodes = [ret_val] + args_nodes, edges = args_edges)
 
 
@@ -388,6 +393,7 @@ operator_in_type_map = {
 }
 
 def export_bin_to_json (node, parent_node):
+    
     ret_val = dict(
                     id = node.node_id,
                     name = "Binary",
