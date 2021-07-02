@@ -53,7 +53,7 @@ def main(args):
 
             #print (output)
 
-            formatted = json.dumps(output["functions"][0])
+            formatted = json.dumps(output)
             #print (formatted)
             os.system ("echo '%s' | jq" % formatted)
 

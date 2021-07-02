@@ -43,7 +43,7 @@ json_nodes = {}
 def make_json_edge(from_, to, src_index, dst_index, parent = False):
     #TODO retrieve src and dst type from the nodes here
 
-    
+
     try:
         src_type = json_nodes[from_]["outPorts"][src_index]["type"]["name"]
     except Exception as e:
@@ -55,7 +55,7 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False):
             dst_type = json_nodes[to]["outPorts"][dst_index]["type"]["name"]
         else:
             dst_type = json_nodes[to]["inPorts"][dst_index]["type"]["name"]
-            
+
     except Exception as e:
         print ("no dst",str(e), from_, to)
 
@@ -151,54 +151,61 @@ field_sub_table = dict(
 )
 
 
-def export_function_to_json(function, parent_node):
+def export_function_to_json(node, parent_node):
 
     global current_scope, json_nodes
 
-    current_scope = function.node_id
+    current_scope = node.node_id
     ret_val = {}
 
-    for field, value in function.__dict__.items():
+    for field, value in node.__dict__.items():
         IR_name          = field_sub_table[field] if field in field_sub_table else field
         ret_val[IR_name] = value
 
-    ret_val["params"]   = function_gen_params( function ) if function.params else None
+    ret_val["params"]   = function_gen_params( node ) if node.params else None
 
-    ret_val["inPorts"]  = function_gen_in_ports (function)
-    ret_val["outPorts"] = function_gen_out_ports(function)
+    ret_val["inPorts"]  = function_gen_in_ports ( node )
+    ret_val["outPorts"] = function_gen_out_ports( node )
 
     ret_val.pop("ret_types")
 
     # register this node:
-    json_nodes[function.node_id] = ret_val
+    json_nodes[node.node_id] = ret_val
 
-    children = function.nodes[0].emit_json(function.node_id)
+    children = node.nodes[0].emit_json( node.node_id )
 
     ret_val["nodes"] = children["nodes"]
     ret_val["edges"] = children["edges"]
 
-    json_nodes[function.node_id].update ( ret_val )
+    json_nodes[node.node_id].update ( ret_val )
 
-    # it's a top node, so no need, to return edges upstream
+    # edges that tranfer parameters to child nodes and recieve results from them:
+    
+    parameters_edge = make_json_edge(node.node_id, children["nodes"][0]["id"], 0, 0)
+    ret_val_edge    = make_json_edge(children["nodes"][0]["id"], node.node_id, 0, 0)
+
+    ret_val["edges"].append(ret_val_edge)
+    ret_val["edges"].append(parameters_edge)
+
+    # it's a top node, so no need to return edges upstream
     return ret_val
 
 
 #---------------------------------------------------------------------------------------------
 
 def export_if_to_json(node, parent_node):
-    
+
     ret_val = {}
-    
+
     # rename fields to name used in JSON IR using a rename dictionary (field_sub_table):
     for field, value in node.__dict__.items():
         IR_name          = field_sub_table[field] if field in field_sub_table else field
-        print (IR_name)
         ret_val[IR_name] = value
 
     ret_val["name"] = field_sub_table[ret_val["name"]]
     ret_val["id"]   = node.node_id
 
-    #make ports for the top node of our 'If'
+    # make ports for the top node of our 'If'
     ret_val["inPorts"]  = json_nodes[parent_node]["inPorts"]
     ret_val["outPorts"] = json_nodes[parent_node]["outPorts"]
 
@@ -244,6 +251,8 @@ def export_if_to_json(node, parent_node):
 
     json_nodes[ node.node_id ].update( ret_val )
 
+
+
     return dict(nodes = [ret_val], edges = ret_val["edges"])
 
 
@@ -262,15 +271,17 @@ def export_call_to_json (node, parent_node):
 
     called_function = ast_.node.Function.functions[function_name]
 
-    json_nodes[node.node_id] = dict(inPorts  = function_gen_in_ports(called_function),
-                                    outPorts = function_gen_out_ports(called_function))
+    ret_val = dict(inPorts  = function_gen_in_ports(called_function),
+                   outPorts = function_gen_out_ports(called_function))
 
-    ret_val = dict(
+    ret_val.update( dict(
                     id       = node.node_id,
                     callee   = function_name,
                     location = node.location,
                     name     = "FunctionCall",
-                   )
+                   ))
+
+    json_nodes[node.node_id] = ret_val
 
     args_nodes = []
     args_edges = []
@@ -281,10 +292,10 @@ def export_call_to_json (node, parent_node):
         args_edges.extend ( children ["edges"] )
 
     json_nodes[node.node_id].update ( ret_val )
-    
+
     #if not json_nodes[parent_node].edges: json_nodes[parent_node].edges = []
     json_nodes[parent_node]["edges"].append(make_json_edge(node.node_id, parent_node, 0, 0, True))
-    
+
     return dict(nodes = [ret_val] + args_nodes, edges = args_edges)
 
 
@@ -393,7 +404,7 @@ operator_in_type_map = {
 }
 
 def export_bin_to_json (node, parent_node):
-    
+
     ret_val = dict(
                     id = node.node_id,
                     name = "Binary",
