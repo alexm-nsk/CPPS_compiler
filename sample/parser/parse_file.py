@@ -252,6 +252,9 @@ class TreeVisitor(NodeVisitor):
     def visit_exp(self, node, visited_children):
         return visited_children[0]
         
+    def visit_exp_singular(self, node, visited_children):
+        return visited_children[0]
+        
     def visit_operand(self, node, visited_children):
         return visited_children[0]
 
