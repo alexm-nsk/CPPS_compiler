@@ -141,7 +141,6 @@ class TreeVisitor(NodeVisitor):
 
     # just return the operation's string
     def visit_bin_op(self, node, visited_children):
-        #print ("Binary: ",node.text ,self.get_location(node))
         return Bin(location  = self.get_location(node),
                     operator = node.text)
 
@@ -155,12 +154,7 @@ class TreeVisitor(NodeVisitor):
         else:
             return visited_children[0]
         
-        
         expression = [visited_children[0]] + tail
-
-        #print (expression)
-        
-        #ret_val = {"name":"algebaraic", "expression": expression}
 
         return Algebraic(expression = expression, location = self.get_location(node))
 
@@ -250,6 +244,8 @@ class TreeVisitor(NodeVisitor):
         return visited_children[2]
 
     def visit_exp(self, node, visited_children):
+        all_exps = unpack_rec_list(visited_children)
+        print (all_exps)
         return visited_children[0]
         
     def visit_exp_singular(self, node, visited_children):
