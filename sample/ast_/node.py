@@ -100,10 +100,12 @@ class If(Node):
 
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
-        self.condition.node_id  = Node.get_node_id()
+        for cond in self.condition:
+            cond.node_id  = Node.get_node_id()
         #print (self.branches)
         for name, branch in self.branches.items():
-            branch.node_id  = Node.get_node_id()
+            for br in branch:
+                br.node_id  = Node.get_node_id()
 
         self.name = "if_"
 

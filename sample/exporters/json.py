@@ -172,7 +172,7 @@ def export_function_to_json(node, parent_node):
     # register this node:
     json_nodes[node.node_id] = ret_val
 
-    children = node.nodes[0].emit_json( node.node_id )
+    children = node.nodes[0][0].emit_json( node.node_id )
 
     ret_val["nodes"] = children["nodes"]
     ret_val["edges"] = children["edges"]
@@ -219,15 +219,15 @@ def export_if_to_json(node, parent_node):
     for br_name, branch in ret_val["branches"].items():
         json_branch   =    dict(
                                     name     = field_sub_table[br_name],
-                                    id       = branch.node_id,
+                                    id       = branch[0].node_id,
                                     inPorts  = json_nodes[parent_node]["inPorts"],
                                     outPorts = json_nodes[parent_node]["outPorts"],
                                     params   = json_nodes[current_scope]["params"],
                                 )
 
         json_branches.append(json_branch)
-        json_nodes[branch.node_id] = json_branch
-        children = branch.emit_json(branch.node_id)
+        json_nodes[branch[0].node_id] = json_branch
+        children = branch[0].emit_json(branch[0].node_id)
         json_branch["nodes"] = children["nodes"]
 
         if not "edges" in json_branch: json_branch["edges"] = []
@@ -237,14 +237,14 @@ def export_if_to_json(node, parent_node):
 
     # process the condition:____________________________________________________________________________
 
-    condition_children = node.condition.emit_json(node.node_id)
+    condition_children = node.condition[0].emit_json(node.node_id)
 
     ret_val["condition"] = condition_children
 
     ret_val["condition"].update(dict(
                                         name       = "Condition",
-                                        id         = node.condition.node_id,
-                                        location   = node.condition.location,
+                                        id         = node.condition[0].node_id,
+                                        location   = node.condition[0].location,
                                         # TODO copy it from the scope, or derive from used identifiers
                                         params     = json_nodes[current_scope]["params"],
                                     ))
@@ -287,7 +287,7 @@ def export_call_to_json (node, parent_node):
     args_edges = []
 
     for i, arg in enumerate(node.args):
-        children = arg.emit_json(parent_node)
+        children = arg[0].emit_json(parent_node)
         args_nodes.extend ( children ["nodes"] )
         args_edges.extend ( children ["edges"] )
 
