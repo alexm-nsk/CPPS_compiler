@@ -43,6 +43,7 @@ json_nodes = {}
 def make_json_edge(from_, to, src_index, dst_index, parent = False):
     #TODO retrieve src and dst type from the nodes here
 
+    dst_type = None
 
     try:
         src_type = json_nodes[from_]["outPorts"][src_index]["type"]["name"]
@@ -180,7 +181,7 @@ def export_function_to_json(node, parent_node):
     json_nodes[node.node_id].update ( ret_val )
 
     # edges that tranfer parameters to child nodes and recieve results from them:
-    
+
     parameters_edge = make_json_edge(node.node_id, children["nodes"][0]["id"], 0, 0)
     ret_val_edge    = make_json_edge(children["nodes"][0]["id"], node.node_id, 0, 0)
 
@@ -236,24 +237,28 @@ def export_if_to_json(node, parent_node):
     ret_val["branches"]  = json_branches
 
     # process the condition:____________________________________________________________________________
-
-    condition_children = node.condition[0].emit_json(node.node_id)
-
-    ret_val["condition"] = condition_children
+    
+    inPorts, outPorts = genPorts(["integer"], ["boolean"], node.condition[0].node_id)
+    
+    ret_val["condition"] = dict(outPorts = outPorts, inPorts = inPorts )
+    
+    json_nodes[node.condition[0].node_id] = ret_val["condition"]
+    
+    condition_children = node.condition[0].emit_json(node.condition[0].node_id)
+    
+    ret_val["condition"].update (condition_children)
 
     ret_val["condition"].update(dict(
                                         name       = "Condition",
                                         id         = node.condition[0].node_id,
                                         location   = node.condition[0].location,
-                                        # TODO copy it from the scope, or derive from used identifiers
                                         params     = json_nodes[current_scope]["params"],
                                     ))
 
     json_nodes[ node.node_id ].update( ret_val )
 
-
-
-    return dict(nodes = [ret_val], edges = ret_val["edges"])
+    return dict(nodes = [ret_val], edges = ret_val["condition"]["edges"]
+                                      + [branch["edges"] for branch in ret_val["branches"]])
 
 
 #---------------------------------------------------------------------------------------------
@@ -300,7 +305,32 @@ def export_call_to_json (node, parent_node):
 
 
 #---------------------------------------------------------------------------------------------
+def genPorts(ins, outs, node_id):
+    
+    inPorts  = []
+    outPorts = []
+    
+    for n, inPort in enumerate(ins):
+        inPorts.append (dict (
+                                        index = n,
+                                        nodeId = node_id,
+                                        type = {"location":"not applicable",
+                                                "name" : inPort}
+                             )
+                       )
+    
+    for n, outPort in enumerate(outs):
+        outPorts.append (dict (
+                                        index = n,
+                                        nodeId = node_id,
+                                        type = {"location":"not applicable",
+                                                "name" : outPort}
+                             )
+                       )
 
+
+    
+    return (inPorts, outPorts)
 
 def export_algebraic_to_json (node, parent_node):
 
@@ -352,6 +382,7 @@ def export_algebraic_to_json (node, parent_node):
         json_nodes[parent_node]["edges"] = []
 
     #json_nodes[parent_node]["edges"].append(final_edge)
+    #print (final_edge, json_nodes[parent_node]["name"])
     return dict(nodes = return_nodes, edges = return_edges + [final_edge])
 
 
@@ -405,6 +436,7 @@ operator_in_type_map = {
 
 def export_bin_to_json (node, parent_node):
 
+
     ret_val = dict(
                     id = node.node_id,
                     name = "Binary",
@@ -431,4 +463,6 @@ def export_bin_to_json (node, parent_node):
                                 ],
                 )
     json_nodes[node.node_id] = ret_val
+    
+            
     return dict(nodes = [ret_val], edges = [])
