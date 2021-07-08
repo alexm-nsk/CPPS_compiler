@@ -24,6 +24,7 @@
 
 
 from exporters.json    import *
+from exporters.graphml import *
 
 
 class Node:
