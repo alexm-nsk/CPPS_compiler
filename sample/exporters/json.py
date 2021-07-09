@@ -98,7 +98,7 @@ def function_gen_params(function):
     return ret_val
 
 
-def function_gen_out_ports(function):
+def function_gen_out_ports(function, node_id):
 
     ret_types = function.ret_types
     if not ret_types:
@@ -109,7 +109,7 @@ def function_gen_out_ports(function):
     for n, r in enumerate(ret_types):
 
         ret_val += [dict(
-                        nodeId = function.node_id,
+                        nodeId = node_id,
                         type = dict(location = r["location"],
                                     name = r["type_name"]),
                         index = n
@@ -118,7 +118,7 @@ def function_gen_out_ports(function):
     return ret_val
 
 
-def function_gen_in_ports(function):
+def function_gen_in_ports(function, node_id):
 
     arg_types = function.params
 
@@ -132,7 +132,7 @@ def function_gen_in_ports(function):
         for var in arg_group["vars"]:
 
             ret_val += [dict(
-                            nodeId = function.node_id,
+                            nodeId = node_id,
                             type = dict(location = var.location,
                                         name     = arg_group["type"]["type_name"]),
                             index = len(ret_val)
@@ -165,8 +165,8 @@ def export_function_to_json(node, parent_node):
 
     ret_val["params"]   = function_gen_params( node ) if node.params else None
 
-    ret_val["inPorts"]  = function_gen_in_ports ( node )
-    ret_val["outPorts"] = function_gen_out_ports( node )
+    ret_val["inPorts"]  = function_gen_in_ports ( node , node.node_id)
+    ret_val["outPorts"] = function_gen_out_ports( node , node.node_id)
 
     ret_val.pop("ret_types")
 
@@ -286,8 +286,8 @@ def export_call_to_json (node, parent_node):
 
     called_function = ast_.node.Function.functions[function_name]
 
-    ret_val = dict(inPorts  = function_gen_in_ports(called_function),
-                   outPorts = function_gen_out_ports(called_function))
+    ret_val = dict(inPorts  = function_gen_in_ports(called_function, node.node_id),
+                   outPorts = function_gen_out_ports(called_function, node.node_id))
 
     ret_val.update( dict(
                     id       = node.node_id,
