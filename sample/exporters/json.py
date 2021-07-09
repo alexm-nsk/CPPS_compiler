@@ -233,6 +233,7 @@ def export_if_to_json(node, parent_node):
                                     inPorts  = inPorts,
                                     outPorts = outPorts,
                                     params   = params,
+                                    location = branch[0].location
                                 )
 
         json_branches.append(json_branch)
@@ -436,10 +437,10 @@ def export_literal_to_json (node, parent_node):
                                                         location = "not applicable",
                                                         name     = "integer" #TODO put the type here
                                                     ),
-                                            name = "Literal"
                                         )
                                 ],
                     value = node.value,
+                    name = "Literal"
                 )
 
     json_nodes[node.node_id] = ret_val
