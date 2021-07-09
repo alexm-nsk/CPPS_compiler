@@ -423,7 +423,8 @@ def export_literal_to_json (node, parent_node):
                                             type = dict(
                                                         location = "not applicable",
                                                         name     = "integer" #TODO put the type here
-                                                    )
+                                                    ),
+                                            name = "Literal"
                                         )
                                 ],
                     value = node.value,
