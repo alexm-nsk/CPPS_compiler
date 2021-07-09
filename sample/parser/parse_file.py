@@ -234,6 +234,7 @@ class TreeVisitor(NodeVisitor):
         return If(**dict(
                         branches  = branches,
                         condition =  condition_node,
+                        location  = self.get_location(node),
                     ))
 
     #----------------------------------------------------

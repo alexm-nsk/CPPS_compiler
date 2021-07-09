@@ -210,7 +210,7 @@ def export_if_to_json(node, parent_node):
     # make ports for the top node of our 'If'
     ret_val["inPorts"]  = json_nodes[parent_node]["inPorts"]
     ret_val["outPorts"] = json_nodes[parent_node]["outPorts"]
-
+    ret_val["location"] = node.location
     # register this node in the global dict:
     json_nodes[ node.node_id ] = ret_val
 
