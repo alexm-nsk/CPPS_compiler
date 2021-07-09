@@ -34,7 +34,7 @@ def parse(input_text):
 
 def main(args):
 
-    print ("_"*50, "\n")
+#    print ("_"*50, "\n")
 
     if ( len( args ) < 2 ):
         print ( "usage: python parse source_code.sis" )
@@ -57,7 +57,9 @@ def main(args):
             #print (formatted)
             #os.system ("echo '%s' | jq" % formatted)
             
-            os.system ("echo '%s'| pygmentize -l xml" % output["functions"][0]) 
+            #os.system ("echo '%s'| pygmentize -l xml" % output["functions"][0]) 
+            for f in output["functions"]:
+                os.system ("echo '%s'" % f) 
             #for function in output["functions"]: print ( str(function) + "\n\n\n" )
             #for name, node in Node.nodes.items(): print (name, node)
         except Exception as e:
