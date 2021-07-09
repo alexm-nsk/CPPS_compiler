@@ -122,15 +122,7 @@ def emit(IR, nodes):
     return document
 
 def main(args):
-    print ("here is an example graph: \n")
-    edge     = make_edge("node1", "node2", 0, 1, "Binary")
-    graph    = make_graph("id", edge)
-
-    document = make_document(graph)
-    import os
-    os.system ("echo '%s'| pygmentize -l xml" % document)
     
-        # ~ xmllint --format xmlfile.xml | pygmentize -l xml | less
     return 0
 
 if __name__ == '__main__':

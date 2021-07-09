@@ -451,6 +451,7 @@ operator_out_type_map = {
     ">" : "boolean",
     "+" : "integer",
     "-" : "integer",
+    "*" : "integer",
 }
 
 operator_in_type_map = {
@@ -458,6 +459,7 @@ operator_in_type_map = {
     ">" : "integer",
     "+" : "integer",
     "-" : "integer",
+    "*" : "integer",
 }
 
 def export_bin_to_json (node, parent_node):

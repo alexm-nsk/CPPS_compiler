@@ -57,9 +57,8 @@ def main(args):
             #print (formatted)
             #os.system ("echo '%s' | jq" % formatted)
             
-            #os.system ("echo '%s'| pygmentize -l xml" % output["functions"][0]) 
-            for f in output["functions"]:
-                os.system ("echo '%s'" % f) 
+            os.system ("echo '%s'| pygmentize -l xml" % output["functions"][0]) 
+            #for f in output["functions"]: os.system ("echo '%s'" % f) 
             #for function in output["functions"]: print ( str(function) + "\n\n\n" )
             #for name, node in Node.nodes.items(): print (name, node)
         except Exception as e:
