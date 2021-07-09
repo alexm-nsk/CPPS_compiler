@@ -77,7 +77,9 @@ class Function(Node):
 
     def emit_json(self, parent_node):
             return export_function_to_json(self, parent_node)
-
+    
+    def emit_graphml(self, parent_node):
+            return export_function_to_graphml(self, parent_node)
 
 class Bin(Node):
 

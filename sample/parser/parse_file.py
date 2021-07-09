@@ -334,7 +334,7 @@ def parse_file(input_text):
 
     for parsed_function in parsed_functions:
         parsed = function_tree_visitor.parse(  parsed_function["text"] , parsed_function["line_offset"], parsed_function["column_offset"] )
-        IRs.append( parsed.emit_json(None) )
+        IRs.append( parsed.emit_graphml(None) )
 
     return {"functions":IRs}
 
