@@ -221,11 +221,11 @@ def export_if_to_json(node, parent_node):
         inPorts = json_nodes[parent_node]["inPorts"]
         outPorts = json_nodes[parent_node]["outPorts"]
         params  = json_nodes[current_scope]["params"]
-        
+
         inPorts[0]["nodeId"]   = branch[0].node_id
         outPorts[0]["nodeId"]  = branch[0].node_id
         params[0][1]["nodeId"] = branch[0].node_id
-        
+
         json_branch   =    dict(
                                     name     = field_sub_table[br_name],
                                     id       = branch[0].node_id,
@@ -245,16 +245,16 @@ def export_if_to_json(node, parent_node):
     ret_val["branches"]  = json_branches
 
     # process the condition:____________________________________________________________________________
-    
+
     #                             TODO  ↓          ↓ cond has to be boolean
     inPorts, outPorts = genPorts(["integer"], ["boolean"], node.condition[0].node_id)
-    
+
     ret_val["condition"] = dict(outPorts = outPorts, inPorts = inPorts )
-    
+
     json_nodes[node.condition[0].node_id] = ret_val["condition"]
-    
+
     condition_children = node.condition[0].emit_json(node.condition[0].node_id)
-    
+
     ret_val["condition"].update (condition_children)
 
     ret_val["condition"].update (dict(
@@ -316,10 +316,10 @@ def export_call_to_json (node, parent_node):
 
 #---------------------------------------------------------------------------------------------
 def genPorts(ins, outs, node_id):
-    
+
     inPorts  = []
     outPorts = []
-    
+
     for n, inPort in enumerate(ins):
         inPorts.append (dict (
                                         index = n,
@@ -328,7 +328,7 @@ def genPorts(ins, outs, node_id):
                                                 "name" : inPort}
                              )
                        )
-    
+
     for n, outPort in enumerate(outs):
         outPorts.append (dict (
                                         index = n,
@@ -339,11 +339,12 @@ def genPorts(ins, outs, node_id):
                        )
 
 
-    
+
     return (inPorts, outPorts)
 
 def export_algebraic_to_json (node, parent_node):
 
+    print (parent_node)
     return_nodes = []
     return_edges = []
     exp = node.expression
@@ -357,7 +358,9 @@ def export_algebraic_to_json (node, parent_node):
             operand = chunk[0]
             #return parent node's (?) node_id
             if type(operand) == ast_.node.Identifier:
-                return current_scope
+                # expecting the required value to come from the input
+                # TODO: check with multiple arguments (correct indices etc.)
+                return parent_node
             else:
                 # TODO process edges too
                 nodes = operand.emit_json(parent_node)
@@ -386,6 +389,7 @@ def export_algebraic_to_json (node, parent_node):
 
                 return operator.node_id
 
+    #the node that puts out result of this algebraic expression:
     final_node = get_nodes(exp)
 
     final_edge = make_json_edge(final_node, parent_node, 0,0)
@@ -476,6 +480,6 @@ def export_bin_to_json (node, parent_node):
                                 ],
                 )
     json_nodes[node.node_id] = ret_val
-    
-            
+
+
     return dict(nodes = [ret_val], edges = [])
