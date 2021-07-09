@@ -344,7 +344,6 @@ def genPorts(ins, outs, node_id):
 
 def export_algebraic_to_json (node, parent_node):
 
-    print (parent_node)
     return_nodes = []
     return_edges = []
     exp = node.expression
