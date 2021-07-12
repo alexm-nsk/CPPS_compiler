@@ -1,6 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+#  graphml.py
+#
+#  Copyright 2021 alexm
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#  MA 02110-1301, USA.
+#
+#
 import re
 from exporters.json    import *
 nodemap = []
@@ -25,16 +45,6 @@ def make_edge(from_ , to, src_port, dst_port, type):
     return f'<edge source="{from_}" target="{to}" sourceport="{src_port}" targetport="{dst_port}">\n'\
          f'  <data key="type">{type}</data>\n'\
          f'</edge>'\
-
-'''
-id:       string,
-name:     string,
-location: string,
-inPorts:  Port[],
-outPorts: Port[],
-props:    Map<string, string>,
-subGraph: string = ""
-'''
 
 props_to_save = { #name in graphml: #name in IR node:
                   #   ↓                ↓
@@ -102,9 +112,6 @@ def make_node(node):
         contents  = make_graph(node["id"]+"_graph", contents)
     else:
         contents = make_edges()
-        # ~ edges_string = make_edges()
-        # ~ if edges_string:
-            # ~ contents     = make_graph(node["id"]+"_graph", edges_string)
         
     return f'<node id=\"{node["id"]}\">\n'\
            f'{indent(props_str)}\n'\
