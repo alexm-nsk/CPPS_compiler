@@ -195,6 +195,7 @@ def export_function_to_json(node, parent_node):
 #---------------------------------------------------------------------------------------------
 
 def export_if_to_json(node, parent_node):
+
     global current_scope
     scope = current_scope
     ret_val = {}
@@ -211,6 +212,7 @@ def export_if_to_json(node, parent_node):
     ret_val["inPorts"]  = json_nodes[parent_node]["inPorts"]
     ret_val["outPorts"] = json_nodes[parent_node]["outPorts"]
     ret_val["location"] = node.location
+    
     # register this node in the global dict:
     json_nodes[ node.node_id ] = ret_val
 
@@ -238,9 +240,9 @@ def export_if_to_json(node, parent_node):
 
         json_branches.append(json_branch)
         json_nodes[branch[0].node_id] = json_branch
-        
+
         current_scope = branch[0].node_id
-        
+
         children = branch[0].emit_json(branch[0].node_id)
         json_branch["nodes"] = children["nodes"]
 
@@ -257,13 +259,13 @@ def export_if_to_json(node, parent_node):
     ret_val["condition"] = dict(outPorts = outPorts, inPorts = inPorts )
 
     json_nodes[node.condition[0].node_id] = ret_val["condition"]
-    
+
     current_scope = node.condition[0].node_id
-    
+
     condition_children = node.condition[0].emit_json(node.condition[0].node_id)
 
     current_scope = scope
-    
+
     ret_val["condition"].update (condition_children)
 
     ret_val["condition"].update (dict(
@@ -274,7 +276,7 @@ def export_if_to_json(node, parent_node):
                                     ))
 
     json_nodes[ node.node_id ].update( ret_val )
-    
+
     #current_scope = scope
     return dict(nodes = [ret_val], edges = [])
                                      #   ret_val["condition"]["edges"]
