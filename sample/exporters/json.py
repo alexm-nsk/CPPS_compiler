@@ -179,12 +179,15 @@ def export_function_to_json(node, parent_node):
     ret_val["nodes"] = []
     ret_val["edges"] = []
     
-    for n, child in enumerate(node.nodes):
-
-        json_child = child[0].emit_json( node.node_id )
+    for n, child in enumerate(node.nodes[0]):
+        # ~ print (child)
+        json_child = child.emit_json( node.node_id )
+        print (json_child)
         
         ret_val["nodes"].extend(json_child["nodes"])
         ret_val["edges"].extend(json_child["edges"])
+        
+        #TODO make emit_json return the mediator node
         
         #parameters_edge = make_json_edge(node.node_id, child.node_id, 0, 0)
         #ret_val_edge    = make_json_edge(json_child["id"], node.node_id, 0, 0)
