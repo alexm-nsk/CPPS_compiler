@@ -56,17 +56,13 @@ def main(args):
             formatted = json.dumps(output)
             #print (formatted)
             os.system ("echo '%s' | jq" % formatted)
-            
-            #os.system ("echo '%s'| pygmentize -l xml" % output["functions"][0]) 
-            #for f in output["functions"]: os.system ("echo '%s'" % f) 
-            #for function in output["functions"]: print ( str(function) + "\n\n\n" )
-            #for name, node in Node.nodes.items(): print (name, node)
+
+            #os.system ("echo '%s'| pygmentize -l xml" % output["functions"][0])
+
         except Exception as e:
             # ~ print (str(e))
             raise e
-            
-        #for n, value in Node.nodes.items(): print (n, ":" , value)
-            
+
     return 0
 
 
