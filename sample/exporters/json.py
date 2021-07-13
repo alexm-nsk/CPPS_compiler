@@ -290,8 +290,10 @@ def export_if_to_json(node, parent_node, slot):
 
     json_nodes[ node.node_id ].update( ret_val )
 
+    final_edge = make_json_edge(node.node_id, parent_node, 0, slot)
+
     #current_scope = scope
-    return dict(nodes = [ret_val], edges = [])
+    return dict(nodes = [ret_val], edges = [final_edge])
                                      #   ret_val["condition"]["edges"]
                                      # + [branch["edges"] for branch in ret_val["branches"]])
 
