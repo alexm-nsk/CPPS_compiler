@@ -152,7 +152,7 @@ field_sub_table = dict(
 )
 
 
-def export_function_to_json(node, parent_node):
+def export_function_to_json(node, parent_node, slot = 0):
 
     global current_scope, json_nodes
 
@@ -181,8 +181,8 @@ def export_function_to_json(node, parent_node):
     
     for n, child in enumerate(node.nodes[0]):
         # ~ print (child)
-        json_child = child.emit_json( node.node_id )
-        print (json_child)
+        json_child = child.emit_json( node.node_id , n)
+        #print (json_child)
         
         ret_val["nodes"].extend(json_child["nodes"])
         ret_val["edges"].extend(json_child["edges"])
@@ -207,7 +207,7 @@ def export_function_to_json(node, parent_node):
 
 #---------------------------------------------------------------------------------------------
 
-def export_if_to_json(node, parent_node):
+def export_if_to_json(node, parent_node, slot):
 
     global current_scope
     scope = current_scope
@@ -299,7 +299,7 @@ def export_if_to_json(node, parent_node):
 #---------------------------------------------------------------------------------------------
 
 
-def export_call_to_json (node, parent_node):
+def export_call_to_json (node, parent_node, slot = 0):
 
     ret_val = {}
 
@@ -367,7 +367,7 @@ def genPorts(ins, outs, node_id):
 
     return (inPorts, outPorts)
 
-def export_algebraic_to_json (node, parent_node):
+def export_algebraic_to_json (node, parent_node, slot = 0):
 
     return_nodes = []
     return_edges = []
@@ -415,7 +415,7 @@ def export_algebraic_to_json (node, parent_node):
     #the node that puts out result of this algebraic expression:
     final_node = get_nodes(exp)
 
-    final_edge = make_json_edge(final_node, parent_node, 0,0)
+    final_edge = make_json_edge(final_node, parent_node, 0, slot)
 
     if(not "edges" in json_nodes[parent_node]):
         json_nodes[parent_node]["edges"] = []
@@ -425,7 +425,7 @@ def export_algebraic_to_json (node, parent_node):
     return dict(nodes = return_nodes, edges = return_edges + [final_edge])
 
 
-def export_identifier_to_json (node, parent_node):
+def export_identifier_to_json (node, parent_node, slot = 0):
 
     # TODO check the case with loop to self in "then"
     parent = json_nodes[ parent_node ]
@@ -438,7 +438,7 @@ def export_identifier_to_json (node, parent_node):
     return dict(nodes = [], edges = [])
 
 
-def export_literal_to_json (node, parent_node):
+def export_literal_to_json (node, parent_node, slot = 0):
 
     ret_val = dict(
                     id = node.node_id,
@@ -476,7 +476,7 @@ operator_in_type_map = {
     "*" : "integer",
 }
 
-def export_bin_to_json (node, parent_node):
+def export_bin_to_json (node, parent_node, slot = 0):
 
     ret_val = dict(
                     id = node.node_id,

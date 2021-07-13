@@ -75,7 +75,7 @@ class Function(Node):
         super().__init__(**kwargs)
         Function.functions[self.function_name] = self
 
-    def emit_json(self, parent_node):
+    def emit_json(self, parent_node, slot = 0):
             return export_function_to_json(self, parent_node)
     
     def emit_graphml(self, parent_node):
@@ -86,8 +86,8 @@ class Bin(Node):
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
 
-    def emit_json(self, parent_node):
-        return (export_bin_to_json(self, parent_node))
+    def emit_json(self, parent_node, slot = 0):
+        return (export_bin_to_json(self, parent_node, slot))
 
 
 class Call(Node):
@@ -95,8 +95,8 @@ class Call(Node):
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
 
-    def emit_json(self, parent_node):
-        return export_call_to_json(self, parent_node)
+    def emit_json(self, parent_node, slot = 0):
+        return export_call_to_json(self, parent_node, slot)
 
 
 class If(Node):
@@ -112,8 +112,8 @@ class If(Node):
 
         self.name = "if_"
 
-    def emit_json(self, parent_node):
-        return (export_if_to_json(self, parent_node))
+    def emit_json(self, parent_node, slot = 0):
+        return (export_if_to_json(self, parent_node, slot))
 
 
 class Algebraic(Node):
@@ -124,8 +124,8 @@ class Algebraic(Node):
         
         self.name = "algebraic"        
         
-    def emit_json(self, parent_node):
-        return (export_algebraic_to_json(self, parent_node))
+    def emit_json(self, parent_node, slot = 0):
+        return (export_algebraic_to_json(self, parent_node, slot))
 
 
 class Identifier(Node):
@@ -134,8 +134,8 @@ class Identifier(Node):
         super().__init__(**kwargs, no_id = True)
         #self.name = "identifier"
 
-    def emit_json(self, parent_node):
-        return (export_identifier_to_json(self, parent_node))
+    def emit_json(self, parent_node, slot = 0):
+        return (export_identifier_to_json(self, parent_node, slot))
 
 
 class Literal(Node):
@@ -143,5 +143,5 @@ class Literal(Node):
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
 
-    def emit_json(self, parent_node):
-        return (export_literal_to_json(self, parent_node))
+    def emit_json(self, parent_node, slot = 0):
+        return (export_literal_to_json(self, parent_node, slot))
