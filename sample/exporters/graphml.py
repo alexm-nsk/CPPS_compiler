@@ -21,8 +21,10 @@
 #  MA 02110-1301, USA.
 #
 #
+
 import re
 from exporters.json    import *
+
 nodemap = []
 
 #indent text within another block for propper nesting

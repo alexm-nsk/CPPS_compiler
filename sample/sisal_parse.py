@@ -53,11 +53,11 @@ def main(args):
 
             #print (output)
 
-            formatted = json.dumps(output["functions"])
+            formatted = json.dumps(output)
             #print (formatted)
-            #os.system ("echo '%s' | jq" % formatted)
+            os.system ("echo '%s' | jq" % formatted)
             
-            os.system ("echo '%s'| pygmentize -l xml" % output["functions"][0]) 
+            #os.system ("echo '%s'| pygmentize -l xml" % output["functions"][0]) 
             #for f in output["functions"]: os.system ("echo '%s'" % f) 
             #for function in output["functions"]: print ( str(function) + "\n\n\n" )
             #for name, node in Node.nodes.items(): print (name, node)

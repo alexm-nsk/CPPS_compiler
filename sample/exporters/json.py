@@ -33,7 +33,7 @@
 #TODO redirect node in to out in "Then" (calculate port index from "parameters")
 
 import ast_.node
-
+import itertools
 import pprint
 
 current_scope = ""
@@ -173,20 +173,30 @@ def export_function_to_json(node, parent_node):
     # register this node:
     json_nodes[node.node_id] = ret_val
 
-    children = node.nodes[0][0].emit_json( node.node_id )
+    #children = node.nodes[0][0].emit_json( node.node_id )
+    #children = node.nodes[0][0].emit_json( node.node_id )
+    
+    ret_val["nodes"] = []
+    ret_val["edges"] = []
+    
+    for n, child in enumerate(node.nodes):
 
-    ret_val["nodes"] = children["nodes"]
-    ret_val["edges"] = children["edges"]
-
+        json_child = child[0].emit_json( node.node_id )
+        
+        ret_val["nodes"].extend(json_child["nodes"])
+        ret_val["edges"].extend(json_child["edges"])
+        
+        #parameters_edge = make_json_edge(node.node_id, child.node_id, 0, 0)
+        #ret_val_edge    = make_json_edge(json_child["id"], node.node_id, 0, 0)
+        
+        #ret_val["edges"].append(ret_val_edge)
+        #ret_val["edges"].append(parameters_edge)
+        
     json_nodes[node.node_id].update ( ret_val )
 
     # edges that tranfer parameters to child nodes and recieve results from them:
 
-    parameters_edge = make_json_edge(node.node_id, children["nodes"][0]["id"], 0, 0)
-    ret_val_edge    = make_json_edge(children["nodes"][0]["id"], node.node_id, 0, 0)
 
-    ret_val["edges"].append(ret_val_edge)
-    ret_val["edges"].append(parameters_edge)
 
     # it's a top node, so no need to return edges upstream
     return ret_val
@@ -212,7 +222,7 @@ def export_if_to_json(node, parent_node):
     ret_val["inPorts"]  = json_nodes[parent_node]["inPorts"]
     ret_val["outPorts"] = json_nodes[parent_node]["outPorts"]
     ret_val["location"] = node.location
-    
+
     # register this node in the global dict:
     json_nodes[ node.node_id ] = ret_val
 
@@ -373,7 +383,6 @@ def export_algebraic_to_json (node, parent_node):
                 # TODO: check with multiple arguments (correct indices etc.)
                 return current_scope
             else:
-                # TODO process edges too
                 nodes = operand.emit_json(parent_node)
                 return_nodes.extend(nodes["nodes"])
                 return_edges.extend(nodes["edges"])
@@ -388,7 +397,7 @@ def export_algebraic_to_json (node, parent_node):
 
                 left  = chunk[ :index]
                 right = chunk[index + 1: ]
-                # TODO process edges too
+
                 op_json = operator.emit_json(parent_node)["nodes"]
                 return_nodes.extend(op_json)
 
@@ -465,7 +474,6 @@ operator_in_type_map = {
 }
 
 def export_bin_to_json (node, parent_node):
-
 
     ret_val = dict(
                     id = node.node_id,
