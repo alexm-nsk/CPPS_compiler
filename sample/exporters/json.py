@@ -179,7 +179,7 @@ def export_function_to_json(node, parent_node, slot = 0):
     ret_val["nodes"] = []
     ret_val["edges"] = []
     
-    for n, child in enumerate(node.nodes[0]):
+    for n, child in enumerate(node.nodes):
         # ~ print (child)
         json_child = child.emit_json( node.node_id , n)
         #print (json_child)
@@ -237,7 +237,8 @@ def export_if_to_json(node, parent_node, slot):
         inPorts = json_nodes[parent_node]["inPorts"]
         outPorts = json_nodes[parent_node]["outPorts"]
         params  = json_nodes[current_scope]["params"]
-
+        
+        # copy ports from parent node and change node_id in our copies to current node:
         inPorts[0]["nodeId"]   = branch[0].node_id
         outPorts[0]["nodeId"]  = branch[0].node_id
         params[0][1]["nodeId"] = branch[0].node_id

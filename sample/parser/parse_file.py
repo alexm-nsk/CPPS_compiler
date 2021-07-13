@@ -207,7 +207,7 @@ class TreeVisitor(NodeVisitor):
         params = dict(
                         name          = "Lambda",
                         function_name = name,
-                        nodes         = [ function_body ],
+                        nodes         = function_body,
                         location      = self.get_location(node),
                         params        = visited_children[7],
                         ret_types     = ret_types
