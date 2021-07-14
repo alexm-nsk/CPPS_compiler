@@ -173,33 +173,18 @@ def export_function_to_json(node, parent_node, slot = 0):
     # register this node:
     json_nodes[node.node_id] = ret_val
 
-    #children = node.nodes[0][0].emit_json( node.node_id )
-    #children = node.nodes[0][0].emit_json( node.node_id )
-
     ret_val["nodes"] = []
     ret_val["edges"] = []
 
     for n, child in enumerate(node.nodes):
-        # ~ print (child)
         json_child = child.emit_json( node.node_id , n)
-        #print (json_child)
 
         ret_val["nodes"].extend(json_child["nodes"])
         ret_val["edges"].extend(json_child["edges"])
 
         #TODO make emit_json return the mediator node
 
-        #parameters_edge = make_json_edge(node.node_id, child.node_id, 0, 0)
-        #ret_val_edge    = make_json_edge(json_child["id"], node.node_id, 0, 0)
-
-        #ret_val["edges"].append(ret_val_edge)
-        #ret_val["edges"].append(parameters_edge)
-
     json_nodes[node.node_id].update ( ret_val )
-
-    # edges that tranfer parameters to child nodes and recieve results from them:
-
-
 
     # it's a top node, so no need to return edges upstream
     return ret_val
@@ -258,9 +243,7 @@ def export_if_to_json(node, parent_node, slot):
             json_nodes[child_node.node_id] = json_branch
 
             current_scope = child_node.node_id
-
             children = child_node.emit_json(child_node.node_id)
-
             current_scope = scope
 
             json_branch["nodes"] = children["nodes"]
@@ -280,13 +263,10 @@ def export_if_to_json(node, parent_node, slot):
     json_nodes[node.condition[0].node_id] = ret_val["condition"]
 
     current_scope = node.condition[0].node_id
-
     condition_children = node.condition[0].emit_json(node.condition[0].node_id)
-
     current_scope = scope
 
     ret_val["condition"].update (condition_children)
-
     ret_val["condition"].update (dict(
                                         name       = "Condition",
                                         id         = node.condition[0].node_id,
@@ -298,10 +278,7 @@ def export_if_to_json(node, parent_node, slot):
 
     final_edge = make_json_edge(node.node_id, parent_node, 0, slot)
 
-    #current_scope = scope
     return dict(nodes = [ret_val], edges = [final_edge])
-                                     #   ret_val["condition"]["edges"]
-                                     # + [branch["edges"] for branch in ret_val["branches"]])
 
 
 #---------------------------------------------------------------------------------------------
@@ -341,9 +318,6 @@ def export_call_to_json (node, parent_node, slot = 0):
 
     json_nodes[node.node_id].update ( ret_val )
 
-    #if not json_nodes[parent_node].edges: json_nodes[parent_node].edges = []
-    #json_nodes[parent_node]["edges"].append(make_json_edge(node.node_id, parent_node, 0, 0, True))
-    #print (args_edges)
     return dict(nodes = [ret_val] + args_nodes, edges = args_edges)
 
 
@@ -388,7 +362,7 @@ def export_algebraic_to_json (node, parent_node, slot = 0):
         # if only an operand left:
         if len(chunk) == 1:
             operand = chunk[0]
-            #return parent node's (?) node_id
+            # return parent node's (?) node_id
             if type(operand) == ast_.node.Identifier:
                 # expecting the required value to come from the input
                 # TODO: check with multiple arguments (correct indices etc.)
