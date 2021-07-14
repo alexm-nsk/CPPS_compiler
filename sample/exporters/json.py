@@ -175,26 +175,26 @@ def export_function_to_json(node, parent_node, slot = 0):
 
     #children = node.nodes[0][0].emit_json( node.node_id )
     #children = node.nodes[0][0].emit_json( node.node_id )
-    
+
     ret_val["nodes"] = []
     ret_val["edges"] = []
-    
+
     for n, child in enumerate(node.nodes):
         # ~ print (child)
         json_child = child.emit_json( node.node_id , n)
         #print (json_child)
-        
+
         ret_val["nodes"].extend(json_child["nodes"])
         ret_val["edges"].extend(json_child["edges"])
-        
+
         #TODO make emit_json return the mediator node
-        
+
         #parameters_edge = make_json_edge(node.node_id, child.node_id, 0, 0)
         #ret_val_edge    = make_json_edge(json_child["id"], node.node_id, 0, 0)
-        
+
         #ret_val["edges"].append(ret_val_edge)
         #ret_val["edges"].append(parameters_edge)
-        
+
     json_nodes[node.node_id].update ( ret_val )
 
     # edges that tranfer parameters to child nodes and recieve results from them:
@@ -234,34 +234,39 @@ def export_if_to_json(node, parent_node, slot):
     json_branches = []
 
     for br_name, branch in ret_val["branches"].items():
-        inPorts  = json_nodes[parent_node]["inPorts"]
-        outPorts = json_nodes[parent_node]["outPorts"]
-        params   = json_nodes[current_scope]["params"]
-        
-        # copy ports from parent node and change node_id in our copies to current node:
-        inPorts[0]["nodeId"]   = branch[0].node_id
-        outPorts[0]["nodeId"]  = branch[0].node_id
-        params[0][1]["nodeId"] = branch[0].node_id
+        for child_node in branch:
 
-        json_branch   =    dict(
-                                    name     = field_sub_table[br_name],
-                                    id       = branch[0].node_id,
-                                    inPorts  = inPorts,
-                                    outPorts = outPorts,
-                                    params   = params,
-                                    location = branch[0].location
-                                )
+            inPorts  = json_nodes[parent_node]["inPorts"]
+            outPorts = json_nodes[parent_node]["outPorts"]
+            params   = json_nodes[current_scope]["params"]
 
-        json_branches.append(json_branch)
-        json_nodes[branch[0].node_id] = json_branch
+            # copy ports from parent node and change node_id in our copies to current node:
+            for iP in inPorts: iP["nodeId"]   = child_node.node_id
+            for oP in inPorts: oP["nodeId"]   = child_node.node_id
+            for param in params: param[1]["nodeId"] = child_node.node_id
 
-        current_scope = branch[0].node_id
+            json_branch   =    dict(
+                                        name     = field_sub_table[br_name],
+                                        id       = child_node.node_id,
+                                        inPorts  = inPorts,
+                                        outPorts = outPorts,
+                                        params   = params,
+                                        location = child_node.location
+                                    )
 
-        children = branch[0].emit_json(branch[0].node_id)
-        json_branch["nodes"] = children["nodes"]
+            json_branches.append(json_branch)
+            json_nodes[child_node.node_id] = json_branch
 
-        if not "edges" in json_branch: json_branch["edges"] = []
-        json_branch["edges"].extend(children["edges"])
+            current_scope = child_node.node_id
+
+            children = child_node.emit_json(child_node.node_id)
+
+            current_scope = scope
+
+            json_branch["nodes"] = children["nodes"]
+
+            if not "edges" in json_branch: json_branch["edges"] = []
+            json_branch["edges"].extend(children["edges"])
 
     ret_val["branches"]  = json_branches
 
