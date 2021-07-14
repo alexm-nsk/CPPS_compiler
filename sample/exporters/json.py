@@ -229,14 +229,14 @@ def export_if_to_json(node, parent_node, slot):
     # register this node in the global dict:
     json_nodes[ node.node_id ] = ret_val
 
-    # process the branches:____________________________________________________________________________
+    # process the branches:___________________________________________________________________
 
     json_branches = []
 
     for br_name, branch in ret_val["branches"].items():
-        inPorts = json_nodes[parent_node]["inPorts"]
+        inPorts  = json_nodes[parent_node]["inPorts"]
         outPorts = json_nodes[parent_node]["outPorts"]
-        params  = json_nodes[current_scope]["params"]
+        params   = json_nodes[current_scope]["params"]
         
         # copy ports from parent node and change node_id in our copies to current node:
         inPorts[0]["nodeId"]   = branch[0].node_id
@@ -265,7 +265,7 @@ def export_if_to_json(node, parent_node, slot):
 
     ret_val["branches"]  = json_branches
 
-    # process the condition:____________________________________________________________________________
+    # process the condition:__________________________________________________________________
 
     #                             TODO  ↓          ↓ cond has to be boolean
     inPorts, outPorts = genPorts(["integer"], ["boolean"], node.condition[0].node_id)
