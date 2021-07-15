@@ -40,6 +40,9 @@ current_scope = ""
 json_nodes = {}
 
 
+#---------------------------------------------------------------------------------------------
+
+
 def make_json_edge(from_, to, src_index, dst_index, parent = False):
     #TODO retrieve src and dst type from the nodes here
 
@@ -77,6 +80,10 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False):
 
             ]
 
+
+#---------------------------------------------------------------------------------------------
+
+
 def function_gen_params(function):
 
     params = function.params
@@ -98,6 +105,9 @@ def function_gen_params(function):
     return ret_val
 
 
+#---------------------------------------------------------------------------------------------
+
+
 def function_gen_out_ports(function, node_id):
 
     ret_types = function.ret_types
@@ -116,6 +126,9 @@ def function_gen_out_ports(function, node_id):
                     )]
 
     return ret_val
+
+
+#---------------------------------------------------------------------------------------------
 
 
 def function_gen_in_ports(function, node_id):
@@ -141,6 +154,9 @@ def function_gen_in_ports(function, node_id):
     return ret_val
 
 
+#---------------------------------------------------------------------------------------------
+
+
 field_sub_table = dict(
 
     function_name = "functionName",
@@ -150,6 +166,9 @@ field_sub_table = dict(
     else_         = "Else",
 
 )
+
+
+#---------------------------------------------------------------------------------------------
 
 
 def export_function_to_json(node, parent_node, slot = 0):
@@ -192,6 +211,7 @@ def export_function_to_json(node, parent_node, slot = 0):
 
 #---------------------------------------------------------------------------------------------
 
+
 def export_if_to_json(node, parent_node, slot):
 
     global current_scope
@@ -219,7 +239,7 @@ def export_if_to_json(node, parent_node, slot):
     json_branches = []
 
     for br_name, branch in ret_val["branches"].items():
-        for child_node in branch:
+        for n, child_node in enumerate(branch):
 
             inPorts  = json_nodes[parent_node]["inPorts"]
             outPorts = json_nodes[parent_node]["outPorts"]
@@ -243,7 +263,7 @@ def export_if_to_json(node, parent_node, slot):
             json_nodes[child_node.node_id] = json_branch
 
             current_scope = child_node.node_id
-            children = child_node.emit_json(child_node.node_id)
+            children = child_node.emit_json(child_node.node_id, n)
             current_scope = scope
 
             json_branch["nodes"] = children["nodes"]
@@ -322,6 +342,8 @@ def export_call_to_json (node, parent_node, slot = 0):
 
 
 #---------------------------------------------------------------------------------------------
+
+
 def genPorts(ins, outs, node_id):
 
     inPorts  = []
@@ -348,6 +370,10 @@ def genPorts(ins, outs, node_id):
 
 
     return (inPorts, outPorts)
+
+
+#---------------------------------------------------------------------------------------------
+
 
 def export_algebraic_to_json (node, parent_node, slot = 0):
 
@@ -394,7 +420,7 @@ def export_algebraic_to_json (node, parent_node, slot = 0):
 
                 return operator.node_id
 
-    #the node that puts out result of this algebraic expression:
+    # the node that puts out result of this algebraic expression:
     final_node = get_nodes(exp)
 
     final_edge = make_json_edge(final_node, parent_node, 0, slot)
@@ -416,6 +442,9 @@ def export_identifier_to_json (node, parent_node, slot = 0):
 
     parent["edges"] = [edge]
     return dict(nodes = [], edges = [])
+
+
+#---------------------------------------------------------------------------------------------
 
 
 def export_literal_to_json (node, parent_node, slot = 0):
@@ -455,6 +484,10 @@ operator_in_type_map = {
     "-" : "integer",
     "*" : "integer",
 }
+
+
+#---------------------------------------------------------------------------------------------
+
 
 def export_bin_to_json (node, parent_node, slot = 0):
 

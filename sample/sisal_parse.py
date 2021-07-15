@@ -37,7 +37,7 @@ def main(args):
 #    print ("_"*50, "\n")
 
     if ( len( args ) < 2 ):
-        print ( "usage: python parse source_code.sis" )
+        print ( "usage: python sisal_parse.py source_code.sis" )
     else:
 
         input_file_name = args[1]
@@ -52,12 +52,14 @@ def main(args):
             output = parse(file_contents)
 
             #print (output)
+            if "--graph" in args:
+                os.system ("echo '%s'| pygmentize -l xml" % output[0].emit_graphml(None))
+            else:
+                
+                formatted = json.dumps([o.emit_json(None) for o in output])
+                #print (formatted)
+                os.system ("echo '%s' | jq" % formatted)
 
-            formatted = json.dumps(output)
-            #print (formatted)
-            os.system ("echo '%s' | jq" % formatted)
-
-            #os.system ("echo '%s'| pygmentize -l xml" % output["functions"][0])
 
         except Exception as e:
             # ~ print (str(e))
