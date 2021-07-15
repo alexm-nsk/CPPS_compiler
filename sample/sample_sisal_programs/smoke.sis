@@ -5,3 +5,7 @@ function Fib( M  : integer returns integer)
     Fib(M - 1) + Fib(M - 2)
   end if
 end function
+
+function Main(M : integer returns integer)
+    Fib(M)
+end function

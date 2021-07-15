@@ -324,6 +324,7 @@ def export_call_to_json (node, parent_node, slot = 0):
                     callee   = function_name,
                     location = node.location,
                     name     = "FunctionCall",
+                    params   = function_gen_params(called_function),
                    ))
 
     json_nodes[node.node_id] = ret_val

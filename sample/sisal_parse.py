@@ -51,16 +51,13 @@ def main(args):
         try:
             output = parse(file_contents)
 
-            #print (output)
             if "--graph" in args:
                 from exporters.graphml import make_document
                 graphs = "\n".join([o.emit_graphml(None) for o in output])
                 graphml_text = make_document(graphs)
                 os.system ("echo '%s'| pygmentize -l xml" % graphml_text)
             else:
-                
                 formatted = json.dumps(dict(function = [o.emit_json(None) for o in output]))
-                #print (formatted)
                 os.system ("echo '%s' | jq" % formatted)
 
 
