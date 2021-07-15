@@ -53,10 +53,11 @@ def main(args):
 
             #print (output)
             if "--graph" in args:
-                os.system ("echo '%s'| pygmentize -l xml" % output[0].emit_graphml(None))
+                from exporters.graphml import make_document
+                os.system ("echo '%s'| pygmentize -l xml" % make_document(output[0].emit_graphml(None)))
             else:
                 
-                formatted = json.dumps([o.emit_json(None) for o in output])
+                formatted = json.dumps(dict(function = [o.emit_json(None) for o in output]))
                 #print (formatted)
                 os.system ("echo '%s' | jq" % formatted)
 

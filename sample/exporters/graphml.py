@@ -33,7 +33,7 @@ def indent(string):
     return (indentation + string.replace("\n", "\n" + indentation))#.strip()
 
 def make_document(content):
-    return '<?xml version="1.0" encoding="UTF-8"?>\n'\
+    document = '<?xml version="1.0" encoding="UTF-8"?>\n'\
            '<graphml xmlns="http://graphml.graphdrawing.org/xmlns"\n\n'\
            '  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\n'\
            '  xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns\n'\
@@ -42,6 +42,8 @@ def make_document(content):
            '    <key id="location" for="node" attr.name="location" attr.type="string" />\n\n\n'\
            '  %s\n'\
            '\n\n</graphml>' % indent(content)
+    document = re.sub("\n\s*\n", "\n", document)
+    return document
 
 def make_edge(from_ , to, src_port, dst_port, type):
     return f'<edge source="{from_}" target="{to}" sourceport="{src_port}" targetport="{dst_port}">\n'\
@@ -83,6 +85,7 @@ def make_node(node):
                 source_port_type + str(e[0]["index"])
                 , target_port_type + str(e[1]["index"]), 
                 e[0]["type"]["name"])
+                
         return edges_string
     
     props_str =  "\n".join(
@@ -124,9 +127,12 @@ def make_node(node):
 def emit(IR, nodes):
     global nodemap, json_nodes
     nodemap = json_nodes
-    graph    = make_graph("id", make_node(IR))
+    
+    graph = ""
+    for ir in IR:
+        graph    += make_graph("id", make_node(ir.emit_json(None))) + "\n"
+        
     document = make_document(graph)
-    document = re.sub("\n\s*\n", "\n", document)
 
     return document
 
@@ -139,4 +145,9 @@ if __name__ == '__main__':
     sys.exit(main(sys.argv))
 
 def export_function_to_graphml(node, parent_node):
-    return emit(node.emit_json(None), None)
+    global nodemap, json_nodes
+    nodemap = json_nodes
+    
+    graph = make_graph("id", make_node(node.emit_json(None)))
+    # ~ return emit(node.emit_json(None), None)
+    return graph
