@@ -25,12 +25,6 @@
 # Implements exporting Node and it's descendants into JSON IR
 
 #---------------------------------------------------------------------------------------------
-# TODO use decorators for field name substitusions
-# TODO everywhere "emit_json" is called check if it generated any edges and if so, add them
-# TODO suggestion to put "linearization" of subtrees in there also (node decides whether it should break up the node list), make function that calls emit_json (node) and returns what's needed
-# TODO write "is_parent(node1, node2)"
-
-#TODO redirect node in to out in "Then" (calculate port index from "parameters")
 
 import ast_.node
 import itertools
