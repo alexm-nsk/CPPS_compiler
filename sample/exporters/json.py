@@ -289,7 +289,9 @@ def export_if_to_json(node, parent_node, slot):
                                     ))
 
     json_nodes[ node.node_id ].update( ret_val )
-
+    
+    # the edge that connects this (If) node with parent node:
+    
     final_edge = make_json_edge(node.node_id, parent_node, 0, slot)
 
     return dict(nodes = [ret_val], edges = [final_edge])
@@ -332,8 +334,10 @@ def export_call_to_json (node, parent_node, slot = 0):
         args_edges.extend ( children ["edges"] )
 
     json_nodes[node.node_id].update ( ret_val )
-
-    return dict(nodes = [ret_val] + args_nodes, edges = args_edges)
+    
+    final_edge = make_json_edge(node.node_id, parent_node, 0, slot)
+    
+    return dict(nodes = [ret_val] + args_nodes, edges = args_edges + [final_edge])
 
 
 #---------------------------------------------------------------------------------------------
