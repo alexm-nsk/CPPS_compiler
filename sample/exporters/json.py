@@ -433,7 +433,8 @@ def export_identifier_to_json (node, parent_node, slot = 0):
 
     for name, arg in parent["params"]:
         if name == node.name:
-            edge = make_json_edge(parent["id"],  parent["id"], 0, 0)
+            # ~ edge = make_json_edge(parent["id"],  parent["id"], 0, 0)
+            edge = make_json_edge(current_scope,  parent["id"], 0, 0)
     # TODO edge might not be initialized here:
     parent["edges"] = [edge]
     return dict(nodes = [], edges = [])
