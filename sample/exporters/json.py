@@ -278,12 +278,9 @@ def export_if_to_json(node, parent_node, slot):
 
     current_scope = node.condition[0].node_id
     condition_children = node.condition[0].emit_json(node.condition[0].node_id)
-
-    ret_val["condition"]["edges"] = condition_children["edges"] + condition_children["final_edges"]
+    ret_val["condition"]["edges"] += condition_children["edges"] + condition_children["final_edges"]
     ret_val["condition"]["nodes"] = condition_children["nodes"]
-
     current_scope = scope
-
 
     ret_val["condition"].update (dict(
                                         name       = "Condition",
