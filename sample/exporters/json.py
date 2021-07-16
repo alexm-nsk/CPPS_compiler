@@ -278,6 +278,10 @@ def export_if_to_json(node, parent_node, slot):
 
     current_scope = node.condition[0].node_id
     condition_children = node.condition[0].emit_json(node.condition[0].node_id)
+    
+    condition_children["edges"] += condition_children["final_edges"]
+    del (condition_children["final_edges"])
+    
     current_scope = scope
 
     ret_val["condition"].update (condition_children)
