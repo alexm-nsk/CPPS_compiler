@@ -278,13 +278,13 @@ def export_if_to_json(node, parent_node, slot):
 
     current_scope = node.condition[0].node_id
     condition_children = node.condition[0].emit_json(node.condition[0].node_id)
-    
-    condition_children["edges"] += condition_children["final_edges"]
-    del (condition_children["final_edges"])
-    
+
+    ret_val["condition"]["edges"] = condition_children["edges"] + condition_children["final_edges"]
+    ret_val["condition"]["nodes"] = condition_children["nodes"]
+
     current_scope = scope
 
-    ret_val["condition"].update (condition_children)
+
     ret_val["condition"].update (dict(
                                         name       = "Condition",
                                         id         = node.condition[0].node_id,
@@ -293,9 +293,9 @@ def export_if_to_json(node, parent_node, slot):
                                     ))
 
     json_nodes[ node.node_id ].update( ret_val )
-    
+
     # the edge that connects this (If) node with parent node:
-    
+
     final_edge = make_json_edge(node.node_id, parent_node, 0, slot)
 
     return dict(nodes = [ret_val], edges = [], final_edges = [final_edge])
@@ -338,9 +338,9 @@ def export_call_to_json (node, parent_node, slot = 0):
         args_edges.extend ( children ["edges"] + children ["final_edges"])
 
     json_nodes[node.node_id].update ( ret_val )
-    
+
     final_edge = make_json_edge(node.node_id, parent_node, 0, slot)
-    
+
     return dict(nodes = [ret_val] + args_nodes, edges = args_edges , final_edges = [final_edge])
 
 
@@ -516,7 +516,7 @@ def export_bin_to_json (node, parent_node, slot = 0):
                                             type = dict(
                                                         location = "not applicable",
                                                         #TODO put the type here
-                                                        name = operator_out_type_map[node.operator] 
+                                                        name = operator_out_type_map[node.operator]
                                                     )
                                         )
                                 ],
