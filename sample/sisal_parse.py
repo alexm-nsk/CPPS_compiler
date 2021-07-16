@@ -57,7 +57,7 @@ def main(args):
                 graphml_text = make_document(graphs)
                 os.system ("echo '%s'| pygmentize -l xml" % graphml_text)
             else:
-                formatted = json.dumps(dict(function = [o.emit_json(None) for o in output]))
+                formatted = json.dumps(dict(functions = [o.emit_json(None) for o in output]))
                 os.system ("echo '%s' | jq" % formatted)
 
 
