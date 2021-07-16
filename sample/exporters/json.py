@@ -434,7 +434,7 @@ def export_identifier_to_json (node, parent_node, slot = 0):
     for name, arg in parent["params"]:
         if name == node.name:
             edge = make_json_edge(parent["id"],  parent["id"], 0, 0)
-
+    # TODO edge might not be initialized here:
     parent["edges"] = [edge]
     return dict(nodes = [], edges = [])
 
@@ -506,7 +506,8 @@ def export_bin_to_json (node, parent_node, slot = 0):
                                             nodeId = node.node_id,
                                             type = dict(
                                                         location = "not applicable",
-                                                        name = operator_out_type_map[node.operator] #TODO put the type here
+                                                        #TODO put the type here
+                                                        name = operator_out_type_map[node.operator] 
                                                     )
                                         )
                                 ],
