@@ -240,8 +240,8 @@ def export_if_to_json(node, parent_node, slot):
             params   = json_nodes[current_scope]["params"]
 
             # copy ports from parent node and change node_id in our copies to current node:
-            for iP in inPorts: iP["nodeId"]   = child_node.node_id
-            for oP in inPorts: oP["nodeId"]   = child_node.node_id
+            for iP in inPorts: iP["nodeId"]         = child_node.node_id
+            for oP in outPorts: oP["nodeId"]        = child_node.node_id
             for param in params: param[1]["nodeId"] = child_node.node_id
 
             json_branch   =    dict(

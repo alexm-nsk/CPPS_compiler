@@ -109,7 +109,7 @@ class If(Node):
         for name, branch in self.branches.items():
             for br in branch:
                 br.node_id  = Node.get_node_id()
-                print (br)
+                # ~ print (br)
 
         self.name = "if_"
 
