@@ -234,41 +234,41 @@ def export_if_to_json(node, parent_node, slot):
     json_branches = []
 
     for br_name, branch in ret_val["branches"].items():
-       
+
         inPorts  = copy.deepcopy(json_nodes[parent_node]["inPorts"])
         outPorts = copy.deepcopy(json_nodes[parent_node]["outPorts"])
         params   = copy.deepcopy(json_nodes[current_scope]["params"])
-        
+
         #TODO check that outporrts number matches subnodes ouputs
             # copy ports from parent node and change node_id in our copies to current node:
         for iP in inPorts: iP["nodeId"]         = branch["node_id"]
         for oP in outPorts: oP["nodeId"]        = branch["node_id"]
         for param in params: param[1]["nodeId"] = branch["node_id"]
         print (branch["node_id"], br_name, inPorts)
-        
+
         json_branch   =    dict(
                                     name     = field_sub_table[br_name],
                                     id       = branch["node_id"],
                                     inPorts  = inPorts,
                                     outPorts = outPorts,
                                     params   = params,
-                                    location = branch["nodes"][0].location
+                                    location = branch["nodes"][0].location,
+                                    nodes    = [],
+                                    edges    = []
                                 )
         print ("branch:", json_branch)
         json_branches.append(json_branch)
         json_nodes[branch["node_id"]] = json_branch
 
         for n, child_node in enumerate(branch["nodes"]):
-            print (child_node,"\n")
+
             current_scope = branch["node_id"]
-            #children = child_node.emit_json(child_node.node_id, n)
+            children = child_node.emit_json(current_scope, n)
             current_scope = scope
 
-        #json_branch["nodes"] = branch["nodes"][0].emit_json(branch["node_id"], 0)
+            json_branch["edges"].extend(children["edges"] + children["final_edges"])
+            json_branch["nodes"].extend(children["nodes"])
 
-        #if not "edges" in json_branch: json_branch["edges"] = []
-        #json_branch["edges"].extend(children["edges"] + children["final_edges"])
-        #break
 
     ret_val["branches"]  = json_branches
 
@@ -338,11 +338,12 @@ def export_call_to_json (node, parent_node, slot = 0):
         children = arg[0].emit_json(node.node_id)
         args_nodes.extend ( children ["nodes"] )
         args_edges.extend ( children ["edges"] + children ["final_edges"])
+    # TODO why edges appear?
+    del (ret_val["edges"])
 
     json_nodes[node.node_id].update ( ret_val )
 
     final_edge = make_json_edge(node.node_id, parent_node, 0, slot)
-
     return dict(nodes = [ret_val] + args_nodes, edges = args_edges , final_edges = [final_edge])
 
 
@@ -447,6 +448,7 @@ def export_identifier_to_json (node, parent_node, slot = 0):
 
     # TODO edge might not be initialized here:
     parent["edges"] = [edge]
+    
     return dict(nodes = [], edges = [], final_edges = [])
 
 
@@ -473,7 +475,8 @@ def export_literal_to_json (node, parent_node, slot = 0):
                 )
 
     json_nodes[node.node_id] = ret_val
-    return dict(nodes = [ret_val], edges = [], final_edges = [])
+    final_edge = make_json_edge(node.node_id, parent_node, 0, slot)
+    return dict(nodes = [ret_val], edges = [], final_edges = [final_edge])
 
 operator_out_type_map = {
     "<" : "boolean",
