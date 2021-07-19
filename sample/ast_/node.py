@@ -41,7 +41,7 @@ class Node:
         if not ( "no_id" in kwargs and kwargs["no_id"]):
             self.node_id = Node.get_node_id()
             Node.nodes[self.node_id] = self
-            
+
         if "no_id" in kwargs: kwargs.pop("no_id")
 
         # TODO consider list of allowed props (https://stackoverflow.com/questions/8187082/how-can-you-set-class-attributes-from-variable-arguments-kwargs-in-python)
@@ -77,7 +77,7 @@ class Function(Node):
 
     def emit_json(self, parent_node, slot = 0):
             return export_function_to_json(self, parent_node)
-    
+
     def emit_graphml(self, parent_node):
             return export_function_to_graphml(self, parent_node)
 
@@ -105,11 +105,11 @@ class If(Node):
         super().__init__(**kwargs)
         for cond in self.condition:
             cond.node_id  = Node.get_node_id()
-        #print (self.branches)
+
         for name, branch in self.branches.items():
+            branch["node_id"]  = Node.get_node_id()
             for br in branch:
-                br.node_id  = Node.get_node_id()
-                # ~ print (br)
+                pass
 
         self.name = "if_"
 
@@ -120,11 +120,11 @@ class If(Node):
 class Algebraic(Node):
 
     def __init__(self, *args, **kwargs):
-        
+
         super().__init__(**kwargs, no_id = True)
-        
-        self.name = "algebraic"        
-        
+
+        self.name = "algebraic"
+
     def emit_json(self, parent_node, slot = 0):
         return (export_algebraic_to_json(self, parent_node, slot))
 
@@ -133,7 +133,6 @@ class Identifier(Node):
 
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs, no_id = True)
-        #self.name = "identifier"
 
     def emit_json(self, parent_node, slot = 0):
         return (export_identifier_to_json(self, parent_node, slot))

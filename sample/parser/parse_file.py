@@ -226,8 +226,8 @@ class TreeVisitor(NodeVisitor):
     def visit_if(self, node, visited_children):
 
         condition_node = visited_children[2]
-        then_node      = visited_children[6]
-        else_node      = visited_children[10]
+        then_node      = {"nodes": visited_children[6]}
+        else_node      = {"nodes": visited_children[10]}
 
         branches = dict(then = then_node, else_ = else_node)
 

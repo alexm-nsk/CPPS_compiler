@@ -29,6 +29,7 @@
 import ast_.node
 import itertools
 import pprint
+import copy
 
 current_scope = ""
 json_nodes = {}
@@ -233,37 +234,41 @@ def export_if_to_json(node, parent_node, slot):
     json_branches = []
 
     for br_name, branch in ret_val["branches"].items():
-        for n, child_node in enumerate(branch):
-
-            inPorts  = json_nodes[parent_node]["inPorts"]
-            outPorts = json_nodes[parent_node]["outPorts"]
-            params   = json_nodes[current_scope]["params"]
-
+       
+        inPorts  = copy.deepcopy(json_nodes[parent_node]["inPorts"])
+        outPorts = copy.deepcopy(json_nodes[parent_node]["outPorts"])
+        params   = copy.deepcopy(json_nodes[current_scope]["params"])
+        
+        #TODO check that outporrts number matches subnodes ouputs
             # copy ports from parent node and change node_id in our copies to current node:
-            for iP in inPorts: iP["nodeId"]         = child_node.node_id
-            for oP in outPorts: oP["nodeId"]        = child_node.node_id
-            for param in params: param[1]["nodeId"] = child_node.node_id
+        for iP in inPorts: iP["nodeId"]         = branch["node_id"]
+        for oP in outPorts: oP["nodeId"]        = branch["node_id"]
+        for param in params: param[1]["nodeId"] = branch["node_id"]
+        print (branch["node_id"], br_name, inPorts)
+        
+        json_branch   =    dict(
+                                    name     = field_sub_table[br_name],
+                                    id       = branch["node_id"],
+                                    inPorts  = inPorts,
+                                    outPorts = outPorts,
+                                    params   = params,
+                                    location = branch["nodes"][0].location
+                                )
+        print ("branch:", json_branch)
+        json_branches.append(json_branch)
+        json_nodes[branch["node_id"]] = json_branch
 
-            json_branch   =    dict(
-                                        name     = field_sub_table[br_name],
-                                        id       = child_node.node_id,
-                                        inPorts  = inPorts,
-                                        outPorts = outPorts,
-                                        params   = params,
-                                        location = child_node.location
-                                    )
-
-            json_branches.append(json_branch)
-            json_nodes[child_node.node_id] = json_branch
-
-            current_scope = child_node.node_id
-            children = child_node.emit_json(child_node.node_id, n)
+        for n, child_node in enumerate(branch["nodes"]):
+            print (child_node,"\n")
+            current_scope = branch["node_id"]
+            #children = child_node.emit_json(child_node.node_id, n)
             current_scope = scope
 
-            json_branch["nodes"] = children["nodes"]
+        #json_branch["nodes"] = branch["nodes"][0].emit_json(branch["node_id"], 0)
 
-            if not "edges" in json_branch: json_branch["edges"] = []
-            json_branch["edges"].extend(children["edges"] + children["final_edges"])
+        #if not "edges" in json_branch: json_branch["edges"] = []
+        #json_branch["edges"].extend(children["edges"] + children["final_edges"])
+        #break
 
     ret_val["branches"]  = json_branches
 
