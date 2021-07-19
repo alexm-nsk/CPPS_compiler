@@ -102,14 +102,14 @@ class TreeVisitor(NodeVisitor):
 
     def visit__(self, node, visited_children):
         return None
-        
+
     def visit_empty(self, node, visited_children):
         return None
 
     #----------------------------------------------------
     # these methods address parsing of function arguments:
     #----------------------------------------------------
-    
+
     # rule: function_arguments = args_groups_list / _
     def visit_function_arguments(self, node, visited_children):
         return visited_children[0]
@@ -146,14 +146,14 @@ class TreeVisitor(NodeVisitor):
 
     # rule: algebraic          = (operand) (_ bin_op _ operand)*
     def visit_algebraic(self, node, visited_children):
-               
+
         if type(visited_children[1]) == list:
             tail =  [value for value in visited_children[1][0] if value]
             if len(visited_children[1]) > 1:
                 tail += [value for value in visited_children[1][1] if value]
         else:
             return visited_children[0]
-        
+
         expression = [visited_children[0]] + tail
 
         return Algebraic(expression = expression, location = self.get_location(node))
@@ -240,7 +240,7 @@ class TreeVisitor(NodeVisitor):
     #----------------------------------------------------
     #
     #----------------------------------------------------
-    
+
     def visit_brackets_algebraic(self, node, visited_children):
         return visited_children[2]
 
@@ -248,10 +248,10 @@ class TreeVisitor(NodeVisitor):
         all_exps = unpack_rec_list(visited_children)
         #print (all_exps)
         return all_exps#visited_children[0]
-        
+
     def visit_exp_singular(self, node, visited_children):
         return visited_children[0]
-        
+
     def visit_operand(self, node, visited_children):
         return visited_children[0]
 
@@ -293,7 +293,7 @@ def parse_file(input_text):
     parsed_functions = []
 
     for function_text in function_matches:
-        
+
         text  = function_text.group(0)
         start = function_text.start()
         end   = function_text.end()
@@ -310,7 +310,7 @@ def parse_file(input_text):
                 # calculate the offset number of lines where errors occured:
 
                 line_offset   = input_text[:start].count("\n")
-                #   we get the length of text between current symbol and 
+                #   we get the length of text between current symbol and
                 #   the closest newline ("\n") preceding the current function block:
                 column_offset = 0
 
