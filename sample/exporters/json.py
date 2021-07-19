@@ -244,7 +244,6 @@ def export_if_to_json(node, parent_node, slot):
         for iP in inPorts: iP["nodeId"]         = branch["node_id"]
         for oP in outPorts: oP["nodeId"]        = branch["node_id"]
         for param in params: param[1]["nodeId"] = branch["node_id"]
-        print (branch["node_id"], br_name, inPorts)
 
         json_branch   =    dict(
                                     name     = field_sub_table[br_name],
@@ -252,14 +251,16 @@ def export_if_to_json(node, parent_node, slot):
                                     inPorts  = inPorts,
                                     outPorts = outPorts,
                                     params   = params,
-                                    location = branch["nodes"][0].location,
+                                    #location = branch["nodes"].location,
                                     nodes    = [],
                                     edges    = []
                                 )
-        print ("branch:", json_branch)
         json_branches.append(json_branch)
         json_nodes[branch["node_id"]] = json_branch
-
+        
+        # ~ if len(branch["nodes"]) != len(outPorts):
+            # ~ raise Exception("Output number mismatch!", )
+            
         for n, child_node in enumerate(branch["nodes"]):
 
             current_scope = branch["node_id"]
