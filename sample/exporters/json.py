@@ -257,10 +257,10 @@ def export_if_to_json(node, parent_node, slot):
                                 )
         json_branches.append(json_branch)
         json_nodes[branch["node_id"]] = json_branch
-        
+
         # ~ if len(branch["nodes"]) != len(outPorts):
             # ~ raise Exception("Output number mismatch!", )
-            
+
         for n, child_node in enumerate(branch["nodes"]):
 
             current_scope = branch["node_id"]
@@ -398,16 +398,20 @@ def export_algebraic_to_json (node, parent_node, slot = 0):
             # return parent node's (?) node_id
             if type(operand) == ast_.node.Identifier:
                 # expecting the required value to come from the input
-                # TODO: check with multiple arguments (correct indices etc.)
+
                 name = operand.name
 
+                identifier_slot = -1
                 for n, p in enumerate(json_nodes[current_scope]["params"]):
                     if(p[0] == name):
                         identifier_slot = n
-                print(identifier_slot)
+
+                if identifier_slot == -1:
+                    raise Exception("value {} not found in current scope".format (name))
+                    
                 return dict(id = current_scope, slot = identifier_slot)
             else:
-                
+
                 nodes = operand.emit_json(current_scope)
                 return_nodes.extend(nodes["nodes"])
                 return_edges.extend(nodes["edges"])
@@ -448,7 +452,7 @@ def export_algebraic_to_json (node, parent_node, slot = 0):
 def export_identifier_to_json (node, parent_node, slot = 0):
 
     # TODO check the case with loop to self in "then"
-    
+
     parent = json_nodes[ parent_node ]
 
     for name, arg in parent["params"]:
@@ -457,7 +461,7 @@ def export_identifier_to_json (node, parent_node, slot = 0):
 
     # TODO edge might not be initialized here:
     parent["edges"] = [edge]
-    
+
     return dict(nodes = [], edges = [], final_edges = [])
 
 
