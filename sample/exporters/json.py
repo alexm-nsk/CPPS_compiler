@@ -239,8 +239,8 @@ def export_if_to_json(node, parent_node, slot):
         outPorts = copy.deepcopy(json_nodes[parent_node]["outPorts"])
         params   = copy.deepcopy(json_nodes[current_scope]["params"])
 
-        #TODO check that outporrts number matches subnodes ouputs
-            # copy ports from parent node and change node_id in our copies to current node:
+        #TODO check that outports number matches subnodes outputs
+        # copy ports from parent node and change node_id in our copies to current node:
         for iP in inPorts: iP["nodeId"]         = branch["node_id"]
         for oP in outPorts: oP["nodeId"]        = branch["node_id"]
         for param in params: param[1]["nodeId"] = branch["node_id"]
