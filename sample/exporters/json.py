@@ -342,7 +342,7 @@ def export_call_to_json (node, parent_node, slot = 0):
         args_nodes.extend ( children ["nodes"] )
         args_edges.extend ( children ["edges"] + children ["final_edges"])
     # TODO why edges appear?
-    del (ret_val["edges"])
+    #del (ret_val["edges"])
 
     json_nodes[node.node_id].update ( ret_val )
 
@@ -459,15 +459,15 @@ def export_identifier_to_json (node, parent_node, slot = 0):
     # TODO check the case with loop to self in "then"
 
     parent = json_nodes[ parent_node ]
-
+    final_edge = {}
     for n, (name, arg) in enumerate(parent["params"]):
         if name == node.name:
             edge = make_json_edge(current_scope,  parent["id"], n, 0)
-
+    
     # TODO edge might not be initialized here:
-    parent["edges"] = [edge]
+    #parent["edges"] = [edge]
 
-    return dict(nodes = [], edges = [], final_edges = [])
+    return dict(nodes = [], edges = [], final_edges = [edge])
 
 
 #---------------------------------------------------------------------------------------------
