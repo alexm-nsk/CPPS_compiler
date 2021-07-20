@@ -141,7 +141,6 @@ def emit(IR, nodes):
     return document
 
 def main(args):
-
     return 0
 
 if __name__ == '__main__':
@@ -149,9 +148,10 @@ if __name__ == '__main__':
     sys.exit(main(sys.argv))
 
 def export_function_to_graphml(node, parent_node):
+
     global nodemap, json_nodes
     nodemap = json_nodes
 
     graph = make_graph("id", make_node(node.emit_json(None)))
-    # ~ return emit(node.emit_json(None), None)
+
     return graph
