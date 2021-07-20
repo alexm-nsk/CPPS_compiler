@@ -395,6 +395,7 @@ def export_algebraic_to_json (node, parent_node, slot = 0):
         # if only an operand left:
         if len(chunk) == 1:
             operand = chunk[0]
+            
             # return parent node's (?) node_id
             if type(operand) == ast_.node.Identifier:
                 # expecting the required value to come from the input
@@ -407,8 +408,8 @@ def export_algebraic_to_json (node, parent_node, slot = 0):
                         identifier_slot = n
 
                 if identifier_slot == -1:
-                    raise Exception("value {} not found in current scope".format (name))
-                    
+                    raise Exception("value {} ({}) not found in current scope".format (name, operand.location))
+
                 return dict(id = current_scope, slot = identifier_slot)
             else:
 
