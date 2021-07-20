@@ -399,12 +399,19 @@ def export_algebraic_to_json (node, parent_node, slot = 0):
             if type(operand) == ast_.node.Identifier:
                 # expecting the required value to come from the input
                 # TODO: check with multiple arguments (correct indices etc.)
-                return current_scope
+                name = operand.name
+
+                for n, p in enumerate(json_nodes[current_scope]["params"]):
+                    if(p[0] == name):
+                        slot = n
+                    
+                return dict(id = current_scope, slot = slot)
             else:
+                
                 nodes = operand.emit_json(current_scope)
                 return_nodes.extend(nodes["nodes"])
                 return_edges.extend(nodes["edges"])
-                return operand.node_id
+                return dict(id = operand.node_id, slot = 0)
 
         # if we still have some splitting to do:
         else:
@@ -422,13 +429,13 @@ def export_algebraic_to_json (node, parent_node, slot = 0):
                 left_node = get_nodes(left)
                 right_node = get_nodes(right)
 
-                return_edges.append(make_json_edge(left_node,  operator.node_id, 0, 0))
-                return_edges.append(make_json_edge(right_node, operator.node_id, 0, 1))
+                return_edges.append(make_json_edge(left_node["id"],  operator.node_id, 0, 0))
+                return_edges.append(make_json_edge(right_node["id"], operator.node_id, 0, 1))
 
-                return operator.node_id
+                return dict(id = operator.node_id, slot = 0)
 
     # the node that puts out result of this algebraic expression:
-    final_node = get_nodes(exp)
+    final_node = get_nodes(exp)["id"]
 
     final_edge = make_json_edge(final_node, parent_node, 0, slot)
 
@@ -441,6 +448,7 @@ def export_algebraic_to_json (node, parent_node, slot = 0):
 def export_identifier_to_json (node, parent_node, slot = 0):
 
     # TODO check the case with loop to self in "then"
+    
     parent = json_nodes[ parent_node ]
 
     for name, arg in parent["params"]:
