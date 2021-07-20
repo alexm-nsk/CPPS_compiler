@@ -251,6 +251,7 @@ def export_if_to_json(node, parent_node, slot):
                                     inPorts  = inPorts,
                                     outPorts = outPorts,
                                     params   = params,
+                                    # TODO make location here:
                                     #location = branch["nodes"].location,
                                     nodes    = [],
                                     edges    = []
@@ -258,8 +259,8 @@ def export_if_to_json(node, parent_node, slot):
         json_branches.append(json_branch)
         json_nodes[branch["node_id"]] = json_branch
 
-        # ~ if len(branch["nodes"]) != len(outPorts):
-            # ~ raise Exception("Output number mismatch!", )
+        if len(branch["nodes"]) != len(outPorts):
+            raise Exception("Output number mismatch!", )
 
         for n, child_node in enumerate(branch["nodes"]):
 
@@ -278,8 +279,8 @@ def export_if_to_json(node, parent_node, slot):
     #                             TODO  ↓          ↓ cond has to be boolean
     inPorts, outPorts = genPorts(["integer"], ["boolean"], node.condition[0].node_id)
 
-    ret_val["condition"] = dict(outPorts = outPorts, 
-                                inPorts  = inPorts , 
+    ret_val["condition"] = dict(outPorts = outPorts,
+                                inPorts  = inPorts ,
                                 params   = json_nodes[current_scope]["params"])
 
     json_nodes[node.condition[0].node_id] = ret_val["condition"]
@@ -293,7 +294,7 @@ def export_if_to_json(node, parent_node, slot):
     ret_val["condition"].update (dict(
                                         name       = "Condition",
                                         id         = node.condition[0].node_id,
-                                        location   = node.condition[0].location,                                        
+                                        location   = node.condition[0].location,
                                     ))
 
     json_nodes[ node.node_id ].update( ret_val )
@@ -396,18 +397,20 @@ def export_algebraic_to_json (node, parent_node, slot = 0):
         # if only an operand left:
         if len(chunk) == 1:
             operand = chunk[0]
-            
+
             # return parent node's (?) node_id
             if type(operand) == ast_.node.Identifier:
                 # expecting the required value to come from the input
 
                 name = operand.name
 
+                # find the argument with identifier's name in scope's paramaeters:
                 identifier_slot = -1
                 for n, p in enumerate(json_nodes[current_scope]["params"]):
                     if(p[0] == name):
                         identifier_slot = n
 
+                # if we haven't found it, raise an exception:
                 if identifier_slot == -1:
                     raise Exception("value {} ({}) not found in current scope".format (name, operand.location))
 
@@ -457,9 +460,9 @@ def export_identifier_to_json (node, parent_node, slot = 0):
 
     parent = json_nodes[ parent_node ]
 
-    for name, arg in parent["params"]:
+    for n, (name, arg) in enumerate(parent["params"]):
         if name == node.name:
-            edge = make_json_edge(current_scope,  parent["id"], 0, 0)
+            edge = make_json_edge(current_scope,  parent["id"], n, 0)
 
     # TODO edge might not be initialized here:
     parent["edges"] = [edge]

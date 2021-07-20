@@ -64,7 +64,7 @@ def make_graph(id, contents):
     return f'<graph id="{id}" edgedefault="directed">\n{indent(contents)}\n</graph>'
 
 def make_node(node):
-    
+
     def is_parent(n1, n2):
         global nodemap
         if not "nodes" in nodemap[n1]:
@@ -72,22 +72,26 @@ def make_node(node):
         if any([n for n in nodemap[n1]["nodes"] if n["id"]==n2]):
             return True
         return False
-    
-    def make_edges():    
+
+    def make_edges():
         edges_string = ""
         if "edges" in node:
             for e in node["edges"]:
                 source_port_type = "in" if is_parent(e[0]["nodeId"], e[1]["nodeId"]) else "out"
                 target_port_type = "out" if is_parent(e[1]["nodeId"], e[0]["nodeId"]) else "in"
-                
+
+                if e[0]["nodeId"] == e[1]["nodeId"]:
+                        source_port_type = "in"
+                        target_port_type = "out"
+
                 edges_string += "\n" + make_edge(
                 e[0]["nodeId"],e[1]["nodeId"],
                 source_port_type + str(e[0]["index"])
-                , target_port_type + str(e[1]["index"]), 
+                , target_port_type + str(e[1]["index"]),
                 e[0]["type"]["name"])
-                
+
         return edges_string
-    
+
     props_str =  "\n".join(
                     [f'<data key=\"{key}\">{str(node[ir_name]).replace("<", "&lt;").replace(">", "&gt;")}</data>'
                     for key, ir_name in props_to_save.items()
@@ -99,7 +103,7 @@ def make_node(node):
                     [f'<port name=\"in{n}\" type=\"{port["type"]["name"]}\"/>\n'
                         for n, port in enumerate(node["inPorts"])]
                    )
-                   
+
     if "outPorts" in node:
         ports_str +=  "\n".join(
                     [f'<port name=\"out{n}\" type=\"{port["type"]["name"]}\"/>'
@@ -117,7 +121,7 @@ def make_node(node):
         contents  = make_graph(node["id"]+"_graph", contents)
     else:
         contents = make_edges()
-        
+
     return f'<node id=\"{node["id"]}\">\n'\
            f'{indent(props_str)}\n'\
            f'{indent(ports_str)}\n'\
@@ -127,17 +131,17 @@ def make_node(node):
 def emit(IR, nodes):
     global nodemap, json_nodes
     nodemap = json_nodes
-    
+
     graph = ""
     for ir in IR:
         graph    += make_graph("id", make_node(ir.emit_json(None))) + "\n"
-        
+
     document = make_document(graph)
 
     return document
 
 def main(args):
-    
+
     return 0
 
 if __name__ == '__main__':
@@ -147,7 +151,7 @@ if __name__ == '__main__':
 def export_function_to_graphml(node, parent_node):
     global nodemap, json_nodes
     nodemap = json_nodes
-    
+
     graph = make_graph("id", make_node(node.emit_json(None)))
     # ~ return emit(node.emit_json(None), None)
     return graph
