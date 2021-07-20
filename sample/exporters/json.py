@@ -403,9 +403,9 @@ def export_algebraic_to_json (node, parent_node, slot = 0):
 
                 for n, p in enumerate(json_nodes[current_scope]["params"]):
                     if(p[0] == name):
-                        slot = n
-                    
-                return dict(id = current_scope, slot = slot)
+                        identifier_slot = n
+                print(identifier_slot)
+                return dict(id = current_scope, slot = identifier_slot)
             else:
                 
                 nodes = operand.emit_json(current_scope)
@@ -429,8 +429,8 @@ def export_algebraic_to_json (node, parent_node, slot = 0):
                 left_node = get_nodes(left)
                 right_node = get_nodes(right)
 
-                return_edges.append(make_json_edge(left_node["id"],  operator.node_id, 0, 0))
-                return_edges.append(make_json_edge(right_node["id"], operator.node_id, 0, 1))
+                return_edges.append(make_json_edge(left_node["id"],  operator.node_id, left_node["slot"], 0))
+                return_edges.append(make_json_edge(right_node["id"], operator.node_id, right_node["slot"], 1))
 
                 return dict(id = operator.node_id, slot = 0)
 
