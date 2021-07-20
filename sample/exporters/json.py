@@ -278,7 +278,9 @@ def export_if_to_json(node, parent_node, slot):
     #                             TODO  ↓          ↓ cond has to be boolean
     inPorts, outPorts = genPorts(["integer"], ["boolean"], node.condition[0].node_id)
 
-    ret_val["condition"] = dict(outPorts = outPorts, inPorts = inPorts , params     = json_nodes[current_scope]["params"])
+    ret_val["condition"] = dict(outPorts = outPorts, 
+                                inPorts  = inPorts , 
+                                params   = json_nodes[current_scope]["params"])
 
     json_nodes[node.condition[0].node_id] = ret_val["condition"]
 
