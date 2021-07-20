@@ -278,7 +278,7 @@ def export_if_to_json(node, parent_node, slot):
     #                             TODO  ↓          ↓ cond has to be boolean
     inPorts, outPorts = genPorts(["integer"], ["boolean"], node.condition[0].node_id)
 
-    ret_val["condition"] = dict(outPorts = outPorts, inPorts = inPorts )
+    ret_val["condition"] = dict(outPorts = outPorts, inPorts = inPorts , params     = json_nodes[current_scope]["params"])
 
     json_nodes[node.condition[0].node_id] = ret_val["condition"]
 
@@ -291,8 +291,7 @@ def export_if_to_json(node, parent_node, slot):
     ret_val["condition"].update (dict(
                                         name       = "Condition",
                                         id         = node.condition[0].node_id,
-                                        location   = node.condition[0].location,
-                                        params     = json_nodes[current_scope]["params"],
+                                        location   = node.condition[0].location,                                        
                                     ))
 
     json_nodes[ node.node_id ].update( ret_val )
