@@ -260,7 +260,7 @@ def export_if_to_json(node, parent_node, slot):
         json_nodes[branch["node_id"]] = json_branch
 
         if len(branch["nodes"]) != len(outPorts):
-            raise Exception("Output number mismatch!", )
+            raise Exception("Output port number doesn't match the number of return values!", )
 
         for n, child_node in enumerate(branch["nodes"]):
 
@@ -446,6 +446,7 @@ def export_algebraic_to_json (node, parent_node, slot = 0):
 
     final_edge = make_json_edge(final_node, parent_node, 0, slot)
 
+    # TODO is this necessary?
     if(not "edges" in json_nodes[parent_node]):
         json_nodes[parent_node]["edges"] = []
 
