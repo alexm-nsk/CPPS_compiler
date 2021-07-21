@@ -59,13 +59,15 @@ def main(args):
             else:
                 formatted = json.dumps(dict(functions = [o.emit_json(None) for o in output]))
                 #["functions"][0]["nodes"][0]["branches"])
-                
+
                 os.system ("echo '%s' | jq" % formatted)
 
 
         except Exception as e:
-            # ~ print (str(e))
-            raise e
+            if "--debug" in args:
+                raise e
+            else:
+                print (str(e))
 
     return 0
 
