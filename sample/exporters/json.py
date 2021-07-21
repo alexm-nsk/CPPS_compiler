@@ -260,7 +260,12 @@ def export_if_to_json(node, parent_node, slot):
         json_nodes[branch["node_id"]] = json_branch
 
         if len(branch["nodes"]) != len(outPorts):
-            raise Exception("Output port number doesn't match the number of return values!", )
+            # connect all node locations (in src. code) into one string:
+            locations = ", ".join(  list(map(lambda x: x.location, branch["nodes"]))  )
+            
+            
+            raise Exception("Output port number doesn't match the number of return values! (nodes at "
+                                            + locations + ")")
 
         for n, child_node in enumerate(branch["nodes"]):
 
