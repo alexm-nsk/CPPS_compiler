@@ -387,6 +387,16 @@ def genPorts(ins, outs, node_id):
 #---------------------------------------------------------------------------------------------
 
 
+def return_type(left, right):
+    if left == "real" or right == "real":
+        return "real"
+    else:
+        return "integer"
+        
+        
+#---------------------------------------------------------------------------------------------
+
+
 def export_algebraic_to_json (node, parent_node, slot = 0):
 
     return_nodes = []
@@ -446,8 +456,12 @@ def export_algebraic_to_json (node, parent_node, slot = 0):
 
                 return_edges.append(make_json_edge(left_node["id"],  operator.node_id, left_node["slot"], 0))
                 return_edges.append(make_json_edge(right_node["id"], operator.node_id, right_node["slot"], 1))
-
-                return dict(id = operator.node_id, slot = 0)
+                
+                type_ = return_type(left_node["type"], right_node["type"])
+                
+                op_json[0]["outPorts"][0]["type"]["name"] = type_
+                
+                return dict(id = operator.node_id, slot = 0, type = type_)
 
     # the node that puts out result of this algebraic expression:
     final_node = get_nodes(exp)["id"]
