@@ -450,8 +450,7 @@ def export_algebraic_to_json (node, parent_node, slot = 0):
                 op_json = operator.emit_json(parent_node)["nodes"]
                 return_nodes.extend(op_json)
 
-                left_node = get_nodes(left)
-                
+                left_node = get_nodes(left)                
                 right_node = get_nodes(right)
 
                 return_edges.append(make_json_edge(left_node["id"],  operator.node_id, left_node["slot"], 0))
@@ -473,6 +472,9 @@ def export_algebraic_to_json (node, parent_node, slot = 0):
         json_nodes[parent_node]["edges"] = []
 
     return dict(nodes = return_nodes, edges = return_edges, final_edges = [final_edge])
+
+
+#---------------------------------------------------------------------------------------------
 
 
 def export_identifier_to_json (node, parent_node, slot = 0):
