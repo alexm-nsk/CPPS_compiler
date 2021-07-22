@@ -444,14 +444,14 @@ def export_algebraic_to_json (node, parent_node, slot = 0):
                 # the loop enumerates the list with even values skipped hence the index:
                 index = n * 2 + 1
 
-                left  = chunk[ :index]
-                right = chunk[index + 1: ]
+                left  = chunk[         : index ] 
+                right = chunk[index + 1:       ]
 
                 op_json = operator.emit_json(parent_node)["nodes"]
                 return_nodes.extend(op_json)
 
                 left_node = get_nodes(left)
-                # TODO get types and apply them to operator, also return operator retrun type
+                
                 right_node = get_nodes(right)
 
                 return_edges.append(make_json_edge(left_node["id"],  operator.node_id, left_node["slot"], 0))
