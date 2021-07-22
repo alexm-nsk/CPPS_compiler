@@ -412,18 +412,20 @@ def export_algebraic_to_json (node, parent_node, slot = 0):
                 for n, p in enumerate(json_nodes[current_scope]["params"]):
                     if(p[0] == name):
                         identifier_slot = n
-
+                        type_ = p[1]["type"]["name"]
+                        break
                 # if we haven't found it, raise an exception:
                 if identifier_slot == -1:
                     raise Exception("value {} ({}) not found in current scope".format (name, operand.location))
 
-                return dict(id = current_scope, slot = identifier_slot)
+                return dict(id = current_scope, slot = identifier_slot, type = type_)
             else:
 
                 nodes = operand.emit_json(current_scope)
                 return_nodes.extend(nodes["nodes"])
                 return_edges.extend(nodes["edges"])
-                return dict(id = operand.node_id, slot = 0)
+                type_ = nodes["nodes"][0]["outPorts"][0]["type"]["name"]
+                return dict(id = operand.node_id, slot = 0, type = type_)
 
         # if we still have some splitting to do:
         else:
@@ -439,6 +441,7 @@ def export_algebraic_to_json (node, parent_node, slot = 0):
                 return_nodes.extend(op_json)
 
                 left_node = get_nodes(left)
+                # TODO get types and apply them to operator, also return operator retrun type
                 right_node = get_nodes(right)
 
                 return_edges.append(make_json_edge(left_node["id"],  operator.node_id, left_node["slot"], 0))
