@@ -58,7 +58,14 @@ def main(args):
                 #os.system ("echo '%s'| pygmentize -l xml" % graphml_text)
                 print (graphml_text)
             else:
-                formatted = json.dumps(dict(functions = [o.emit_json(None) for o in output]), indent = 1)
+                
+                formatted = json.dumps(
+                                        dict(
+                                             functions = [o.emit_json(None) for o in output],
+                                             definitions = []
+                                            ), 
+                                       indent = 1)
+                                        
                 #["functions"][0]["nodes"][0]["branches"])
                 print( formatted )
                 #os.system ("echo '%s' | jq" % formatted)
