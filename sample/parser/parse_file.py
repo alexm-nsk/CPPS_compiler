@@ -83,7 +83,7 @@ class TreeVisitor(NodeVisitor):
 
 
     # rule: type_list     = type (_ "," _ type)*
-    # rule: type          = ("array" _ "[" _ type  _"]") / std_type
+    # rule: type          = ("array" _ "of" _ type ) / std_type
     def visit_type(self, node, visited_children):
 
         child_type = type(visited_children[0])
@@ -91,7 +91,7 @@ class TreeVisitor(NodeVisitor):
         if child_type == dict:
             return visited_children[0]
 
-        elif child_type == list:
+        elif child_type == list: # very hacky but works for now
             item_type = visited_children[0][4]
             return dict(type_name = f"Array[{item_type}]", location = self.get_location(node))
 
