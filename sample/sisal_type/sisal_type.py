@@ -48,8 +48,10 @@ built_in_types = ["integer", "real"]
           # ~ }
 
 #-------------------------------------------------------------------------------------------
+class BaseType:
+    pass
 
-class IntegerType:
+class IntegerType(BaseType):
 
     def __init__(self, location = "not applicable"):
         self.location = location
@@ -57,15 +59,23 @@ class IntegerType:
     def emit_json(self):
         return dict(location = self.location , name = "integer")
 
-class RealType:
+class RealType(BaseType):
 
     def __init__(self, location = "not applicable"):
         self.location = location
 
     def emit_json(self):
         return dict(location = self.location , name = "real")
+        
+class BooleanType(BaseType):
 
-class ArrayType:
+    def __init__(self, location = "not applicable"):
+        self.location = location
+
+    def emit_json(self):
+        return dict(location = self.location , name = "boolean")
+
+class ArrayType(BaseType):
 
     def __init__(self, element_type, location = "not applicable"):
         self.element_type = element_type
