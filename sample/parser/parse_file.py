@@ -237,6 +237,16 @@ class TreeVisitor(NodeVisitor):
                         location  = self.get_location(node),
                     ))
 
+
+    #----------------------------------------------------
+    #
+    #----------------------------------------------------
+    
+    def visit_array_access(self, node, visited_children):
+        return ArrayAccess(**dict(
+                                    location = self.get_location(node)
+                                ))
+    
     #----------------------------------------------------
     #
     #----------------------------------------------------

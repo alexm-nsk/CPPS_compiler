@@ -145,3 +145,11 @@ class Literal(Node):
 
     def emit_json(self, parent_node, slot = 0):
         return (export_literal_to_json(self, parent_node, slot))
+
+class ArrayAccess(Node):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(**kwargs)
+
+    def emit_json(self, parent_node, slot = 0):
+        return (export_array_access_to_json(self, parent_node, slot))

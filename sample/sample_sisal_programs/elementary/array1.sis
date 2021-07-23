@@ -1,3 +1,3 @@
-function main(A:array of array of real returns real)
-  A[1][1]
+function main(A:array of real returns real)
+  A[1]
 end function
