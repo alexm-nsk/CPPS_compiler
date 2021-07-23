@@ -47,49 +47,80 @@ built_in_types = ["integer", "real"]
             # ~ "index": 0
           # ~ }
 
+#-------------------------------------------------------------------------------------------
 
 class IntegerType:
+
     def __init__(self, location):
-        pass
-        
-    def emit_json():
+        self.location = location
+
+    def emit_json(self):
         return dict(location = self.location , name = "integer")
 
 class RealType:
+
     def __init__(self, location):
-        pass
-        
-    def emit_json():
+        self.location = location
+
+    def emit_json(self):
         return dict(location = self.location , name = "real")
 
 class ArrayType:
+
     def __init__(self, location, element_type):
         self.element_type = element_type
         self.location = location
+
+    def emit_json(self):
+        return dict(location = self.location , element = self.element_type.emit_json())
+
+# ~ class CustomType:
+
+    # ~ def __init__(self, location):
+        # ~ self.location = location
+
+    # ~ def emit_json():
+        # ~ return dict(location = self.location)
         
-    def emit_json():
-        return dict(location = self.location , name = "real")
+#-------------------------------------------------------------------------------------------
 
-class TypeDescription:
-    def __init__(self, location, type_):
-        pass
+# ~ class TypeDescription:
+    # ~ def __init__(self, location, type_):
+        # ~ pass
 
-    def emit_json():
-        return {
-                    "location" : self.location,
-                    type_.name : type.emit_json()
-                }
+    # ~ def emit_json():
+        # ~ return {
+                    # ~ "location" : self.location,
+                    # ~ type_.name : type.emit_json()
+                # ~ }
+
+#-------------------------------------------------------------------------------------------
 
 class SisalType:
+
     def __init__(self, node_id, type_descriprion, index):
-        self.node_id          = node_is
+
+        self.node_id          = node_id
         self.type_description = type_descriprion
         self.index            = index
 
 
-    def emit_json():
+    def emit_json(self):
+
         return dict(
-                        nodeId = self.node_id,
-                        type   = type_descritpion.emit_json(),
-                        index  = index,
+                        nodeId = "node" + str(self.node_id),
+                        type   = self.type_description.emit_json(),
+                        index  = self.index,
                     )
+
+#-------------------------------------------------------------------------------------------
+
+if __name__ == "__main__":
+    #code for trying things out, won't run when this module is imported
+    import json
+    arr = SisalType(1,
+                    ArrayType("loc", IntegerType("loc"))
+                    ,1)
+    integer = SisalType(1, IntegerType("loc"),1)
+    print (json.dumps(integer.emit_json(),indent = 2))
+    print (json.dumps(arr.emit_json(), indent = 2))
