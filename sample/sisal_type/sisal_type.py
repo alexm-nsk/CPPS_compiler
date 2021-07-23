@@ -24,21 +24,72 @@
 
 built_in_types = ["integer", "real"]
 
-class SisalType:
-    pass
-    
-# ~ class Integer(SisalType):
-    
-    # ~ def __init__(self):
-        # ~ pass
+    # ~ {
+          # ~ "nodeId": "node1",
+          # ~ "type": {
+            # ~ "location": "1:26-1:30",
+            # ~ "name": "real"
+          # ~ },
+          # ~ "index": 0
+        # ~ }
+
+
+
+         # ~ {
+            # ~ "nodeId": "node1",
+            # ~ "type": {
+              # ~ "location": "1:17-1:31",
+              # ~ "element": {
+                # ~ "location": "1:26-1:30",
+                # ~ "name": "real"
+              # ~ }
+            # ~ },
+            # ~ "index": 0
+          # ~ }
+
+
+class IntegerType:
+    def __init__(self, location):
+        pass
         
-    # ~ def __repr__(self):
-        # ~ return "Integer"
+    def emit_json():
+        return dict(location = self.location , name = "integer")
 
-class SisalArray:
-    
-    def __init__(self, sisal_type):
-        self.item_type = sisal_type
+class RealType:
+    def __init__(self, location):
+        pass
+        
+    def emit_json():
+        return dict(location = self.location , name = "real")
 
-    def __repr__(self):
-        return "Array[%s]" % self.item_type
+class ArrayType:
+    def __init__(self, location, element_type):
+        self.element_type = element_type
+        self.location = location
+        
+    def emit_json():
+        return dict(location = self.location , name = "real")
+
+class TypeDescription:
+    def __init__(self, location, type_):
+        pass
+
+    def emit_json():
+        return {
+                    "location" : self.location,
+                    type_.name : type.emit_json()
+                }
+
+class SisalType:
+    def __init__(self, node_id, type_descriprion, index):
+        self.node_id          = node_is
+        self.type_description = type_descriprion
+        self.index            = index
+
+
+    def emit_json():
+        return dict(
+                        nodeId = self.node_id,
+                        type   = type_descritpion.emit_json(),
+                        index  = index,
+                    )
