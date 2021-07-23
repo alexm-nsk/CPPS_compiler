@@ -51,7 +51,7 @@ built_in_types = ["integer", "real"]
 
 class IntegerType:
 
-    def __init__(self, location):
+    def __init__(self, location = "not applicable"):
         self.location = location
 
     def emit_json(self):
@@ -59,7 +59,7 @@ class IntegerType:
 
 class RealType:
 
-    def __init__(self, location):
+    def __init__(self, location = "not applicable"):
         self.location = location
 
     def emit_json(self):
@@ -67,7 +67,7 @@ class RealType:
 
 class ArrayType:
 
-    def __init__(self, location, element_type):
+    def __init__(self, element_type, location = "not applicable"):
         self.element_type = element_type
         self.location = location
 
@@ -119,7 +119,7 @@ if __name__ == "__main__":
     #code for trying things out, won't run when this module is imported
     import json
     arr = SisalType(1,
-                    ArrayType("loc", IntegerType("loc"))
+                    ArrayType(IntegerType("loc"), "loc")
                     ,1)
     integer = SisalType(1, IntegerType("loc"),1)
     print (json.dumps(integer.emit_json(),indent = 2))
