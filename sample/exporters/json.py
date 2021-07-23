@@ -392,8 +392,8 @@ def return_type(left, right):
         return "real"
     else:
         return "integer"
-        
-        
+
+
 #---------------------------------------------------------------------------------------------
 
 
@@ -444,22 +444,22 @@ def export_algebraic_to_json (node, parent_node, slot = 0):
                 # the loop enumerates the list with even values skipped hence the index:
                 index = n * 2 + 1
 
-                left  = chunk[         : index ] 
+                left  = chunk[         : index ]
                 right = chunk[index + 1:       ]
 
                 op_json = operator.emit_json(parent_node)["nodes"]
                 return_nodes.extend(op_json)
 
-                left_node = get_nodes(left)                
+                left_node = get_nodes(left)
                 right_node = get_nodes(right)
 
                 return_edges.append(make_json_edge(left_node["id"],  operator.node_id, left_node["slot"], 0))
                 return_edges.append(make_json_edge(right_node["id"], operator.node_id, right_node["slot"], 1))
-                
+
                 type_ = return_type(left_node["type"], right_node["type"])
-                
+
                 op_json[0]["outPorts"][0]["type"]["name"] = type_
-                
+
                 return dict(id = operator.node_id, slot = 0, type = type_)
 
     # the node that puts out result of this algebraic expression:
