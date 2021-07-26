@@ -89,15 +89,22 @@ def function_gen_params(function):
     ret_val = []
 
     for group in params:
-        ret_val.extend([
-            [var.name,
-                dict(
-                    nodeId = nodeId,
-                    type = group["type"].emit_json()
-                )
+        for var in group["vars"]:
+
+            type_ = group["type"].emit_json()
+            # initially type varicable has it's location (like location of "integer" in function definition)
+            # we replace it with variable's location
+            type_.update(dict(location = var.location))
+
+            ret_val += [
+                [var.name,
+                    dict(
+                        nodeId = nodeId,
+                        type = type_
+                    )
+                ]
             ]
-            for var in group["vars"]
-        ])
+
     return ret_val
 
 
@@ -131,9 +138,8 @@ def function_gen_in_ports(function, node_id):
     ret_val = []
 
     for arg_group in arg_types:
-
         for var in arg_group["vars"]:
-            ret_val += [emit_type_object(node_id, arg_group["type"], len(ret_val))]
+            ret_val += [emit_type_object(node_id, arg_group["type"], len(ret_val), var.location)]
 
     return ret_val
 
