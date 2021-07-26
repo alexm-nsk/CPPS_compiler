@@ -91,7 +91,6 @@ def function_gen_params(function):
     for group in params:
         ret_val.extend([
             [var.name,
-             
                 dict(
                     nodeId = nodeId,
                     type = group["type"].emit_json()
@@ -114,13 +113,6 @@ def function_gen_out_ports(function, node_id):
     ret_val = []
 
     for n, r in enumerate(ret_types):
-
-        # ~ ret_val += [dict(
-                        # ~ nodeId = node_id,
-                        # ~ type = dict(location = r["location"],
-                                    # ~ name = r["type_name"]),
-                        # ~ index = n
-                    # ~ )]
         ret_val += [emit_type_object(node_id, r, n)]
 
     return ret_val
@@ -141,14 +133,6 @@ def function_gen_in_ports(function, node_id):
     for arg_group in arg_types:
 
         for var in arg_group["vars"]:
-
-            # ~ ret_val += [dict(
-                            # ~ nodeId = node_id,
-                            # ~ type = dict(location = var.location,
-                                        # ~ name     = arg_group["type"]["type_name"]),
-                            # ~ index = len(ret_val)
-                        # ~ )]
-            #                                                              #index
             ret_val += [emit_type_object(node_id, arg_group["type"], len(ret_val))]
 
     return ret_val
