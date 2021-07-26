@@ -31,6 +31,8 @@ import itertools
 import pprint
 import copy
 
+from sisal_type.sisal_type import *
+
 current_scope = ""
 json_nodes = {}
 
@@ -89,10 +91,10 @@ def function_gen_params(function):
     for group in params:
         ret_val.extend([
             [var.name,
+             
                 dict(
                     nodeId = nodeId,
-                    type = dict(location = var.location,
-                                name = group["type"]["type_name"])
+                    type = group["type"].emit_json()
                 )
             ]
             for var in group["vars"]
@@ -113,12 +115,13 @@ def function_gen_out_ports(function, node_id):
 
     for n, r in enumerate(ret_types):
 
-        ret_val += [dict(
-                        nodeId = node_id,
-                        type = dict(location = r["location"],
-                                    name = r["type_name"]),
-                        index = n
-                    )]
+        # ~ ret_val += [dict(
+                        # ~ nodeId = node_id,
+                        # ~ type = dict(location = r["location"],
+                                    # ~ name = r["type_name"]),
+                        # ~ index = n
+                    # ~ )]
+        ret_val += [emit_type_object(node_id, r, n)]
 
     return ret_val
 
@@ -139,12 +142,14 @@ def function_gen_in_ports(function, node_id):
 
         for var in arg_group["vars"]:
 
-            ret_val += [dict(
-                            nodeId = node_id,
-                            type = dict(location = var.location,
-                                        name     = arg_group["type"]["type_name"]),
-                            index = len(ret_val)
-                        )]
+            # ~ ret_val += [dict(
+                            # ~ nodeId = node_id,
+                            # ~ type = dict(location = var.location,
+                                        # ~ name     = arg_group["type"]["type_name"]),
+                            # ~ index = len(ret_val)
+                        # ~ )]
+            #                                                              #index
+            ret_val += [emit_type_object(node_id, arg_group["type"], len(ret_val))]
 
     return ret_val
 

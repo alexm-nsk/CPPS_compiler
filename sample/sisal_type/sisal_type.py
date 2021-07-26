@@ -96,7 +96,7 @@ class CustomType:
 
 def emit_type_object(node_id, type_description, index):
     return dict(
-                    nodeId = "node" + str(node_id),
+                    nodeId = str(node_id),
                     type   = type_description.emit_json(),
                     index  = index,
                 )

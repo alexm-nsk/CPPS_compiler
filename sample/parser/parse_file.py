@@ -86,7 +86,7 @@ class TreeVisitor(NodeVisitor):
 
         child_type = type(visited_children[0])
 
-        if child_type == dict:
+        if child_type == IntegerType or child_type == RealType:
             return visited_children[0]
 
         elif child_type == list: # very hacky but works for now
@@ -95,9 +95,15 @@ class TreeVisitor(NodeVisitor):
 
     # rule: std_type      = "integer" / "real"
     def visit_std_type(self, node, visited_children):
-
+        type_name = node.text
+        location = self.get_location(node)
+        
+        if type_name == "integer":
+            return IntegerType(location)
+        elif type_name == "real":
+            return RealType(location)
+        
         return dict(type_name = node.text, location = self.get_location(node))
-
     def visit__(self, node, visited_children):
         return None
 
