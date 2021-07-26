@@ -66,7 +66,7 @@ class RealType(BaseType):
 
     def emit_json(self):
         return dict(location = self.location , name = "real")
-        
+
 class BooleanType(BaseType):
 
     def __init__(self, location = "not applicable"):
@@ -91,15 +91,16 @@ class CustomType:
 
     def emit_json():
         return dict(location = self.location)
-        
+
 #-------------------------------------------------------------------------------------------
 
 def emit_type_object(node_id, type_description, index):
     return dict(
-                        nodeId = "node" + str(node_id),
-                        type   = type_description.emit_json(),
-                        index  = index,
-                    )
+                    nodeId = "node" + str(node_id),
+                    type   = type_description.emit_json(),
+                    index  = index,
+                )
+
 #-------------------------------------------------------------------------------------------
 
 if __name__ == "__main__":
