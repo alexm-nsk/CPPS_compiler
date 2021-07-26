@@ -66,12 +66,12 @@ class TreeVisitor(NodeVisitor):
     def get_location(self, node):
         text = node.full_text
 
-        start_row    = text[:node.start].count("\n") + 1 # lines have to start from "1"
+        start_row    = text[:node.start].count("\n") + 1 # line numbers have to start from "1"
         start_column = len (  (text[:node.start].split("\n"))[-1]  )
 
         if start_row == 1: start_column += self.column_offset
 
-        end_row      = text[:node.end].count("\n") + 1  # lines have to start from "1"
+        end_row      = text[:node.end].count("\n") + 1
         end_column   = len (  (text[:node.end].split("\n"))[-1]  )
 
         if end_row == 1: end_row += self.column_offset
@@ -81,8 +81,6 @@ class TreeVisitor(NodeVisitor):
                                     end_row + self.line_offset,
                                     end_column)
 
-
-    # rule: type_list     = type (_ "," _ type)*
     # rule: type          = ("array" _ "of" _ type ) / std_type
     def visit_type(self, node, visited_children):
 
