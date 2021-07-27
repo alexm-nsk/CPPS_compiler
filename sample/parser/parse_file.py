@@ -85,37 +85,25 @@ class TreeVisitor(NodeVisitor):
     def visit_type(self, node, visited_children):
 
         return visited_children[0]
-        
-        child_type = type(visited_children[0])
-
-        #if child_type == IntegerType or child_type == RealType:
-        if issubclass(child_type, NumberType):
-            return visited_children[0]
-
-        elif child_type == ArrayType:
-            element_type = visited_children[0][4]
-            print (element_type)
-            return ArrayType(element_type,  self.get_location(node))
-            #return dict(type_name = f"Array[{item_type}]", location = self.get_location(node))
 
     # rule: std_type      = "integer" / "real"
     def visit_std_type(self, node, visited_children):
         type_name = node.text
         location = self.get_location(node)
-        
+
         if type_name == "integer":
             return IntegerType(location)
         elif type_name == "real":
             return RealType(location)
-  
-        
+
+
         #return dict(type_name = node.text, location = self.get_location(node))
-        
+
     def visit_array(self, node, visited_children):
         element_type = visited_children[4]
         print (element_type)
         return ArrayType(element_type,  self.get_location(node))
-        
+
     def visit__(self, node, visited_children):
         return None
 
@@ -258,12 +246,12 @@ class TreeVisitor(NodeVisitor):
     #----------------------------------------------------
     #
     #----------------------------------------------------
-    
+
     def visit_array_access(self, node, visited_children):
         return ArrayAccess(**dict(
                                     location = self.get_location(node)
                                 ))
-    
+
     #----------------------------------------------------
     #
     #----------------------------------------------------
