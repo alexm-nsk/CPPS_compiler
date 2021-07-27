@@ -86,10 +86,11 @@ class TreeVisitor(NodeVisitor):
 
         child_type = type(visited_children[0])
 
-        if child_type == IntegerType or child_type == RealType:
+        #if child_type == IntegerType or child_type == RealType:
+        if issubclass(child_type, NumberType):
             return visited_children[0]
 
-        elif child_type == list: # very hacky but works for now
+        elif child_type == ArrayType: # very hacky but works for now
             item_type = visited_children[0][4]
             return dict(type_name = f"Array[{item_type}]", location = self.get_location(node))
 
