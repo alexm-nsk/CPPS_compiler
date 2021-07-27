@@ -101,7 +101,6 @@ class TreeVisitor(NodeVisitor):
 
     def visit_array(self, node, visited_children):
         element_type = visited_children[4]
-        print (element_type)
         return ArrayType(element_type,  self.get_location(node))
 
     def visit__(self, node, visited_children):

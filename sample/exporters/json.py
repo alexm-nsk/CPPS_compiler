@@ -568,6 +568,5 @@ def export_bin_to_json (node, parent_node, slot = 0):
 #---------------------------------------------------------------------------------------------
 
 
-def export_array_access_to_json (node, parent_node, slot = 0):
-
+def export_array_access_to_json (node, parent_node, slot = 0):    
     return dict(nodes = [], edges = [], final_edges = [])
