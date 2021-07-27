@@ -555,6 +555,42 @@ def export_bin_to_json (node, parent_node, slot = 0):
 
 
 #---------------------------------------------------------------------------------------------
+# ~ {
+          # ~ "name": "ArrayAccess",
+          # ~ "location": "2:4-2:7",
+          # ~ "outPorts": [
+            # ~ {
+              # ~ "nodeId": "node2",
+              # ~ "type": {
+                # ~ "location": "1:26-1:30",
+                # ~ "name": "real"
+              # ~ },
+              # ~ "index": 0
+            # ~ }
+          # ~ ],
+          # ~ "inPorts": [
+            # ~ {
+              # ~ "nodeId": "node2",
+              # ~ "type": {
+                # ~ "location": "1:17-1:31",
+                # ~ "element": {
+                  # ~ "location": "1:26-1:30",
+                  # ~ "name": "real"
+                # ~ }
+              # ~ },
+              # ~ "index": 0
+            # ~ },
+            # ~ {
+              # ~ "nodeId": "node2",
+              # ~ "type": {
+                # ~ "location": "not applicable",
+                # ~ "name": "integer"
+              # ~ },
+              # ~ "index": 1
+            # ~ }
+          # ~ ],
+          # ~ "id": "node2"
+        # ~ }
 
 
 def export_array_access_to_json (node, parent_node, slot = 0):    
