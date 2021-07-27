@@ -89,7 +89,7 @@ def function_gen_params(function):
     ret_val = []
     #print (params)
     for group in params:
-        for var in group["vars"]:
+        for n, var in enumerate(group["vars"]):
 
             type_ = group["type"].emit_json()
             # initially type varicable has it's location (like location of "integer" in function definition)
@@ -98,10 +98,12 @@ def function_gen_params(function):
 
             ret_val += [
                 [var.name,
-                    dict(
-                        nodeId = nodeId,
-                        type = type_
-                    )
+                    # ~ dict(
+                        # ~ nodeId = nodeId,
+                        # ~ type = type_,
+                        # ~ index = n
+                    # ~ )
+                    emit_type_object(nodeId, group["type"], n, location = var.location)
                 ]
             ]
 
