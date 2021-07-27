@@ -97,10 +97,11 @@ class CustomType:
 
 #-------------------------------------------------------------------------------------------
 
-def emit_type_object(node_id, type_description, index, location = "not available"):
+def emit_type_object(node_id, type_description, index, location = None):
 
     type_   = type_description.emit_json()
-    type_["location"] = location
+    
+    if location: type_["location"] = location
     
     return dict(
                     nodeId = str(node_id),
