@@ -87,7 +87,7 @@ def function_gen_params(function):
     nodeId = function.node_id
 
     ret_val = []
-
+    #print (params)
     for group in params:
         for var in group["vars"]:
 
