@@ -555,7 +555,10 @@ def export_bin_to_json (node, parent_node, slot = 0):
 
 
 #---------------------------------------------------------------------------------------------
-# ~ {
+
+# 1-dimentional ArrayAccess IR example:
+
+  # ~ {
           # ~ "name": "ArrayAccess",
           # ~ "location": "2:4-2:7",
           # ~ "outPorts": [
@@ -593,5 +596,91 @@ def export_bin_to_json (node, parent_node, slot = 0):
         # ~ }
 
 
-def export_array_access_to_json (node, parent_node, slot = 0):    
+
+
+# 2-dimentional ArrayAccess IR example:
+ # ~ {
+          # ~ "name": "ArrayAccess",
+          # ~ "location": "2:4-2:7",
+          # ~ "outPorts": [
+            # ~ {
+              # ~ "nodeId": "node2",
+              # ~ "type": {
+                # ~ "location": "1:26-1:40",
+                # ~ "element": {
+                  # ~ "location": "1:35-1:39",
+                  # ~ "name": "real"
+                # ~ }
+              # ~ },
+              # ~ "index": 0
+            # ~ }
+          # ~ ],
+          # ~ "inPorts": [
+            # ~ {
+              # ~ "nodeId": "node2",
+              # ~ "type": {
+                # ~ "location": "1:17-1:40",
+                # ~ "element": {
+                  # ~ "location": "1:26-1:40",
+                  # ~ "element": {
+                    # ~ "location": "1:35-1:39",
+                    # ~ "name": "real"
+                  # ~ }
+                # ~ }
+              # ~ },
+              # ~ "index": 0
+            # ~ },
+            # ~ {
+              # ~ "nodeId": "node2",
+              # ~ "type": {
+                # ~ "location": "not applicable",
+                # ~ "name": "integer"
+              # ~ },
+              # ~ "index": 1
+            # ~ }
+          # ~ ],
+          # ~ "id": "node2"
+        # ~ },
+        
+        # ~ {
+          # ~ "name": "ArrayAccess",
+          # ~ "location": "2:7-2:10",
+          # ~ "outPorts": [
+            # ~ {
+              # ~ "nodeId": "node4",
+              # ~ "type": {
+                # ~ "location": "1:35-1:39",
+                # ~ "name": "real"
+              # ~ },
+              # ~ "index": 0
+            # ~ }
+          # ~ ],
+          # ~ "inPorts": [
+            # ~ {
+              # ~ "nodeId": "node4",
+              # ~ "type": {
+                # ~ "location": "1:26-1:40",
+                # ~ "element": {
+                  # ~ "location": "1:35-1:39",
+                  # ~ "name": "real"
+                # ~ }
+              # ~ },
+              # ~ "index": 0
+            # ~ },
+            # ~ {
+              # ~ "nodeId": "node4",
+              # ~ "type": {
+                # ~ "location": "not applicable",
+                # ~ "name": "integer"
+              # ~ },
+              # ~ "index": 1
+            # ~ }
+          # ~ ],
+          # ~ "id": "node4"
+        # ~ }
+
+
+
+def export_array_access_to_json (node, parent_node, slot = 0):
+    # TODO check with array's definition if types and dimensions match
     return dict(nodes = [], edges = [], final_edges = [])
