@@ -683,4 +683,27 @@ def export_bin_to_json (node, parent_node, slot = 0):
 
 def export_array_access_to_json (node, parent_node, slot = 0):
     # TODO check with array's definition if types and dimensions match
-    return dict(nodes = [], edges = [], final_edges = [])
+    
+    # need to get array's type:
+    params = json_nodes[current_scope]["params"]
+    
+    for p in params:
+        if p[0] == node.name:
+            type_ = p[1]["type"]
+            break
+    
+    in_ports = [dict(node_Id = node.node_id, type = type_, index = 0), 
+                dict(node_Id = node.node_id, type = dict(location = "not applciable", name = "integer"), index = 1)]
+    
+    #out_ports = [dict(node_Id = node.node_id, type = type_, index = 0), 
+     #           dict(node_Id = node.node_id, type = dict(location = "not applciable", name = "integer"), index = 1)]
+    
+    ret_val = dict(
+                        name = "ArrayAccess",
+                        location = node.location,
+                        inPorts = in_ports,
+                        outPorts = [], 
+                        id = node.node_id
+                    )
+                    
+    return dict(nodes = [ret_val], edges = [], final_edges = [])
