@@ -247,10 +247,13 @@ class TreeVisitor(NodeVisitor):
     #----------------------------------------------------
     # rule: array_access       = ( identifier / array_access ) _ "[" _ number_literal  _"]"
     def visit_array_access(self, node, visited_children):
-        array_name = visited_children[0][0].name
+        array_name  = visited_children[0][0].name
+        index = visited_children[4]
+        
         return ArrayAccess(**dict(
                                     name = array_name,
-                                    location = self.get_location(node)
+                                    location = self.get_location(node),
+                                    index = index                                    
                                 ))
 
     #----------------------------------------------------

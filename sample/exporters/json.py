@@ -691,19 +691,20 @@ def export_array_access_to_json (node, parent_node, slot = 0):
         if p[0] == node.name:
             type_ = p[1]["type"]
             break
-    
+    # ~ print (type_["element"])
     in_ports = [dict(node_Id = node.node_id, type = type_, index = 0), 
                 dict(node_Id = node.node_id, type = dict(location = "not applciable", name = "integer"), index = 1)]
     
-    #out_ports = [dict(node_Id = node.node_id, type = type_, index = 0), 
-     #           dict(node_Id = node.node_id, type = dict(location = "not applciable", name = "integer"), index = 1)]
+    out_ports = [dict(node_Id = node.node_id, type = type_, index = 0)]
     
     ret_val = dict(
                         name = "ArrayAccess",
                         location = node.location,
                         inPorts = in_ports,
-                        outPorts = [], 
+                        outPorts = out_ports, 
                         id = node.node_id
                     )
                     
-    return dict(nodes = [ret_val], edges = [], final_edges = [])
+    index_nodes = node.index.emit_json(parent_node)
+    
+    return dict(nodes = [ret_val] + index_nodes["nodes"], edges = [], final_edges = [])
