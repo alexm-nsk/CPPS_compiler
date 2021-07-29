@@ -705,6 +705,7 @@ def export_array_access_to_json (node, parent_node, slot = 0):
     in_ports = [dict(node_Id = node.node_id, type = type_, index = 0), 
                 dict(node_Id = node.node_id, type = dict(location = "not applicable", name = "integer"), index = 1)]
 
+    #                                               we put out a type_["element"]
     out_ports = [dict(node_Id = node.node_id, type = type_["element"], index = 0)]
     
     ret_val = dict(
@@ -719,4 +720,4 @@ def export_array_access_to_json (node, parent_node, slot = 0):
     index_nodes = node.index.emit_json( node.node_id, 1)
 
     final_edge = make_json_edge(node.node_id, parent_node, 0, slot, True)
-    return dict(nodes = [ret_val] + index_nodes["nodes"], edges = [final_edge], final_edges = [final_edge] + index_nodes["final_edges"])
+    return dict(nodes = [ret_val] + index_nodes["nodes"], edges = [], final_edges = [final_edge] + index_nodes["final_edges"])
