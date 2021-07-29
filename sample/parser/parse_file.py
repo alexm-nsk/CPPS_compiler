@@ -277,6 +277,9 @@ class TreeVisitor(NodeVisitor):
     def visit_number_literal(self, node, visited_children):
         return visited_children[0]
 
+    def visit_array_index(self, node, visited_children):
+        return visited_children[0]
+
     # this passes through any nodes for which we don't have a visit_smth(...) method defined
     def generic_visit(self, node, visited_children):
 
@@ -346,7 +349,7 @@ def parse_file(input_text):
                 break
 
             else:
-                print (str(e))
+                raise e
 
     # translate functions separately:
 
