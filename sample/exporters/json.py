@@ -46,11 +46,11 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
 
     dst_type = None
 
-    print (src_index)
-    print("from", json_nodes[from_])
-    print (dst_index)
-    print("to", json_nodes[to])
-    print()
+    # ~ print (src_index)
+    # ~ print("from", json_nodes[from_])
+    # ~ print (dst_index)
+    # ~ print("to", json_nodes[to])
+    # ~ print()
 
     try:
         portType = "inPorts" if parameter else "outPorts"
