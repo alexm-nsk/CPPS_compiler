@@ -52,7 +52,6 @@ def get_type(type_):
         return "array of " + get_type(type_["element"])
 
 def make_edge(from_ , to, src_port, dst_port, type):
-    print (type)
     return f'<edge source="{from_}" target="{to}" sourceport="{src_port}" targetport="{dst_port}">\n'\
          f'  <data key="type">{get_type(type)}</data>\n'\
          f'</edge>'\
