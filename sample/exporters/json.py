@@ -46,21 +46,12 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
 
     dst_type = None
 
-    # ~ print (src_index)
-    # ~ print("from", json_nodes[from_])
-    # ~ print (dst_index)
-    # ~ print("to", json_nodes[to])
-    # ~ print()
-
     try:
         portType = "inPorts" if parameter else "outPorts"
-        
+
         src_port = json_nodes[from_][portType][src_index]
-        if "name" in src_port["type"]:
-            src_type = src_port["type"]#["name"]
-        else:        
-            src_type = src_port["type"]#["element"]
-        
+        src_type = src_port["type"]
+
     except Exception as e:
         print ("no src ", str(e))
 
@@ -70,9 +61,7 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
             dst_port = json_nodes[to]["outPorts"][dst_index]
         else:
             dst_port = json_nodes[to]["inPorts"][dst_index]
-        # ~ if to == "node3":
-            # ~ print (dst_port, parent)
-            # ~ print (json_nodes[to])
+
         dst_type = dst_port["type"]
 
     except Exception as e:
@@ -84,7 +73,6 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
 
 
     return [
-
                 {
                     "index"  : src_index,
                     "nodeId" : from_,
@@ -96,7 +84,6 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
                     "nodeId" : to,
                     "type"   : {"location" : "TODO", **dst_type}
                 }
-
             ]
 
 
