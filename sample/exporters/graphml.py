@@ -45,9 +45,16 @@ def make_document(content):
     document = re.sub("\n\s*\n", "\n", document)
     return document
 
+def get_type(type_):
+    if "name" in type_:
+        return type_["name"]
+    else:
+        return "array of " + get_type(type_["element"])
+
 def make_edge(from_ , to, src_port, dst_port, type):
+    print (type)
     return f'<edge source="{from_}" target="{to}" sourceport="{src_port}" targetport="{dst_port}">\n'\
-         f'  <data key="type">{type}</data>\n'\
+         f'  <data key="type">{get_type(type)}</data>\n'\
          f'</edge>'\
 
 props_to_save = { #name in graphml: #name in IR node:
@@ -63,11 +70,6 @@ props_to_save = { #name in graphml: #name in IR node:
 def make_graph(id, contents):
     return f'<graph id="{id}" edgedefault="directed">\n{ indent(contents) }\n</graph>'
 
-def get_type(type_):
-    if "name" in type_:
-        return type_["name"]
-    else:
-        return "array of " + get_type(type_["element"])
 
 def make_node(node):
 
@@ -94,7 +96,7 @@ def make_node(node):
                 e[0]["nodeId"],e[1]["nodeId"],
                 source_port_type + str(e[0]["index"])
                 , target_port_type + str(e[1]["index"]),
-                e[0]["type"]["name"])
+                e[0]["type"])
 
         return edges_string
 

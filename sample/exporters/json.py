@@ -57,9 +57,9 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
         
         src_port = json_nodes[from_][portType][src_index]
         if "name" in src_port["type"]:
-            src_type = json_nodes[from_][portType][src_index]["type"]["name"]
+            src_type = src_port["type"]#["name"]
         else:        
-            src_type = json_nodes[from_][portType][src_index]["type"]["element"]
+            src_type = src_port["type"]#["element"]
         
     except Exception as e:
         print ("no src ", str(e))
@@ -68,13 +68,12 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
     try:
         if parent:
             dst_port = json_nodes[to]["outPorts"][dst_index]
-            dst_type = dst_port["type"]["name"]
         else:
             dst_port = json_nodes[to]["inPorts"][dst_index]
-            if "name" in dst_port["type"]:
-                dst_type = dst_port["type"]["name"]
-            else:
-                dst_type = dst_port["type"]["element"]
+        if to == "node3":
+            print (dst_port, parent)
+            print (json_nodes[to])
+        dst_type = dst_port["type"]
 
     except Exception as e:
         import sys, os
@@ -89,13 +88,13 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
                 {
                     "index"  : src_index,
                     "nodeId" : from_,
-                    "type"   : {"location" : "TODO", "name" : src_type}
+                    "type"   : {"location" : "TODO", **src_type}
                 },
 
                 {
                     "index"  : dst_index,
                     "nodeId" : to,
-                    "type"   : {"location" : "TODO", "name" : dst_type}
+                    "type"   : {"location" : "TODO", **dst_type}
                 }
 
             ]
@@ -737,7 +736,7 @@ def export_array_access_to_json (node, parent_node, slot = 0):
             index_nodes = node.index.emit_json( node.node_id, 1)
 
             final_edge = make_json_edge(node.node_id, parent_node, 0, slot, True)
-            array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, True, parameter = True)
+            array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, False, parameter = True)
 
             return dict(nodes = [ret_val] + index_nodes["nodes"],
                         edges = index_nodes["edges"] + [array_input_edge],
