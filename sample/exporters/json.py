@@ -70,9 +70,9 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
             dst_port = json_nodes[to]["outPorts"][dst_index]
         else:
             dst_port = json_nodes[to]["inPorts"][dst_index]
-        if to == "node3":
-            print (dst_port, parent)
-            print (json_nodes[to])
+        # ~ if to == "node3":
+            # ~ print (dst_port, parent)
+            # ~ print (json_nodes[to])
         dst_type = dst_port["type"]
 
     except Exception as e:
