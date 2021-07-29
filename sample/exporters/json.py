@@ -697,28 +697,32 @@ def export_array_access_to_json (node, parent_node, slot = 0):
     # need to get array's type:
     params = json_nodes[current_scope]["params"]
     
-    for p in params:
+    for array_index_in_params, p in enumerate(params):
         if p[0] == node.name:
-            type_ = p[1]["type"]
-            break
+            type_ = p[1]["type"]            
 
-    in_ports = [dict(node_Id = node.node_id, type = type_, index = 0), 
-                dict(node_Id = node.node_id, type = dict(location = "not applicable", name = "integer"), index = 1)]
+            in_ports = [dict(node_Id = node.node_id, type = type_, index = 0), 
+                        dict(node_Id = node.node_id, type = dict(location = "not applicable", name = "integer"), index = 1)]
 
-    #                                               we put out a type_["element"]
-    out_ports = [dict(node_Id = node.node_id, type = type_["element"], index = 0)]
-    
-    ret_val = dict(
-                        name = "ArrayAccess",
-                        location = node.location,
-                        inPorts = in_ports,
-                        outPorts = out_ports, 
-                        id = node.node_id
-                    )
+            #                                               we put out a type_["element"]
+            out_ports = [dict(node_Id = node.node_id, type = type_["element"], index = 0)]
+            
+            ret_val = dict(
+                                name = "ArrayAccess",
+                                location = node.location,
+                                inPorts = in_ports,
+                                outPorts = out_ports, 
+                                id = node.node_id
+                            )
 
-    json_nodes[node.node_id] = ret_val
-    #print (node.index)
-    index_nodes = node.index.emit_json( node.node_id, 1)
+            json_nodes[node.node_id] = ret_val
+            #print (node.index)
+            index_nodes = node.index.emit_json( node.node_id, 1)
 
-    final_edge = make_json_edge(node.node_id, parent_node, 0, slot, True)
-    return dict(nodes = [ret_val] + index_nodes["nodes"], edges = [], final_edges = [final_edge] + index_nodes["final_edges"])
+            final_edge = make_json_edge(node.node_id, parent_node, 0, slot, True)
+            array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, True)
+            return dict(nodes = [ret_val] + index_nodes["nodes"], 
+                        edges = index_nodes["edges"] + [array_input_edge], 
+                        final_edges = [final_edge] + index_nodes["final_edges"])
+                        
+    raise Exception ("Array %s not found in this scope!(%s)" % (node.name, node.location))
