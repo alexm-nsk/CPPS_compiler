@@ -100,13 +100,13 @@ def make_node(node):
     ports_str = ""
     if "inPorts" in node:
         ports_str =  "".join(
-                    [f'<port name=\"in{n}\" type=\"{port["type"]["name"]}\"/>\n'
+                    [f'<port name=\"in{n}\" type=\"{port["type"]["name"] if "name" in port["type"] else port["type"]["element"]}\"/>\n'
                         for n, port in enumerate(node["inPorts"])]
                    )
 
     if "outPorts" in node:
         ports_str +=  "\n".join(
-                    [f'<port name=\"out{n}\" type=\"{port["type"]["name"]}\"/>'
+                    [f'<port name=\"out{n}\" type=\"{port["type"]["name"] if "name" in port["type"] else port["type"]["element"]}\"/>'
                         for n, port in enumerate(node["outPorts"])]
                    )
 
