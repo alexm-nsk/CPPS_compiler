@@ -63,11 +63,11 @@ props_to_save = { #name in graphml: #name in IR node:
 def make_graph(id, contents):
     return f'<graph id="{id}" edgedefault="directed">\n{ indent(contents) }\n</graph>'
 
-def get_type(port):
-    if "name" in port["type"]:
-        return port["type"]["name"]
+def get_type(type_):
+    if "name" in type_:
+        return type_["name"]
     else:
-        return "array of " + port["type"]["element"]["name"]
+        return "array of " + get_type(type_["element"])
 
 def make_node(node):
 
@@ -106,13 +106,13 @@ def make_node(node):
     ports_str = ""
     if "inPorts" in node:
         ports_str =  "".join(
-                    [f'<port name=\"in{n}\" type=\"{ get_type (port) }\"/>\n'
+                    [f'<port name=\"in{n}\" type=\"{ get_type (port["type"]) }\"/>\n'
                         for n, port in enumerate(node["inPorts"])]
                    )
 
     if "outPorts" in node:
         ports_str +=  "\n".join(
-                    [f'<port name=\"out{n}\" type=\"{ get_type (port) }\"/>'
+                    [f'<port name=\"out{n}\" type=\"{ get_type (port["type"]) }\"/>'
                         for n, port in enumerate(node["outPorts"])]
                    )
 
