@@ -41,13 +41,20 @@ json_nodes = {}
 #---------------------------------------------------------------------------------------------
 
 
-def make_json_edge(from_, to, src_index, dst_index, parent = False):
+def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = False):
     #TODO retrieve src and dst type from the nodes here
 
     dst_type = None
 
+    print (src_index)
+    print("from", json_nodes[from_])
+    print (dst_index)
+    print("to", json_nodes[to])
+    print()
+
     try:
-        src_type = json_nodes[from_]["outPorts"][src_index]["type"]["name"]
+        portType = "inPorts" if parameter else "outPorts"
+        src_type = json_nodes[from_][portType][src_index]["type"]["name"]
     except Exception as e:
         print ("no src ", str(e))
 
@@ -422,14 +429,14 @@ def export_algebraic_to_json (node, parent_node, slot = 0):
                 if identifier_slot == -1:
                     raise Exception("value {} ({}) not found in current scope".format (name, operand.location))
 
-                return dict(id = current_scope, slot = identifier_slot, type = type_)
+                return dict(id = current_scope, slot = identifier_slot, type = type_, parameter = True)
             else:
 
                 nodes = operand.emit_json(current_scope)
                 return_nodes.extend(nodes["nodes"])
                 return_edges.extend(nodes["edges"])
                 type_ = nodes["nodes"][0]["outPorts"][0]["type"]["name"]
-                return dict(id = operand.node_id, slot = 0, type = type_)
+                return dict(id = operand.node_id, slot = 0, type = type_, parameter = False)
 
         # if we still have some splitting to do:
         else:
@@ -447,14 +454,14 @@ def export_algebraic_to_json (node, parent_node, slot = 0):
                 left_node = get_nodes(left)
                 right_node = get_nodes(right)
 
-                return_edges.append(make_json_edge(left_node["id"],  operator.node_id, left_node["slot"], 0))
-                return_edges.append(make_json_edge(right_node["id"], operator.node_id, right_node["slot"], 1))
+                return_edges.append(make_json_edge(left_node["id"],  operator.node_id, left_node["slot"],  0, parameter = left_node["parameter"]))
+                return_edges.append(make_json_edge(right_node["id"], operator.node_id, right_node["slot"], 1, parameter = right_node["parameter"]))
 
                 type_ = return_type(left_node["type"], right_node["type"])
 
                 op_json[0]["outPorts"][0]["type"]["name"] = type_
 
-                return dict(id = operator.node_id, slot = 0, type = type_)
+                return dict(id = operator.node_id, slot = 0, type = type_, parameter = False)
 
     # the node that puts out result of this algebraic expression:
     final_node = get_nodes(exp)["id"]
