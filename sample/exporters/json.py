@@ -31,6 +31,8 @@ import itertools
 import pprint
 import copy
 
+import sys, os
+
 from ast_.port import *
 from sisal_type.sisal_type import *
 
@@ -46,30 +48,23 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
     dst_type = None
 
     try:
-        portType = "inPorts" if parameter else "outPorts"
-
-        src_port = json_nodes[from_][portType][src_index]
+        port_type = "inPorts" if parameter else "outPorts"
+        src_port = json_nodes[from_][port_type][src_index]
         src_type = src_port["type"]
 
     except Exception as e:
         print ("no src ", str(e))
 
-
     try:
-        if parent:
-            dst_port = json_nodes[to]["outPorts"][dst_index]
-        else:
-            dst_port = json_nodes[to]["inPorts"][dst_index]
-
+        port_type = "outPorts" if parent else "inPorts"
+        dst_port = json_nodes[to][port_type][dst_index]
         dst_type = dst_port["type"]
 
     except Exception as e:
-        import sys, os
         print ("no dst",str(e),"\n\n", json_nodes[from_],"\n\n", json_nodes[to])
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
-
 
     return [
                 {
