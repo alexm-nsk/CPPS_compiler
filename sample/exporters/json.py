@@ -699,6 +699,7 @@ def export_array_access_to_json (node, parent_node, slot = 0):
 
     # find this array in scope's parameters:
     for array_index_in_params, p in enumerate(params):
+
         # params go in pairs[name, {description}], so p[0] is the name
         # and we compare it with name of arrray requested:
         if p[0] == node.name:
@@ -724,9 +725,10 @@ def export_array_access_to_json (node, parent_node, slot = 0):
 
             final_edge = make_json_edge(node.node_id, parent_node, 0, slot, True)
             array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, True)
+
             return dict(nodes = [ret_val] + index_nodes["nodes"],
                         edges = index_nodes["edges"] + [array_input_edge],
                         final_edges = [final_edge] + index_nodes["final_edges"])
-    
+
     # if we didn't find it, raise an exception:
     raise Exception ("Array %s not found in this scope!(%s)" % (node.name, node.location))
