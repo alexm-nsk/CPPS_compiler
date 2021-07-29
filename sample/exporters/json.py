@@ -42,7 +42,6 @@ json_nodes = {}
 
 
 def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = False):
-    #TODO retrieve src and dst type from the nodes here
 
     dst_type = None
 
