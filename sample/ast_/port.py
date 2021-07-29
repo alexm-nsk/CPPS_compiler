@@ -50,12 +50,15 @@ from sisal_type.sisal_type import *
 
 
 class Port:
+
     def __init__(self, node_id, type_, index):
+
         self.node_id = node_id
-        self.type = type_
-        self.index = index
+        self.type_   = type_
+        self.index   = index
 
     def emit_json():
+
         return dict(nodeId = self.node_id,
                     type   = self.type_.emit_json(),
                     index  = self.index)

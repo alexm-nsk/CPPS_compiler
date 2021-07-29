@@ -31,6 +31,7 @@ import itertools
 import pprint
 import copy
 
+from ast_.port import *
 from sisal_type.sisal_type import *
 
 current_scope = ""
@@ -53,12 +54,21 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False):
 
     try:
         if parent:
-            dst_type = json_nodes[to]["outPorts"][dst_index]["type"]["name"]
+            dst_port = json_nodes[to]["outPorts"][dst_index]
+            dst_type = dst_port["type"]["name"]
         else:
-            dst_type = json_nodes[to]["inPorts"][dst_index]["type"]["name"]
+            dst_port = json_nodes[to]["inPorts"][dst_index]
+            if "name" in dst_port["type"]:
+                dst_type = dst_port["type"]["name"]
+            else:
+                dst_type = dst_port["type"]["element"]
 
     except Exception as e:
-        print ("no dst",str(e), from_, to)
+        import sys, os
+        print ("no dst",str(e),"\n\n", json_nodes[from_],"\n\n", json_nodes[to])
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
 
 
     return [
@@ -683,7 +693,7 @@ def export_bin_to_json (node, parent_node, slot = 0):
 
 def export_array_access_to_json (node, parent_node, slot = 0):
     # TODO check with array's definition if types and dimensions match
-    
+
     # need to get array's type:
     params = json_nodes[current_scope]["params"]
     
@@ -694,7 +704,7 @@ def export_array_access_to_json (node, parent_node, slot = 0):
     # ~ print (type_["element"])
     in_ports = [dict(node_Id = node.node_id, type = type_, index = 0), 
                 dict(node_Id = node.node_id, type = dict(location = "not applicable", name = "integer"), index = 1)]
-    
+
     out_ports = [dict(node_Id = node.node_id, type = type_, index = 0)]
     
     ret_val = dict(
@@ -704,7 +714,8 @@ def export_array_access_to_json (node, parent_node, slot = 0):
                         outPorts = out_ports, 
                         id = node.node_id
                     )
+
     json_nodes[node.node_id] = ret_val
-    index_nodes = node.index.emit_json(parent_node)
+    index_nodes = node.index.emit_json( node.node_id, 1)
     
-    return dict(nodes = [ret_val] + index_nodes["nodes"], edges = [], final_edges = [])
+    return dict(nodes = [ret_val] + index_nodes["nodes"], edges = [], final_edges = index_nodes["final_edges"])
