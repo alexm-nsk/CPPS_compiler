@@ -701,7 +701,7 @@ def export_array_access_to_json (node, parent_node, slot = 0):
         if p[0] == node.name:
             type_ = p[1]["type"]
             break
-    # ~ print (type_["element"])
+
     in_ports = [dict(node_Id = node.node_id, type = type_, index = 0), 
                 dict(node_Id = node.node_id, type = dict(location = "not applicable", name = "integer"), index = 1)]
 
