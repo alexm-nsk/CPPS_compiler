@@ -717,7 +717,7 @@ def export_array_access_to_json (node, parent_node, slot = 0):
                     )
 
     json_nodes[node.node_id] = ret_val
-    print (node.index)
+    #print (node.index)
     index_nodes = node.index.emit_json( node.node_id, 1)
 
     final_edge = make_json_edge(node.node_id, parent_node, 0, slot, True)
