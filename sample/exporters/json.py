@@ -651,7 +651,7 @@ def export_bin_to_json (node, parent_node, slot = 0):
           # ~ ],
           # ~ "id": "node2"
         # ~ },
-        
+
         # ~ {
           # ~ "name": "ArrayAccess",
           # ~ "location": "2:7-2:10",
@@ -696,33 +696,37 @@ def export_array_access_to_json (node, parent_node, slot = 0):
 
     # need to get array's type:
     params = json_nodes[current_scope]["params"]
-    
-    for array_index_in_params, p in enumerate(params):
-        if p[0] == node.name:
-            type_ = p[1]["type"]            
 
-            in_ports = [dict(node_Id = node.node_id, type = type_, index = 0), 
+    # find this array in scope's parameters:
+    for array_index_in_params, p in enumerate(params):
+        # params go in pairs[name, {description}], so p[0] is the name
+        # and we compare it with name of arrray requested:
+        if p[0] == node.name:
+            type_ = p[1]["type"]
+
+            in_ports = [dict(node_Id = node.node_id, type = type_, index = 0),
                         dict(node_Id = node.node_id, type = dict(location = "not applicable", name = "integer"), index = 1)]
 
             #                                               we put out a type_["element"]
             out_ports = [dict(node_Id = node.node_id, type = type_["element"], index = 0)]
-            
+
             ret_val = dict(
                                 name = "ArrayAccess",
                                 location = node.location,
                                 inPorts = in_ports,
-                                outPorts = out_ports, 
+                                outPorts = out_ports,
                                 id = node.node_id
                             )
 
             json_nodes[node.node_id] = ret_val
-            #print (node.index)
+
             index_nodes = node.index.emit_json( node.node_id, 1)
 
             final_edge = make_json_edge(node.node_id, parent_node, 0, slot, True)
             array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, True)
-            return dict(nodes = [ret_val] + index_nodes["nodes"], 
-                        edges = index_nodes["edges"] + [array_input_edge], 
+            return dict(nodes = [ret_val] + index_nodes["nodes"],
+                        edges = index_nodes["edges"] + [array_input_edge],
                         final_edges = [final_edge] + index_nodes["final_edges"])
-                        
+    
+    # if we didn't find it, raise an exception:
     raise Exception ("Array %s not found in this scope!(%s)" % (node.name, node.location))
