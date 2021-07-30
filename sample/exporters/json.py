@@ -469,10 +469,11 @@ def export_identifier_to_json (node, parent_node, slot = 0):
     # TODO check the case with loop to self in "then"
 
     parent = json_nodes[ parent_node ]
+    scope = json_nodes[ current_scope ]
     final_edge = {}
-    for n, (name, arg) in enumerate(parent["params"]):
+    for n, (name, arg) in enumerate(scope["params"]):
         if name == node.name:
-            edge = make_json_edge(current_scope,  parent["id"], n, 0)
+            edge = make_json_edge(current_scope,  parent["id"], n, 0, parameter = True)
 
     return dict(nodes = [], edges = [], final_edges = [edge])
 
