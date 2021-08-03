@@ -57,9 +57,6 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
 
     try:
         port_type = "outPorts" if parent else "inPorts"
-        
-        #if from_ == "node2" and to == "node7":            print (port_type)
-            
         dst_port = json_nodes[to][port_type][dst_index]
         dst_type = dst_port["type"]
 
@@ -93,7 +90,7 @@ def function_gen_params(function):
     nodeId = function.node_id
 
     ret_val = []
-    #print (params)
+
     for group in params:
         for n, var in enumerate(group["vars"]):
             ret_val += [
@@ -181,7 +178,6 @@ def export_function_to_json(node, parent_node, slot = 0):
     ret_val["edges"] = []
 
     for n, child in enumerate(node.nodes):
-        # ("slot", n)
         json_child = child.emit_json( node.node_id , n)
 
         ret_val["nodes"].extend(json_child["nodes"])
@@ -389,7 +385,7 @@ def return_type(left, right):
 
 
 def export_algebraic_to_json (node, parent_node, fslot = 0):
-   # print (fslot)
+
     return_nodes = []
     return_edges = []
     exp = node.expression
