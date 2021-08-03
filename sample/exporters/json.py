@@ -27,8 +27,6 @@
 #---------------------------------------------------------------------------------------------
 
 import ast_.node
-import itertools
-import pprint
 import copy
 
 import sys, os
