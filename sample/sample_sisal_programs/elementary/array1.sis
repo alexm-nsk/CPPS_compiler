@@ -1,3 +1,3 @@
 function main(A:array of real; a:integer returns real)
-   1 + A[1 - a] + 1 
+   A[a]
 end function
