@@ -504,6 +504,10 @@ def export_literal_to_json (node, parent_node, slot = 0):
     final_edge = make_json_edge(node.node_id, parent_node, 0, slot)
     return dict(nodes = [ret_val], edges = [], final_edges = [final_edge])
 
+
+#---------------------------------------------------------------------------------------------
+
+
 operator_out_type_map = {
     "<" : "boolean",
     ">" : "boolean",
