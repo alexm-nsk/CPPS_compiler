@@ -572,7 +572,7 @@ def export_array_access_to_json (node, parent_node, slot = 0):
     # find this array in scope's parameters:
     for array_index_in_params, p in enumerate(params):
 
-        # params go in pairs[name, {description}], so p[0] is the name
+        # params go in pairs["name", {description}], so p[0] is the name
         # and we compare it with name of arrray requested:
         if p[0] == node.name:
             type_ = p[1]["type"]
