@@ -274,6 +274,9 @@ class TreeVisitor(NodeVisitor):
     def visit_operand(self, node, visited_children):
         return visited_children[0]
 
+    def visit_alg_start(self, node, visited_children):
+        return visited_children[0]
+
     def visit_number_literal(self, node, visited_children):
         return visited_children[0]
 

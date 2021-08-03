@@ -57,6 +57,9 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
 
     try:
         port_type = "outPorts" if parent else "inPorts"
+        
+        #if from_ == "node2" and to == "node7":            print (port_type)
+            
         dst_port = json_nodes[to][port_type][dst_index]
         dst_type = dst_port["type"]
 
@@ -178,10 +181,11 @@ def export_function_to_json(node, parent_node, slot = 0):
     ret_val["edges"] = []
 
     for n, child in enumerate(node.nodes):
+        # ("slot", n)
         json_child = child.emit_json( node.node_id , n)
 
         ret_val["nodes"].extend(json_child["nodes"])
-        ret_val["edges"].extend(json_child["edges"] + json_child["final_edges"])
+        ret_val["edges"] += json_child["edges"] + json_child["final_edges"]
 
         #TODO make emit_json return the mediator node
 
@@ -384,8 +388,8 @@ def return_type(left, right):
 #---------------------------------------------------------------------------------------------
 
 
-def export_algebraic_to_json (node, parent_node, slot = 0):
-
+def export_algebraic_to_json (node, parent_node, fslot = 0):
+   # print (fslot)
     return_nodes = []
     return_edges = []
     exp = node.expression
@@ -451,8 +455,8 @@ def export_algebraic_to_json (node, parent_node, slot = 0):
 
     # the node that puts out result of this algebraic expression:
     final_node = get_nodes(exp)["id"]
-
-    final_edge = make_json_edge(final_node, parent_node, 0, slot)
+    #print ("fslot:", fslot)
+    final_edge = make_json_edge(final_node, parent_node, 0, fslot, parent = (parent_node == current_scope))
 
     # TODO is this necessary?
     if(not "edges" in json_nodes[parent_node]):
@@ -716,13 +720,13 @@ def export_array_access_to_json (node, parent_node, slot = 0):
             json_nodes[node.node_id] = ret_val
 
             index_nodes = node.index.emit_json( node.node_id, 1)
-
+            
             final_edge = make_json_edge(node.node_id, parent_node, 0, slot, True)
             array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, False, parameter = True)
 
             return dict(nodes = [ret_val] + index_nodes["nodes"],
-                        edges = index_nodes["edges"] + [array_input_edge],
-                        final_edges = [final_edge] + index_nodes["final_edges"])
+                        edges = index_nodes["edges"] + [array_input_edge] + index_nodes["final_edges"],
+                        final_edges = [final_edge] )
 
     # if we didn't find it, raise an exception:
     raise Exception ("Array %s not found in this scope!(%s)" % (node.name, node.location))
