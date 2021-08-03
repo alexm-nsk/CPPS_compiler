@@ -451,7 +451,7 @@ def export_algebraic_to_json (node, parent_node, fslot = 0):
 
     # the node that puts out result of this algebraic expression:
     final_node = get_nodes(exp)["id"]
-    #print ("fslot:", fslot)
+    #     Here we check if target node is the scope, this determines wether we target our output edge at in or out port
     final_edge = make_json_edge(final_node, parent_node, 0, fslot, parent = (parent_node == current_scope))
 
     # TODO is this necessary?
@@ -560,130 +560,6 @@ def export_bin_to_json (node, parent_node, slot = 0):
 
 #---------------------------------------------------------------------------------------------
 
-# 1-dimentional ArrayAccess IR example:
-
-  # ~ {
-          # ~ "name": "ArrayAccess",
-          # ~ "location": "2:4-2:7",
-          # ~ "outPorts": [
-            # ~ {
-              # ~ "nodeId": "node2",
-              # ~ "type": {
-                # ~ "location": "1:26-1:30",
-                # ~ "name": "real"
-              # ~ },
-              # ~ "index": 0
-            # ~ }
-          # ~ ],
-          # ~ "inPorts": [
-            # ~ {
-              # ~ "nodeId": "node2",
-              # ~ "type": {
-                # ~ "location": "1:17-1:31",
-                # ~ "element": {
-                  # ~ "location": "1:26-1:30",
-                  # ~ "name": "real"
-                # ~ }
-              # ~ },
-              # ~ "index": 0
-            # ~ },
-            # ~ {
-              # ~ "nodeId": "node2",
-              # ~ "type": {
-                # ~ "location": "not applicable",
-                # ~ "name": "integer"
-              # ~ },
-              # ~ "index": 1
-            # ~ }
-          # ~ ],
-          # ~ "id": "node2"
-        # ~ }
-
-
-
-
-# 2-dimentional ArrayAccess IR example:
- # ~ {
-          # ~ "name": "ArrayAccess",
-          # ~ "location": "2:4-2:7",
-          # ~ "outPorts": [
-            # ~ {
-              # ~ "nodeId": "node2",
-              # ~ "type": {
-                # ~ "location": "1:26-1:40",
-                # ~ "element": {
-                  # ~ "location": "1:35-1:39",
-                  # ~ "name": "real"
-                # ~ }
-              # ~ },
-              # ~ "index": 0
-            # ~ }
-          # ~ ],
-          # ~ "inPorts": [
-            # ~ {
-              # ~ "nodeId": "node2",
-              # ~ "type": {
-                # ~ "location": "1:17-1:40",
-                # ~ "element": {
-                  # ~ "location": "1:26-1:40",
-                  # ~ "element": {
-                    # ~ "location": "1:35-1:39",
-                    # ~ "name": "real"
-                  # ~ }
-                # ~ }
-              # ~ },
-              # ~ "index": 0
-            # ~ },
-            # ~ {
-              # ~ "nodeId": "node2",
-              # ~ "type": {
-                # ~ "location": "not applicable",
-                # ~ "name": "integer"
-              # ~ },
-              # ~ "index": 1
-            # ~ }
-          # ~ ],
-          # ~ "id": "node2"
-        # ~ },
-
-        # ~ {
-          # ~ "name": "ArrayAccess",
-          # ~ "location": "2:7-2:10",
-          # ~ "outPorts": [
-            # ~ {
-              # ~ "nodeId": "node4",
-              # ~ "type": {
-                # ~ "location": "1:35-1:39",
-                # ~ "name": "real"
-              # ~ },
-              # ~ "index": 0
-            # ~ }
-          # ~ ],
-          # ~ "inPorts": [
-            # ~ {
-              # ~ "nodeId": "node4",
-              # ~ "type": {
-                # ~ "location": "1:26-1:40",
-                # ~ "element": {
-                  # ~ "location": "1:35-1:39",
-                  # ~ "name": "real"
-                # ~ }
-              # ~ },
-              # ~ "index": 0
-            # ~ },
-            # ~ {
-              # ~ "nodeId": "node4",
-              # ~ "type": {
-                # ~ "location": "not applicable",
-                # ~ "name": "integer"
-              # ~ },
-              # ~ "index": 1
-            # ~ }
-          # ~ ],
-          # ~ "id": "node4"
-        # ~ }
-
-
 
 def export_array_access_to_json (node, parent_node, slot = 0):
     # TODO check with array's definition if types and dimensions match
@@ -716,7 +592,7 @@ def export_array_access_to_json (node, parent_node, slot = 0):
             json_nodes[node.node_id] = ret_val
 
             index_nodes = node.index.emit_json( node.node_id, 1)
-            
+
             final_edge = make_json_edge(node.node_id, parent_node, 0, slot, True)
             array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, False, parameter = True)
 
