@@ -183,8 +183,6 @@ def export_function_to_json(node, parent_node, slot = 0):
         ret_val["nodes"].extend(json_child["nodes"])
         ret_val["edges"] += json_child["edges"] + json_child["final_edges"]
 
-        #TODO make emit_json return the mediator node
-
     json_nodes[node.node_id].update ( ret_val )
 
     # it's a top node, so no need to return edges upstream
