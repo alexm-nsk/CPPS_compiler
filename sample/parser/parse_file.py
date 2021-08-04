@@ -150,23 +150,11 @@ class TreeVisitor(NodeVisitor):
 
     # rule: algebraic          = (operand) (_ bin_op _ operand)*
     def visit_algebraic(self, node, visited_children):
+
         expression = [visited_children[0]]
-        #print 
         if len(visited_children):
-            
             for n,v in enumerate(visited_children[1]):
-                #print (n, ":", v[1], v[3])
                 expression += [v[1]] + [v[3]]
-            
-
-        # ~ if type(visited_children[1]) == list:
-            # ~ tail =  [value for value in visited_children[1][0] if value]
-            # ~ if len(visited_children[1]) > 1:
-                # ~ tail += [value for value in visited_children[1][1] if value]
-        # ~ else:
-            # ~ return visited_children[0]
-
-        # ~ expression = [visited_children[0]] + tail
 
         return Algebraic(expression = expression, location = self.get_location(node))
 
