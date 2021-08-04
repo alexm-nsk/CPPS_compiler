@@ -307,6 +307,9 @@ def export_call_to_json (node, parent_node, slot = 0):
 
     function_name = node.function_name.name
 
+    if not function_name in ast_.node.Function.functions:
+        raise Exception ("Function %s at %s not found" % (function_name, node.location))
+
     called_function = ast_.node.Function.functions[function_name]
 
     ret_val = dict(inPorts  = function_gen_in_ports(called_function, node.node_id),
