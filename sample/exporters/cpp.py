@@ -21,3 +21,7 @@
 #  MA 02110-1301, USA.
 #
 #
+
+class CppModule:
+    def __init__(self):
+        pass
