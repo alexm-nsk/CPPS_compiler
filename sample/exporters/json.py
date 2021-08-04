@@ -299,16 +299,17 @@ def export_if_to_json(node, parent_node, slot):
 
 def export_call_to_json (node, parent_node, slot = 0):
 
+    function_name = node.function_name.name
+
+    if not function_name in ast_.node.Function.functions:
+        raise Exception ("Function %s at %s not found" % (function_name, node.location))
+
     ret_val = {}
 
     for field, value in node.__dict__.items():
         IR_name          = field_sub_table[field] if field in field_sub_table else field
         ret_val[IR_name] = value
 
-    function_name = node.function_name.name
-
-    if not function_name in ast_.node.Function.functions:
-        raise Exception ("Function %s at %s not found" % (function_name, node.location))
 
     called_function = ast_.node.Function.functions[function_name]
 
