@@ -22,6 +22,13 @@
 #
 #
 
+template = '''#include <stdio>
+{functions}
+void main(){
+{code}
+}
+'''
+
 class CppModule:
     def __init__(self):
         pass

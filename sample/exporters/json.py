@@ -422,28 +422,28 @@ def export_algebraic_to_json (node, parent_node, fslot = 0):
 
         # if we still have some splitting to do:
         else:
+            operator = chunk[1]
+            
+            # the loop enumerates the list with even values skipped hence the index:
+            index = 1
 
-            for n, operator in enumerate(chunk[1::2]):
-                # the loop enumerates the list with even values skipped hence the index:
-                index = n * 2 + 1
+            left  = chunk[         : index ]
+            right = chunk[index +1:       ]
 
-                left  = chunk[         : index ]
-                right = chunk[index + 1:       ]
+            op_json = operator.emit_json(parent_node)["nodes"]
+            return_nodes.extend(op_json)
 
-                op_json = operator.emit_json(parent_node)["nodes"]
-                return_nodes.extend(op_json)
+            left_node = get_nodes(left)
+            right_node = get_nodes(right)
 
-                left_node = get_nodes(left)
-                right_node = get_nodes(right)
+            return_edges.append(make_json_edge(left_node["id"],  operator.node_id, left_node["slot"],  0, parameter = left_node["parameter"]))
+            return_edges.append(make_json_edge(right_node["id"], operator.node_id, right_node["slot"], 1, parameter = right_node["parameter"]))
 
-                return_edges.append(make_json_edge(left_node["id"],  operator.node_id, left_node["slot"],  0, parameter = left_node["parameter"]))
-                return_edges.append(make_json_edge(right_node["id"], operator.node_id, right_node["slot"], 1, parameter = right_node["parameter"]))
+            type_ = return_type(left_node["type"], right_node["type"])
 
-                type_ = return_type(left_node["type"], right_node["type"])
+            op_json[0]["outPorts"][0]["type"]["name"] = type_
 
-                op_json[0]["outPorts"][0]["type"]["name"] = type_
-
-                return dict(id = operator.node_id, slot = 0, type = type_, parameter = False)
+            return dict(id = operator.node_id, slot = 0, type = type_, parameter = False)
 
     # the node that puts out result of this algebraic expression:
     final_node = get_nodes(exp)["id"]
