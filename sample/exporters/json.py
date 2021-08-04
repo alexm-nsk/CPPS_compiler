@@ -447,7 +447,7 @@ def export_algebraic_to_json (node, parent_node, fslot = 0):
 
     # the node that puts out result of this algebraic expression:
     final_node = get_nodes(exp)["id"]
-    #     Here we check if target node is the scope, this determines wether we target our output edge at in or out port
+    #     Here we check if target node is the scope, this determines wether we target our output edge at "in" or "out" port
     final_edge = make_json_edge(final_node, parent_node, 0, fslot, parent = (parent_node == current_scope))
 
     # TODO is this necessary?

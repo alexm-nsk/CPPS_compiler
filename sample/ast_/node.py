@@ -25,6 +25,7 @@
 
 from exporters.json    import *
 from exporters.graphml import *
+from exporters.c++ import *
 
 
 class Node:
