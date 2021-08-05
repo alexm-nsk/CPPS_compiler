@@ -302,7 +302,7 @@ def export_call_to_json (node, parent_node, slot = 0):
     function_name = node.function_name.name
 
     if not function_name in ast_.node.Function.functions:
-        raise Exception ("Function %s at %s not found" % (function_name, node.location))
+        raise Exception ("Function '%s' referenced to at %s not found" % (function_name, node.location))
 
     ret_val = {}
 
