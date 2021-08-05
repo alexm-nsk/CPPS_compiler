@@ -490,6 +490,7 @@ def export_literal_to_json (node, parent_node, slot = 0):
     ret_val = dict(
                     id = node.node_id,
                     location = node.location,
+                    inPorts = [],
                     outPorts = [
                                     dict(
                                             index = 0,
