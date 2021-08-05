@@ -336,7 +336,7 @@ def export_call_to_json (node, parent_node, slot = 0):
 
     json_nodes[node.node_id].update ( ret_val )
 
-    final_edge = make_json_edge(node.node_id, parent_node, 0, slot)
+    final_edge = make_json_edge(node.node_id, parent_node, 0, slot, parent = (parent_node == current_scope))
     return dict(nodes = [ret_val] + args_nodes, edges = args_edges , final_edges = [final_edge])
 
 
@@ -506,7 +506,7 @@ def export_literal_to_json (node, parent_node, slot = 0):
                 )
 
     json_nodes[node.node_id] = ret_val
-    final_edge = make_json_edge(node.node_id, parent_node, 0, slot)
+    final_edge = make_json_edge(node.node_id, parent_node, 0, slot, parent = (parent_node == current_scope))
     return dict(nodes = [ret_val], edges = [], final_edges = [final_edge])
 
 
