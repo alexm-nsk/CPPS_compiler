@@ -58,8 +58,9 @@ class Node:
     def emit_cpp(self):
         pass
 
-    def emit_llvm(self, module):
-        pass
+    def emit_llvm(self, module, builder = None):
+        class_name = self.__class__.__name__
+        return eval ( "export_" + class_name.lower() + "_to_llvm(self, module, builder)")
 
     def __repr__(self):
         return (str(self.__dict__))
@@ -83,8 +84,8 @@ class Function(Node):
     def emit_graphml(self, parent_node):
             return export_function_to_graphml(self, parent_node)
 
-    def emit_llvm(self, module):
-        return export_function_to_llvm(self, module)
+    #def emit_llvm(self, module):
+     #   return export_function_to_llvm(self, module)
 
 
 class Bin(Node):
@@ -95,8 +96,8 @@ class Bin(Node):
     def emit_json(self, parent_node, slot = 0):
         return (export_bin_to_json(self, parent_node, slot))
 
-    def emit_llvm(self, module, builder):
-        return export_bin_to_llvm(self, module, builder)
+    # ~ def emit_llvm(self, module, builder):
+        # ~ return export_bin_to_llvm(self, module, builder)
 
 
 class Call(Node):
@@ -107,8 +108,8 @@ class Call(Node):
     def emit_json(self, parent_node, slot = 0):
         return export_call_to_json(self, parent_node, slot)
 
-    def emit_llvm(self, module, builder):
-        return export_call_to_llvm(self, module, builder)
+    # ~ def emit_llvm(self, module, builder):
+        # ~ return export_call_to_llvm(self, module, builder)
 
 class If(Node):
 
@@ -127,8 +128,8 @@ class If(Node):
     def emit_json(self, parent_node, slot = 0):
         return (export_if_to_json(self, parent_node, slot))
 
-    def emit_llvm(self, module, builder):
-        return export_if_to_llvm(self, module, builder)
+    # ~ def emit_llvm(self, module, builder):
+        # ~ return export_if_to_llvm(self, module, builder)
         
 class Algebraic(Node):
 
@@ -141,8 +142,8 @@ class Algebraic(Node):
     def emit_json(self, parent_node, slot = 0):
         return (export_algebraic_to_json(self, parent_node, slot))
 
-    def emit_llvm(self, module, builder):
-        return export_algebraic_to_llvm(self, module, builder)
+    # ~ def emit_llvm(self, module, builder):
+        # ~ return export_algebraic_to_llvm(self, module, builder)
 
 class Identifier(Node):
 
@@ -152,8 +153,8 @@ class Identifier(Node):
     def emit_json(self, parent_node, slot = 0):
         return (export_identifier_to_json(self, parent_node, slot))
 
-    def emit_llvm(self, module, builder):
-        return export_identifier_to_llvm(self, module, builder)
+    # ~ def emit_llvm(self, module, builder):
+        # ~ return export_identifier_to_llvm(self, module, builder)
 
 class Literal(Node):
 
@@ -163,8 +164,8 @@ class Literal(Node):
     def emit_json(self, parent_node, slot = 0):
         return (export_literal_to_json(self, parent_node, slot))
 
-    def emit_llvm(self, module, builder):
-        return export_literal_to_llvm(self, module, builder)
+    # ~ def emit_llvm(self, module, builder):
+        # ~ return export_literal_to_llvm(self, module, builder)
 
 class ArrayAccess(Node):
 
@@ -174,5 +175,5 @@ class ArrayAccess(Node):
     def emit_json(self, parent_node, slot = 0):
         return (export_array_access_to_json(self, parent_node, slot))
 
-    def emit_llvm(self, module, builder):
-        return export_array_access_to_llvm(self, module, builder)
+    # ~ def emit_llvm(self, module, builder):
+        # ~ return export_arrayaccess_to_llvm(self, module, builder)

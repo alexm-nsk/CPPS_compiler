@@ -78,7 +78,7 @@ def create_module(functions, module_name):
     return module
 
 
-def export_function_to_llvm(function_node, module):
+def export_function_to_llvm(function_node, module, builder = None):
 
     arg_types = []
     params    = []
