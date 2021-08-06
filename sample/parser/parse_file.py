@@ -209,7 +209,7 @@ class TreeVisitor(NodeVisitor):
                         function_name = name,
                         nodes         = function_body,
                         location      = self.get_location(node),
-                        params        = visited_children[7],
+                        params        = visited_children[7] if visited_children[7] else [],
                         ret_types     = ret_types
                       )
 

@@ -84,20 +84,23 @@ def export_function_to_llvm(function_node, module):
     
     # ~ print (function.function_name)
     #print (function_node.params)
-    if (function_node.params):
-        for type_ in function_node.params:
-            for p in type_["vars"]:
-                print (p.name, type_["type"])
+    arg_types = []
+    params    = []
+    for type_ in function_node.params:
+        for p in type_["vars"]:
+            print (p.name, type_["type"].emit_llvm())
+            arg_types.append(type_["type"].emit_llvm())
+            params.append(p.name)
     
-    #if( num_return_vals > 1):
-     #   function_type         = ir.FunctionType(ir.PointerType(ir.IntType(32)),args, False)
-    #else:
-    args                      = (int32 for p in range(1))
     
-    function_type         = ir.FunctionType(ir.IntType(32), args, False)
+    function_type         = ir.FunctionType(ir.IntType(32), (p for p in arg_types), False)
 
     function = ir.Function(module, function_type, name=function_node.function_name)
     
+    # assign names to llvm function parameters (not necessary, but makes llvm code easier to read):
+    for n,p in enumerate(params):
+        function.args[n].name = p
+        
     llvm_functions[function_node.function_name] = function
     
     block = function.append_basic_block(name = "entry")

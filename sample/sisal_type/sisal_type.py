@@ -22,6 +22,8 @@
 #
 #
 
+from llvmlite import ir, binding
+
 built_in_types = ["integer", "real"]
 
     # ~ {
@@ -61,6 +63,9 @@ class IntegerType(NumberType):
 
     def emit_json(self):
         return dict(location = self.location , name = "integer")
+    
+    def emit_llvm(self):
+        return ir.IntType(32)
 
 class RealType(NumberType):
 
