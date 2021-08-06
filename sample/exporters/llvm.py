@@ -56,7 +56,7 @@ def init_llvm(module_name = "microsisal"):
     return module
 
 
-def add_bitcaster(builder):
+def add_bitcaster(builder, module):
 
     voidptr_ty                 = ir.IntType(8).as_pointer()
     fmt = "%i \n\0"
@@ -80,7 +80,7 @@ def create_module(functions, module_name):
     return module
 
 
-def export_function_to_llvm(function, module):
+def export_function_to_llvm(function_node, module):
     
     # ~ print (function.function_name)
     # ~ print (function.params)
@@ -92,7 +92,30 @@ def export_function_to_llvm(function, module):
     
     function_type         = ir.FunctionType(ir.IntType(32), args, False)
 
-    function = ir.Function(module, function_type, name=function.function_name)
+    function = ir.Function(module, function_type, name=function_node.function_name)
+    
+    llvm_functions[function_node.function_name] = function
+    
+    block = function.append_basic_block(name = "entry")
+
+    # vars_ is a map that connects LLVM identifiers with SISAL names
+    vars_ = []
+
+    # ~ #put names for each parameter into our function definition in our module
+    # ~ for n,p in enumerate(self.params):
+        # ~ self.function.args[n].name = p["name"]
+        # ~ # vars_ is a map that connects LLVM identifiers with SISAL names
+        # ~ vars_.append({"name": p["name"], "llvm_identifier" : self.function.args[n]})
+        # ~ # set values to the node's output so that it can be read anytime by it's child nodes
+        # ~ self.output.append( self.function.args[n] )
+
+    builder = ir.IRBuilder(block)
+
+    # needed for printf:
+    if function_node.function_name == "main":
+        fmt_arg = add_bitcaster(builder, module)
+
+    
     #llvm_functions[function_name]  = self.function
     return None
 
