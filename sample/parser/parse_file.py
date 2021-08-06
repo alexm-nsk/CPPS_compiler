@@ -210,7 +210,7 @@ class TreeVisitor(NodeVisitor):
                         nodes         = function_body,
                         location      = self.get_location(node),
                         params        = visited_children[7] if visited_children[7] else [],
-                        ret_types     = ret_types
+                        ret_types     = ret_types if ret_types else [VoidType()]
                       )
 
         function = Function(**params)

@@ -67,7 +67,7 @@ class IntegerType(NumberType):
     def emit_llvm(self):
         return ir.IntType(32)
         
-class IVoidType(NumberType):
+class VoidType(BaseType):
 
     def __init__(self, location = "not applicable"):
         self.location = location
