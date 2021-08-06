@@ -49,6 +49,7 @@ def init_llvm(module_name = "microsisal"):
     printf         = ir.Function(module, printf_ty, name = "printf")
     
     llvm_initialized = True
+    return module
 
 def add_bitcaster(builder):
     voidptr_ty                 = ir.IntType(8).as_pointer()
@@ -62,6 +63,13 @@ def add_bitcaster(builder):
     fmt_arg                    = builder.bitcast(global_fmt, voidptr_ty)
     return fmt_arg
 
+def create_module(functions, module_name):
+    module = init_llvm(module_name)
+    
+    for function in functions:
+        function.emit_llvm(module)
+        
+    return module
 
 if __name__ == "__main__":
     pass

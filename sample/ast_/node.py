@@ -58,7 +58,7 @@ class Node:
     def emit_cpp(self):
         pass
 
-    def emit_llvm(self):
+    def emit_llvm(self, module):
         pass
 
     def __repr__(self):
@@ -83,7 +83,7 @@ class Function(Node):
     def emit_graphml(self, parent_node):
             return export_function_to_graphml(self, parent_node)
 
-    def emit_llvm(self):
+    def emit_llvm(self, module):
         pass
 
 
@@ -95,7 +95,7 @@ class Bin(Node):
     def emit_json(self, parent_node, slot = 0):
         return (export_bin_to_json(self, parent_node, slot))
 
-    def emit_llvm(self):
+    def emit_llvm(self, module):
         pass
 
 
@@ -107,7 +107,7 @@ class Call(Node):
     def emit_json(self, parent_node, slot = 0):
         return export_call_to_json(self, parent_node, slot)
 
-    def emit_llvm(self):
+    def emit_llvm(self, module):
         pass
 
 class If(Node):
@@ -127,7 +127,7 @@ class If(Node):
     def emit_json(self, parent_node, slot = 0):
         return (export_if_to_json(self, parent_node, slot))
 
-    def emit_llvm(self):
+    def emit_llvm(self, module):
         pass
 
 class Algebraic(Node):
@@ -141,7 +141,7 @@ class Algebraic(Node):
     def emit_json(self, parent_node, slot = 0):
         return (export_algebraic_to_json(self, parent_node, slot))
 
-    def emit_llvm(self):
+    def emit_llvm(self, module):
         pass
 
 class Identifier(Node):
@@ -152,7 +152,7 @@ class Identifier(Node):
     def emit_json(self, parent_node, slot = 0):
         return (export_identifier_to_json(self, parent_node, slot))
 
-    def emit_llvm(self):
+    def emit_llvm(self, module):
         pass
 
 class Literal(Node):
@@ -163,7 +163,7 @@ class Literal(Node):
     def emit_json(self, parent_node, slot = 0):
         return (export_literal_to_json(self, parent_node, slot))
 
-    def emit_llvm(self):
+    def emit_llvm(self, module):
         pass
 
 class ArrayAccess(Node):
@@ -174,5 +174,5 @@ class ArrayAccess(Node):
     def emit_json(self, parent_node, slot = 0):
         return (export_array_access_to_json(self, parent_node, slot))
 
-    def emit_llvm(self):
+    def emit_llvm(self, module):
         pass

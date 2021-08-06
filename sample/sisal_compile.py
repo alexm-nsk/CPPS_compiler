@@ -27,6 +27,7 @@ from parser.parse_file import parse_file
 import re
 import os, json
 from ast_.node import *
+from exporters.llvm import *
 
 def parse(input_text):
     return parse_file(input_text)
@@ -48,23 +49,11 @@ def main(args):
         try:
             output = parse(file_contents)
             
-            print (output)
-            # ~ if "--graph" in args:
-                # ~ from exporters.graphml import make_document
-                # ~ graphs = "\n".join([o.emit_graphml(None) for o in output])
-                # ~ graphml_text = make_document(graphs)
-                # ~ #os.system ("echo '%s'| pygmentize -l xml" % graphml_text)
-                # ~ print (graphml_text)
-            # ~ else:
-                
-                # ~ formatted = json.dumps(
-                                        # ~ dict(
-                                             # ~ functions = [o.emit_json(None) for o in output],
-                                             # ~ definitions = []
-                                            # ~ ), 
-                                       # ~ indent = 1)
-                                        
-                # ~ print( formatted )
+            module_name = input_file_name.split("/")[-1]
+            module_name = re.sub("\..*", ".ll", module_name)
+            code = create_module(output, module_name)
+            print (code)
+
 
         except Exception as e:
             if "--debug" in args:
