@@ -83,7 +83,11 @@ def create_module(functions, module_name):
 def export_function_to_llvm(function_node, module):
     
     # ~ print (function.function_name)
-    # ~ print (function.params)
+    #print (function_node.params)
+    if (function_node.params):
+        for type_ in function_node.params:
+            for p in type_["vars"]:
+                print (p.name, type_["type"])
     
     #if( num_return_vals > 1):
      #   function_type         = ir.FunctionType(ir.PointerType(ir.IntType(32)),args, False)
