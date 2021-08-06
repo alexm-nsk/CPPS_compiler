@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  parse.py
+#  sisal_compile.py
 #  
 #  Copyright 2021 alexm
 #  
@@ -22,37 +22,60 @@
 #  
 #  
 
-from ast.node import Node
-from ast.edge import Edge
+from parser.parse_file import parse_file
 
 import re
+import os, json
+from ast_.node import *
 
-def compile(input_text):
-    pass
-    
+def parse(input_text):
+    return parse_file(input_text)
+
 def main(args):
-    
+
     if ( len( args ) < 2 ):
-        print ( "usage: python sisal_compile.py IR.json" )
+        print ( "usage: python sisal_parse.py source_code.sis" )
     else:
-        
+
         input_file_name = args[1]
         try:
             file_contents = open(input_file_name, "r").read()
         except:
+            # TODO make sure to isolate I/O error from malformed commandline parameters
             print ("error reading %s" % input_file_name)
             return 1
-            
+
         try:
             output = parse(file_contents)
+            
             print (output)
+            # ~ if "--graph" in args:
+                # ~ from exporters.graphml import make_document
+                # ~ graphs = "\n".join([o.emit_graphml(None) for o in output])
+                # ~ graphml_text = make_document(graphs)
+                # ~ #os.system ("echo '%s'| pygmentize -l xml" % graphml_text)
+                # ~ print (graphml_text)
+            # ~ else:
+                
+                # ~ formatted = json.dumps(
+                                        # ~ dict(
+                                             # ~ functions = [o.emit_json(None) for o in output],
+                                             # ~ definitions = []
+                                            # ~ ), 
+                                       # ~ indent = 1)
+                                        
+                # ~ print( formatted )
+
         except Exception as e:
-            print (str(e))            
-        
+            if "--debug" in args:
+                raise e
+            else:
+                print (str(e))
+
     return 0
 
 
 if __name__ == '__main__':
-    
+
     import sys
     sys.exit(main(sys.argv))
