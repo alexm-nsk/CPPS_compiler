@@ -85,7 +85,6 @@ class Function(Node):
 
     def emit_llvm(self, module):
         return export_function_to_llvm(self, module)
-        
 
 
 class Bin(Node):
@@ -97,7 +96,7 @@ class Bin(Node):
         return (export_bin_to_json(self, parent_node, slot))
 
     def emit_llvm(self, module):
-        pass
+        return export_bin_to_llvm(self, module)
 
 
 class Call(Node):
@@ -109,7 +108,7 @@ class Call(Node):
         return export_call_to_json(self, parent_node, slot)
 
     def emit_llvm(self, module):
-        pass
+        return export_call_to_llvm(self, module)
 
 class If(Node):
 
@@ -129,8 +128,8 @@ class If(Node):
         return (export_if_to_json(self, parent_node, slot))
 
     def emit_llvm(self, module):
-        pass
-
+        return export_if_to_llvm(self, module)
+        
 class Algebraic(Node):
 
     def __init__(self, *args, **kwargs):
@@ -143,7 +142,7 @@ class Algebraic(Node):
         return (export_algebraic_to_json(self, parent_node, slot))
 
     def emit_llvm(self, module):
-        pass
+        return export_algebraic_to_llvm(self, module)
 
 class Identifier(Node):
 
@@ -154,7 +153,7 @@ class Identifier(Node):
         return (export_identifier_to_json(self, parent_node, slot))
 
     def emit_llvm(self, module):
-        pass
+        return export_identifier_to_llvm(self, module)
 
 class Literal(Node):
 
@@ -165,7 +164,7 @@ class Literal(Node):
         return (export_literal_to_json(self, parent_node, slot))
 
     def emit_llvm(self, module):
-        pass
+        return export_literal_to_llvm(self, module)
 
 class ArrayAccess(Node):
 
@@ -176,4 +175,4 @@ class ArrayAccess(Node):
         return (export_array_access_to_json(self, parent_node, slot))
 
     def emit_llvm(self, module):
-        pass
+        return export_array_access_to_llvm(self, module)

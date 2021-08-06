@@ -24,8 +24,6 @@
 
 from llvmlite import ir, binding
 
-int32 = ir.IntType(32)
-
 llvm_initialized = False
 llvm_functions   = {}
 
@@ -108,6 +106,10 @@ def export_function_to_llvm(function_node, module):
 
     builder = ir.IRBuilder(block)
 
+    #print(function_node.nodes)
+    print (function_node.function_name)
+    function_node.nodes[0].emit_llvm(module)
+
     # needed for printf:
     if function_node.function_name == "main":
         fmt_arg = add_bitcaster(builder, module)
@@ -115,6 +117,12 @@ def export_function_to_llvm(function_node, module):
 
     llvm_functions[function_node.function_name]  = function
 
+
+def export_if_to_llvm(function_node, module):
+    pass
+    
+def export_call_to_llvm(function_node, module):
+    pass
 
 if __name__ == "__main__":
     pass
