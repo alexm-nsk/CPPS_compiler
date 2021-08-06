@@ -81,40 +81,32 @@ def create_module(functions, module_name):
 
 
 def export_function_to_llvm(function_node, module):
-    
-    # ~ print (function.function_name)
-    #print (function_node.params)
+
     arg_types = []
     params    = []
+
+    # get types and names of this function's arguments
     for type_ in function_node.params:
         for p in type_["vars"]:
-            print (p.name, type_["type"].emit_llvm())
             arg_types.append(type_["type"].emit_llvm())
             params.append(p.name)
     
-    
-    function_type         = ir.FunctionType(ir.IntType(32), (p for p in arg_types), False)
+    #just one value for now:
+    # TODO (make multiresult)
+    function_type = ir.FunctionType(function_node.ret_types[0].emit_llvm(), (p for p in arg_types), False)
 
     function = ir.Function(module, function_type, name=function_node.function_name)
-    
-    # assign names to llvm function parameters (not necessary, but makes llvm code easier to read):
-    for n,p in enumerate(params):
-        function.args[n].name = p
-        
-    llvm_functions[function_node.function_name] = function
-    
-    block = function.append_basic_block(name = "entry")
 
     # vars_ is a map that connects LLVM identifiers with SISAL names
     vars_ = []
+    # assign names to llvm function parameters (not necessary, but makes llvm code easier to read):
+    for n,p in enumerate(params):
+        function.args[n].name = p
+        vars_.append({"name": p, "llvm_identifier" : function.args[n]})
+    
+    llvm_functions[function_node.function_name] = function
 
-    # ~ #put names for each parameter into our function definition in our module
-    # ~ for n,p in enumerate(self.params):
-        # ~ self.function.args[n].name = p["name"]
-        # ~ # vars_ is a map that connects LLVM identifiers with SISAL names
-        # ~ vars_.append({"name": p["name"], "llvm_identifier" : self.function.args[n]})
-        # ~ # set values to the node's output so that it can be read anytime by it's child nodes
-        # ~ self.output.append( self.function.args[n] )
+    block = function.append_basic_block(name = "entry")
 
     builder = ir.IRBuilder(block)
 
@@ -122,9 +114,8 @@ def export_function_to_llvm(function_node, module):
     if function_node.function_name == "main":
         fmt_arg = add_bitcaster(builder, module)
 
-    
-    #llvm_functions[function_name]  = self.function
-    return None
+
+    llvm_functions[function_node.function_name]  = function
 
 
 if __name__ == "__main__":

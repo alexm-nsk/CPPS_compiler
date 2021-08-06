@@ -66,6 +66,17 @@ class IntegerType(NumberType):
     
     def emit_llvm(self):
         return ir.IntType(32)
+        
+class IVoidType(NumberType):
+
+    def __init__(self, location = "not applicable"):
+        self.location = location
+
+    def emit_json(self):
+        return dict(location = self.location , name = "void")
+    
+    def emit_llvm(self):
+        return ir.VoidType()
 
 class RealType(NumberType):
 
