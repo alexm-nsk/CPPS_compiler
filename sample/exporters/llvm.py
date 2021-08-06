@@ -106,9 +106,7 @@ def export_function_to_llvm(function_node, module):
 
     builder = ir.IRBuilder(block)
 
-    #print(function_node.nodes)
-    print (function_node.function_name)
-    function_node.nodes[0].emit_llvm(module)
+    function_node.nodes[0].emit_llvm(module, builder)
 
     # needed for printf:
     if function_node.function_name == "main":
@@ -118,10 +116,10 @@ def export_function_to_llvm(function_node, module):
     llvm_functions[function_node.function_name]  = function
 
 
-def export_if_to_llvm(function_node, module):
+def export_if_to_llvm(function_node, module, builder):
     pass
     
-def export_call_to_llvm(function_node, module):
+def export_call_to_llvm(function_node, module, builder):
     pass
 
 if __name__ == "__main__":
