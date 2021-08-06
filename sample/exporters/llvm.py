@@ -104,8 +104,6 @@ def export_function_to_llvm(function_node, module):
         function.args[n].name = p
         vars_.append({"name": p, "llvm_identifier" : function.args[n]})
     
-    llvm_functions[function_node.function_name] = function
-
     block = function.append_basic_block(name = "entry")
 
     builder = ir.IRBuilder(block)
