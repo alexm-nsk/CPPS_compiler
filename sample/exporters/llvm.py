@@ -22,10 +22,15 @@
 #
 #
 
+from llvmlite import ir, binding
+
+int32 = ir.IntType(32)
+
 llvm_initialized = False
+llvm_functions   = {}
 
 def init_llvm(module_name = "microsisal"):
-    from llvmlite import ir, binding
+
 
     binding.initialize()
     binding.initialize_native_target()
@@ -34,7 +39,6 @@ def init_llvm(module_name = "microsisal"):
     module        = ir.Module( name = module_name )
     module.triple = binding.get_default_triple()
 
-    int32 = ir.IntType(32)
 
 
     target         = binding.Target.from_default_triple()
@@ -47,11 +51,13 @@ def init_llvm(module_name = "microsisal"):
     voidptr_ty     = ir.IntType(8).as_pointer()
     printf_ty      = ir.FunctionType(ir.IntType(32), [voidptr_ty], var_arg = True)
     printf         = ir.Function(module, printf_ty, name = "printf")
-    
+
     llvm_initialized = True
     return module
 
+
 def add_bitcaster(builder):
+
     voidptr_ty                 = ir.IntType(8).as_pointer()
     fmt = "%i \n\0"
 
@@ -63,13 +69,33 @@ def add_bitcaster(builder):
     fmt_arg                    = builder.bitcast(global_fmt, voidptr_ty)
     return fmt_arg
 
+
 def create_module(functions, module_name):
+
     module = init_llvm(module_name)
-    
+
     for function in functions:
         function.emit_llvm(module)
-        
+
     return module
+
+
+def export_function_to_llvm(function, module):
+    
+    # ~ print (function.function_name)
+    # ~ print (function.params)
+    
+    #if( num_return_vals > 1):
+     #   function_type         = ir.FunctionType(ir.PointerType(ir.IntType(32)),args, False)
+    #else:
+    args                      = (int32 for p in range(1))
+    
+    function_type         = ir.FunctionType(ir.IntType(32), args, False)
+
+    function = ir.Function(module, function_type, name=function.function_name)
+    #llvm_functions[function_name]  = self.function
+    return None
+
 
 if __name__ == "__main__":
     pass

@@ -84,7 +84,8 @@ class Function(Node):
             return export_function_to_graphml(self, parent_node)
 
     def emit_llvm(self, module):
-        pass
+        return export_function_to_llvm(self, module)
+        
 
 
 class Bin(Node):
