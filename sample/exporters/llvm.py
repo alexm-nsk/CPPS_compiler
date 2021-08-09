@@ -120,24 +120,22 @@ def export_function_to_llvm(function_node, scope = None):
 
     builder = ir.IRBuilder(block)
 
-    scope = LlvmScope(builder, vars_)
-
-    function_node.nodes[0].emit_llvm(scope)
+    scope = LlvmScope(builder, vars_)   
 
     # needed for printf:
     if function_node.function_name == "main":
         fmt_arg = add_bitcaster(builder, module)
 
-
+    scope.builder.ret(function_node.nodes[0].emit_llvm(scope))
 
 def export_if_to_llvm(if_node, scope):
 
-
     condition_result = if_node.condition[0].emit_llvm(scope)
-    #scope = deepcopy(scope)
 
-    if_ret_val = scope.builder.alloca(ir.IntType(32))
-    
+    # TODO put actual type here
+
+    if_ret_val = scope.builder.alloca(ir.IntType(32), name = "if_result")
+
     with scope.builder.if_else(condition_result) as (then, else_):
         with then:
             then_result = if_node.branches["then"]["nodes"][0].emit_llvm(scope)
@@ -145,8 +143,8 @@ def export_if_to_llvm(if_node, scope):
         with else_:
             else_result = if_node.branches["else_"]["nodes"][0].emit_llvm(scope)
             scope.builder.store(else_result, if_ret_val)
-    
-    return scope.builder.ret(if_ret_val)
+
+    return if_ret_val
 
 
 def export_algebraic_to_llvm(algebraic_node, scope):
