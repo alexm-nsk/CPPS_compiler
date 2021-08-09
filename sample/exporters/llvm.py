@@ -131,28 +131,30 @@ def export_function_to_llvm(function_node, scope = None):
 
 
 def export_if_to_llvm(if_node, scope):
-    
-    
+
+
     condition_result = if_node.condition[0].emit_llvm(scope)
     #scope = deepcopy(scope)
+
+    if_ret_val = scope.builder.alloca(ir.IntType(32))
     
     with scope.builder.if_else(condition_result) as (then, else_):
         with then:
-            scope.builder.ret(if_node.branches["then"]["nodes"][0].emit_llvm(scope))
-            #result = scope.builder.alloca(ir.IntType(32))
+            then_result = if_node.branches["then"]["nodes"][0].emit_llvm(scope)
+            scope.builder.store(then_result, if_ret_val)
         with else_:
-            scope.builder.ret(if_node.branches["else_"]["nodes"][0].emit_llvm(scope))
-            pass
-        
-    #scope.builder = 
+            else_result = if_node.branches["else_"]["nodes"][0].emit_llvm(scope)
+            scope.builder.store(else_result, if_ret_val)
+    
+    return scope.builder.ret(if_ret_val)
 
 
 def export_algebraic_to_llvm(algebraic_node, scope):
-    
+
     lhs   = algebraic_node.expression[0].emit_llvm(scope)
     rhs   = algebraic_node.expression[2].emit_llvm(scope)
     cmpop = algebraic_node.expression[1].operator
-    
+
     if cmpop == "<":
         return scope.builder.icmp_signed(cmpop, lhs, rhs, name='cmp_result')
     elif cmpop == "+":
@@ -160,7 +162,7 @@ def export_algebraic_to_llvm(algebraic_node, scope):
     elif cmpop == "-":
         return scope.builder.sub(lhs, rhs, name='sub')
     else:
-        raise Exception ("Unsupported operation:", 
+        raise Exception ("Unsupported operation:",
                                 algebraic_node.expression[1].location,
                                 algebraic_node.expression[1].operator)
 
@@ -177,17 +179,13 @@ def export_call_to_llvm(function_call_node, scope):
 
     name = function_call_node.function_name.name
     args = [ arg[0].emit_llvm(scope) for arg in function_call_node.args ]
-    print (name, args)
-    return scope.builder.call(llvm_functions[name], args, name='call_result', cconv=None, tail=False, fastmath=())
+
     # ~ Call function fn with arguments args, a sequence of values.
-
     # ~ cconv is the optional calling convention.
-
     # ~ tail, if True, is a hint for the optimizer to perform tail-call optimization.
-
     # ~ fastmath is a string or a sequence of strings of names for fast-math flags.
 
-    pass
+    return scope.builder.call(llvm_functions[name], args, name='call_result', cconv=None, tail=False, fastmath=())
 
 
 if __name__ == "__main__":
