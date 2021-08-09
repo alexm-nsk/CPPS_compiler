@@ -125,41 +125,32 @@ def export_function_to_llvm(function_node, scope = None):
     if function_node.function_name == "main":
         fmt_arg = add_bitcaster(builder, module)
 
-
     llvm_functions[function_node.function_name]  = function
 
 
 def export_if_to_llvm(if_node, scope):
-    # print ()
     if_node.condition[0].emit_llvm(scope)
-    pass
+
 
 def export_algebraic_to_llvm(algebraic_node, scope):
-    #print ("alegebraic")
-    #print (algebraic_node.expression)
+    lhs   = algebraic_node.expression[0].emit_llvm(scope)
+    rhs   = algebraic_node.expression[2].emit_llvm(scope)
+    cmpop = algebraic_node.expression[1].operator
 
-    left  = algebraic_node.expression[0].emit_llvm(scope)
-    right = algebraic_node.expression[2].emit_llvm(scope)
-    op    = algebraic_node.expression[1].operator
+    return scope.builder.icmp_signed(cmpop, lhs, rhs, name='')
 
-    print (left, op, right)
-
-
-    #builder.fcmp_ordered(cmpop, lhs, rhs, name='', flags=[])
-
-    pass
 
 def export_identifier_to_llvm(identifier_node, scope):
-
-    #print (scope.vars[identifier_node.name])
-    # pull variable from scope
     return scope.vars[identifier_node.name]
+
 
 def export_literal_to_llvm(literal_node, scope):
     return ir.Constant( literal_node.type.emit_llvm() , int(literal_node.value))
 
+
 def export_call_to_llvm(function_node, scope):
     pass
+
 
 if __name__ == "__main__":
     pass
