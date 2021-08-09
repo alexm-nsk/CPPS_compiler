@@ -58,9 +58,9 @@ class Node:
     def emit_cpp(self):
         pass
 
-    def emit_llvm(self, module, builder = None):
+    def emit_llvm(self, scope = None):
         class_name = self.__class__.__name__
-        return eval ( "export_" + class_name.lower() + "_to_llvm(self, module, builder)")
+        return eval ( "export_" + class_name.lower() + "_to_llvm(self, scope)")
 
     def __repr__(self):
         return (str(self.__dict__))

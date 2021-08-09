@@ -27,6 +27,14 @@ from llvmlite import ir, binding
 llvm_initialized = False
 llvm_functions   = {}
 
+module = None
+
+class LlvmScope:
+
+    def __init__(self, builder, vars_):
+        self.vars = vars_
+        self.builder = builder
+
 def init_llvm(module_name = "microsisal"):
 
 
@@ -69,7 +77,7 @@ def add_bitcaster(builder, module):
 
 
 def create_module(functions, module_name):
-
+    global module 
     module = init_llvm(module_name)
 
     for function in functions:
@@ -78,8 +86,10 @@ def create_module(functions, module_name):
     return module
 
 
-def export_function_to_llvm(function_node, module, builder = None):
-
+def export_function_to_llvm(function_node, scope = None):
+    
+    global module
+    
     arg_types = []
     params    = []
 
@@ -88,6 +98,7 @@ def export_function_to_llvm(function_node, module, builder = None):
         for p in type_["vars"]:
             arg_types.append(type_["type"].emit_llvm())
             params.append(p.name)
+
     
     #just one value for now:
     # TODO (make multiresult)
@@ -96,17 +107,19 @@ def export_function_to_llvm(function_node, module, builder = None):
     function = ir.Function(module, function_type, name=function_node.function_name)
 
     # vars_ is a map that connects LLVM identifiers with SISAL names
-    vars_ = []
+    vars_ = {}
     # assign names to llvm function parameters (not necessary, but makes llvm code easier to read):
     for n,p in enumerate(params):
         function.args[n].name = p
-        vars_.append({"name": p, "llvm_identifier" : function.args[n]})
+        vars_[p] = function.args[n]
     
     block = function.append_basic_block(name = "entry")
 
     builder = ir.IRBuilder(block)
 
-    function_node.nodes[0].emit_llvm(module, builder)
+    scope = LlvmScope(builder, vars_)
+    
+    function_node.nodes[0].emit_llvm(scope)
 
     # needed for printf:
     if function_node.function_name == "main":
@@ -116,10 +129,36 @@ def export_function_to_llvm(function_node, module, builder = None):
     llvm_functions[function_node.function_name]  = function
 
 
-def export_if_to_llvm(function_node, module, builder):
+def export_if_to_llvm(if_node, scope):
+    # print ()
+    if_node.condition[0].emit_llvm(scope)
     pass
     
-def export_call_to_llvm(function_node, module, builder):
+def export_algebraic_to_llvm(algebraic_node, scope):
+    #print ("alegebraic")
+    #print (algebraic_node.expression)
+    
+    left  = algebraic_node.expression[0].emit_llvm(scope)
+    right = algebraic_node.expression[2].emit_llvm(scope)
+    op    = algebraic_node.expression[1].operator
+    
+    print (left, op, right)
+        
+        
+    #builder.fcmp_ordered(cmpop, lhs, rhs, name='', flags=[])
+    
+    pass
+    
+def export_identifier_to_llvm(identifier_node, scope):
+    print (identifier_node)
+    print (scope.vars[identifier_node.name])
+    # pull variable from scope
+    return 
+    
+def export_literal_to_llvm(function_node, scope):
+    pass
+    
+def export_call_to_llvm(function_node, scope):
     pass
 
 if __name__ == "__main__":
