@@ -177,7 +177,7 @@ class TreeVisitor(NodeVisitor):
 
     # rule: number_literal_int             = ~"[0-9]+"
     def visit_number_literal_int(self, node, visited_children):
-        return Literal(value = node.text, location = self.get_location(node))
+        return Literal(value = node.text, location = self.get_location(node), type = IntegerType())
 
     def visit_identifier(self, node, visited_children):
         return Identifier(name = node.text, location = self.get_location(node))

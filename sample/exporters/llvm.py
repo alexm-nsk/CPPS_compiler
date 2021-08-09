@@ -77,7 +77,7 @@ def add_bitcaster(builder, module):
 
 
 def create_module(functions, module_name):
-    global module 
+    global module
     module = init_llvm(module_name)
 
     for function in functions:
@@ -87,9 +87,9 @@ def create_module(functions, module_name):
 
 
 def export_function_to_llvm(function_node, scope = None):
-    
+
     global module
-    
+
     arg_types = []
     params    = []
 
@@ -99,7 +99,7 @@ def export_function_to_llvm(function_node, scope = None):
             arg_types.append(type_["type"].emit_llvm())
             params.append(p.name)
 
-    
+
     #just one value for now:
     # TODO (make multiresult)
     function_type = ir.FunctionType(function_node.ret_types[0].emit_llvm(), (p for p in arg_types), False)
@@ -112,13 +112,13 @@ def export_function_to_llvm(function_node, scope = None):
     for n,p in enumerate(params):
         function.args[n].name = p
         vars_[p] = function.args[n]
-    
+
     block = function.append_basic_block(name = "entry")
 
     builder = ir.IRBuilder(block)
 
     scope = LlvmScope(builder, vars_)
-    
+
     function_node.nodes[0].emit_llvm(scope)
 
     # needed for printf:
@@ -133,31 +133,31 @@ def export_if_to_llvm(if_node, scope):
     # print ()
     if_node.condition[0].emit_llvm(scope)
     pass
-    
+
 def export_algebraic_to_llvm(algebraic_node, scope):
     #print ("alegebraic")
     #print (algebraic_node.expression)
-    
+
     left  = algebraic_node.expression[0].emit_llvm(scope)
     right = algebraic_node.expression[2].emit_llvm(scope)
     op    = algebraic_node.expression[1].operator
-    
+
     print (left, op, right)
-        
-        
+
+
     #builder.fcmp_ordered(cmpop, lhs, rhs, name='', flags=[])
-    
+
     pass
-    
+
 def export_identifier_to_llvm(identifier_node, scope):
-    print (identifier_node)
-    print (scope.vars[identifier_node.name])
+
+    #print (scope.vars[identifier_node.name])
     # pull variable from scope
-    return 
-    
-def export_literal_to_llvm(function_node, scope):
-    pass
-    
+    return scope.vars[identifier_node.name]
+
+def export_literal_to_llvm(literal_node, scope):
+    return ir.Constant( literal_node.type.emit_llvm() , int(literal_node.value))
+
 def export_call_to_llvm(function_node, scope):
     pass
 
