@@ -27,7 +27,8 @@ from copy import deepcopy
 
 llvm_initialized = False
 llvm_functions   = {}
-
+printf = None
+fmt_arg = None
 module = None
 
 class LlvmScope:
@@ -39,6 +40,7 @@ class LlvmScope:
 
 def init_llvm(module_name = "microsisal"):
 
+    global printf, fmt_arg
 
     binding.initialize()
     binding.initialize_native_target()
@@ -90,7 +92,7 @@ def create_module(functions, module_name):
 
 def export_function_to_llvm(function_node, scope = None):
 
-    global module
+    global module, printf, fmt_arg
 
     arg_types = []
     params    = []
@@ -120,13 +122,16 @@ def export_function_to_llvm(function_node, scope = None):
 
     builder = ir.IRBuilder(block)
 
-    scope = LlvmScope(builder, vars_)   
+    scope = LlvmScope(builder, vars_)
 
+    function_result = function_node.nodes[0].emit_llvm(scope)
     # needed for printf:
     if function_node.function_name == "main":
         fmt_arg = add_bitcaster(builder, module)
+        builder.call(printf, [fmt_arg, function_result])
 
-    scope.builder.ret(function_node.nodes[0].emit_llvm(scope))
+    scope.builder.ret(function_result)
+
 
 def export_if_to_llvm(if_node, scope):
 
