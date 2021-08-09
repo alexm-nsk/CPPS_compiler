@@ -27,7 +27,6 @@ from parser.parse_file import parse_file
 import re
 import os, json
 from ast_.node import *
-from exporters.llvm import *
 
 def parse(input_text):
     return parse_file(input_text)
