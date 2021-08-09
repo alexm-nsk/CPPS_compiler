@@ -23,6 +23,7 @@
 #
 
 from llvmlite import ir, binding
+from copy import deepcopy
 
 llvm_initialized = False
 llvm_functions   = {}
@@ -31,9 +32,10 @@ module = None
 
 class LlvmScope:
 
-    def __init__(self, builder, vars_):
-        self.vars = vars_
+    def __init__(self, builder, vars_, name = ""):
+        self.vars    = vars_
         self.builder = builder
+        self.name    = name
 
 def init_llvm(module_name = "microsisal"):
 
@@ -105,6 +107,7 @@ def export_function_to_llvm(function_node, scope = None):
     function_type = ir.FunctionType(function_node.ret_types[0].emit_llvm(), (p for p in arg_types), False)
 
     function = ir.Function(module, function_type, name=function_node.function_name)
+    llvm_functions[function_node.function_name]  = function
 
     # vars_ is a map that connects LLVM identifiers with SISAL names
     vars_ = {}
@@ -125,19 +128,41 @@ def export_function_to_llvm(function_node, scope = None):
     if function_node.function_name == "main":
         fmt_arg = add_bitcaster(builder, module)
 
-    llvm_functions[function_node.function_name]  = function
 
 
 def export_if_to_llvm(if_node, scope):
-    if_node.condition[0].emit_llvm(scope)
+    
+    
+    condition_result = if_node.condition[0].emit_llvm(scope)
+    #scope = deepcopy(scope)
+    
+    with scope.builder.if_else(condition_result) as (then, else_):
+        with then:
+            scope.builder.ret(if_node.branches["then"]["nodes"][0].emit_llvm(scope))
+            #result = scope.builder.alloca(ir.IntType(32))
+        with else_:
+            scope.builder.ret(if_node.branches["else_"]["nodes"][0].emit_llvm(scope))
+            pass
+        
+    #scope.builder = 
 
 
 def export_algebraic_to_llvm(algebraic_node, scope):
+    
     lhs   = algebraic_node.expression[0].emit_llvm(scope)
     rhs   = algebraic_node.expression[2].emit_llvm(scope)
     cmpop = algebraic_node.expression[1].operator
-
-    return scope.builder.icmp_signed(cmpop, lhs, rhs, name='')
+    
+    if cmpop == "<":
+        return scope.builder.icmp_signed(cmpop, lhs, rhs, name='cmp_result')
+    elif cmpop == "+":
+        return scope.builder.add(lhs, rhs, name='sum')
+    elif cmpop == "-":
+        return scope.builder.sub(lhs, rhs, name='sub')
+    else:
+        raise Exception ("Unsupported operation:", 
+                                algebraic_node.expression[1].location,
+                                algebraic_node.expression[1].operator)
 
 
 def export_identifier_to_llvm(identifier_node, scope):
@@ -148,7 +173,20 @@ def export_literal_to_llvm(literal_node, scope):
     return ir.Constant( literal_node.type.emit_llvm() , int(literal_node.value))
 
 
-def export_call_to_llvm(function_node, scope):
+def export_call_to_llvm(function_call_node, scope):
+
+    name = function_call_node.function_name.name
+    args = [ arg[0].emit_llvm(scope) for arg in function_call_node.args ]
+    print (name, args)
+    return scope.builder.call(llvm_functions[name], args, name='call_result', cconv=None, tail=False, fastmath=())
+    # ~ Call function fn with arguments args, a sequence of values.
+
+    # ~ cconv is the optional calling convention.
+
+    # ~ tail, if True, is a hint for the optimizer to perform tail-call optimization.
+
+    # ~ fastmath is a string or a sequence of strings of names for fast-math flags.
+
     pass
 
 
