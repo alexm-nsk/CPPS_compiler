@@ -138,8 +138,6 @@ def export_if_to_llvm(if_node, scope):
 
     condition_result = if_node.condition[0].emit_llvm(scope)
 
-    # TODO put actual type here
-
     if_ret_val = scope.builder.alloca(scope.expected_type, name = "if_result_pointer")
 
     with scope.builder.if_else(condition_result) as (then, else_):
