@@ -33,10 +33,11 @@ module = None
 
 class LlvmScope:
 
-    def __init__(self, builder, vars_, name = ""):
-        self.vars    = vars_
-        self.builder = builder
-        self.name    = name
+    def __init__(self, builder, vars_, expected_type = None, name = ""):
+        self.vars          = vars_
+        self.builder       = builder
+        self.name          = name
+        self.expected_type = expected_type
 
 def init_llvm(module_name = "microsisal"):
 
@@ -122,7 +123,7 @@ def export_function_to_llvm(function_node, scope = None):
 
     builder = ir.IRBuilder(block)
 
-    scope = LlvmScope(builder, vars_)
+    scope = LlvmScope(builder, vars_, expected_type = function_node.ret_types[0].emit_llvm())
 
     function_result = function_node.nodes[0].emit_llvm(scope)
     # needed for printf:
@@ -139,7 +140,7 @@ def export_if_to_llvm(if_node, scope):
 
     # TODO put actual type here
 
-    if_ret_val = scope.builder.alloca(ir.IntType(32), name = "if_result_pointer")
+    if_ret_val = scope.builder.alloca(scope.expected_type, name = "if_result_pointer")
 
     with scope.builder.if_else(condition_result) as (then, else_):
         with then:
