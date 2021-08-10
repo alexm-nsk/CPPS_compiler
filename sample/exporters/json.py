@@ -600,7 +600,7 @@ def export_array_access_to_json (node, parent_node, slot = 0):
 
             json_nodes[node.node_id] = ret_val
 
-            index_nodes = node.index.emit_json( node.node_id, 1)
+            index_nodes = node.indices[0].emit_json( node.node_id, 1)
 
             final_edge = make_json_edge(node.node_id, parent_node, 0, slot, True)
             array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, False, parameter = True)
