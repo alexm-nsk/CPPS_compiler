@@ -114,7 +114,8 @@ def export_function_to_llvm(function_node, scope = None):
 
     # vars_ is a map that connects LLVM identifiers with SISAL names
     vars_ = {}
-    # assign names to llvm function parameters (not necessary, but makes llvm code easier to read):
+    
+    # assign names to llvm function parameters (used when we recall those arguments in function's body):
     for n,p in enumerate(params):
         function.args[n].name = p
         vars_[p] = function.args[n]
