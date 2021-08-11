@@ -250,7 +250,7 @@ class TreeVisitor(NodeVisitor):
         #for i in indices:            print (i)
 
         #eval("")
-        def make_array(index):
+        def make_array(index = 0):
             if index < len(indices) - 1:
                 return ArrayAccess(
                                 name     = array_name,
@@ -258,8 +258,10 @@ class TreeVisitor(NodeVisitor):
                                 indices  = indices[index],
                                 subarray = make_array(index + 1)
                             )
-            
-        return make_array(0)
+                            
+        array = make_array()
+        array.inline_indices = indices #save it for LLVM
+        return array
         # ~ ArrayAccess(
                             # ~ name     = array_name,
                             # ~ location = self.get_location(node),
