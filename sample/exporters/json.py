@@ -575,10 +575,10 @@ def export_array_access_to_json (node, parent_node, slot = 0):
 
     # need to get array's type:
     params = json_nodes[current_scope]["params"]
-    
+
     if not params:
         raise Exception ("Error accessing the array: current scope doesn't have any variables", node.location)
-        
+
     # find this array in scope's parameters:
     for array_index_in_params, p in enumerate(params):
 
@@ -608,8 +608,16 @@ def export_array_access_to_json (node, parent_node, slot = 0):
             final_edge = make_json_edge(node.node_id, parent_node, 0, slot, True)
             array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, False, parameter = True)
 
-            return dict(nodes = [ret_val] + index_nodes["nodes"],
-                        edges = index_nodes["edges"] + [array_input_edge] + index_nodes["final_edges"],
+            sub_nodes = []
+            sub_edges = []
+
+            if node.subarray:
+                subarray = node.subarray.emit_json(node.node_id, slot = 0)
+                sub_nodes = subarray["nodes"]
+                sub_edges = subarray["edges"] + subarray["final_edges"]                
+
+            return dict(nodes = [ret_val] + index_nodes["nodes"] + sub_nodes,
+                        edges = index_nodes["edges"] + [array_input_edge] + index_nodes["final_edges"] + sub_edges,
                         final_edges = [final_edge] )
 
     # if we didn't find it, raise an exception:
