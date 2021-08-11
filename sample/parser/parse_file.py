@@ -247,9 +247,8 @@ class TreeVisitor(NodeVisitor):
 
         indices = [index_group[3] for index_group in visited_children[1]]
 
-        #for i in indices:            print (i)
-
-        #eval("")
+        # creates a "nested doll" of Array objects
+        # it facilitates the numeration
         def make_array(index = 0):
             if index < len(indices) - 1:
                 return ArrayAccess(
@@ -258,20 +257,10 @@ class TreeVisitor(NodeVisitor):
                                 indices  = indices[index],
                                 subarray = make_array(index + 1)
                             )
-                            
+
         array = make_array()
         array.inline_indices = indices #save it for LLVM
         return array
-        # ~ ArrayAccess(
-                            # ~ name     = array_name,
-                            # ~ location = self.get_location(node),
-                            # ~ indices  = indices[0],
-                            # ~ subarray = ArrayAccess(
-                                                    # ~ name     = array_name,
-                                                    # ~ location = self.get_location(node),
-                                                    # ~ indices  = indices[1]
-                                                   # ~ )
-                           # ~ )
 
     #----------------------------------------------------
     #
