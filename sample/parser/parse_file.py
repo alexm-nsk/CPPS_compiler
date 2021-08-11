@@ -231,11 +231,11 @@ class TreeVisitor(NodeVisitor):
 
         branches = dict(then = then_node, else_ = else_node)
 
-        return If(**dict(
+        return If(
                         branches  = branches,
                         condition =  condition_node,
                         location  = self.get_location(node),
-                    ))
+                    )
 
 
     #----------------------------------------------------
@@ -246,15 +246,30 @@ class TreeVisitor(NodeVisitor):
         array_name  = visited_children[0].name
 
         indices = [index_group[3] for index_group in visited_children[1]]
-        
-        for i in indices:
-            print (i)
-        
-        return ArrayAccess(**dict(
-                                    name = array_name,
-                                    location = self.get_location(node),
-                                    indices = indices
-                                ))
+
+        #for i in indices:            print (i)
+
+        #eval("")
+        def make_array(index):
+            if index < len(indices) - 1:
+                return ArrayAccess(
+                                name     = array_name,
+                                location = self.get_location(node),
+                                indices  = indices[index],
+                                subarray = make_array(index + 1)
+                            )
+            
+        return make_array(0)
+        # ~ ArrayAccess(
+                            # ~ name     = array_name,
+                            # ~ location = self.get_location(node),
+                            # ~ indices  = indices[0],
+                            # ~ subarray = ArrayAccess(
+                                                    # ~ name     = array_name,
+                                                    # ~ location = self.get_location(node),
+                                                    # ~ indices  = indices[1]
+                                                   # ~ )
+                           # ~ )
 
     #----------------------------------------------------
     #
