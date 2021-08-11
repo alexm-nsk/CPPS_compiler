@@ -577,7 +577,7 @@ def export_array_access_to_json (node, parent_node, slot = 0):
     params = json_nodes[current_scope]["params"]
     
     if not params:
-        raise Exception ("Error accessing the array: the scope doesn't have any variables", node.location)
+        raise Exception ("Error accessing the array: current scope doesn't have any variables", node.location)
         
     # find this array in scope's parameters:
     for array_index_in_params, p in enumerate(params):
@@ -603,7 +603,7 @@ def export_array_access_to_json (node, parent_node, slot = 0):
 
             json_nodes[node.node_id] = ret_val
 
-            index_nodes = node.indices.emit_json( node.node_id, 1)
+            index_nodes = node.index.emit_json( node.node_id, 1)
 
             final_edge = make_json_edge(node.node_id, parent_node, 0, slot, True)
             array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, False, parameter = True)

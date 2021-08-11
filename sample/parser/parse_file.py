@@ -248,14 +248,14 @@ class TreeVisitor(NodeVisitor):
         indices = [index_group[3] for index_group in visited_children[1]]
 
         # creates a "nested doll" of Array objects
-        # it facilitates the numeration
+        # it facilitates the numeration of nodes
         def make_array(index = 0):
-            if index < len(indices) - 1:
+            if index < len(indices):
                 return ArrayAccess(
                                 name     = array_name,
                                 location = self.get_location(node),
-                                indices  = indices[index],
-                                subarray = make_array(index + 1)
+                                index    = indices[index],
+                                subarray = make_array(index + 1),
                             )
 
         array = make_array()
