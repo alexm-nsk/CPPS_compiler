@@ -246,7 +246,10 @@ class TreeVisitor(NodeVisitor):
         array_name  = visited_children[0].name
 
         indices = [index_group[3] for index_group in visited_children[1]]
-
+        
+        for i in indices:
+            print (i)
+        
         return ArrayAccess(**dict(
                                     name = array_name,
                                     location = self.get_location(node),
