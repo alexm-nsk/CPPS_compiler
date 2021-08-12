@@ -53,7 +53,6 @@ def main(args):
                 from exporters.graphml import make_document
                 graphs = "\n".join([o.emit_graphml(None) for o in output])
                 graphml_text = make_document(graphs)
-                #os.system ("echo '%s'| pygmentize -l xml" % graphml_text)
                 print (graphml_text)
             else:
                 
@@ -64,9 +63,7 @@ def main(args):
                                             ), 
                                        indent = 1)
                                         
-                #["functions"][0]["nodes"][0]["branches"])
                 print( formatted )
-                #os.system ("echo '%s' | jq" % formatted)
 
         except Exception as e:
             if "--debug" in args:
