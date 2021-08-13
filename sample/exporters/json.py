@@ -650,7 +650,9 @@ def export_array_access_to_json (node, parent_node, slot = 0):
                                 location = node.location,
                                 
                                 inPorts = [dict(node_Id = node.node_id, type = type_, index = 0),
-                                           dict(node_Id = node.node_id, type = dict(location = "not applicable", name = "integer"), index = 1)],
+                                           dict(node_Id = node.node_id, type = 
+                                                    dict(location = "not applicable", name = "integer"), 
+                                           index = 1)],
                                            
                                 outPorts = [dict(node_Id = node.node_id, type = type_["element"], index = 0)],
                                 
