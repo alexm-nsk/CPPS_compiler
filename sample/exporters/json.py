@@ -661,7 +661,8 @@ def export_array_access_to_json (node, parent_node, slot = 0):
 
             index_nodes = node.index.emit_json( node.node_id, 1)
 
-            # we create final edge aimed at scope node only when it's a terminal ArrayAccess-node
+            # we create final edge aimed at scope node only when it's a terminal (the final dimension's) ArrayAccess-node
+            # i.e A[][][][*this one*]
             if not node.subarray:
                 final_edges = [make_json_edge(node.node_id, current_scope, 0, slot, True)]
                 array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, False, parameter = False)
@@ -669,6 +670,7 @@ def export_array_access_to_json (node, parent_node, slot = 0):
                 final_edges = []
                 array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, False, parameter = True)
 
+            # generate the rest of ArrayAccess's and connect them with edges:
             sub_nodes = []
             sub_edges = []
 
