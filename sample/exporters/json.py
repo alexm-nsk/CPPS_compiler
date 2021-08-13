@@ -644,7 +644,7 @@ def export_array_access_to_json (node, parent_node, slot = 0):
             for i in range (node.array_index):
                 type_ = type_["element"]
             
-            # form our dict taht we will turn into json
+            # form our dict that we will turn into json
             json_node = dict(
                                 name = "ArrayAccess",
                                 location = node.location,
