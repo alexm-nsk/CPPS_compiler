@@ -602,7 +602,7 @@ def export_array_access_to_json (node, parent_node, slot = 0):
                     for i in range(access_length):
                         defined_type = defined_type["element"] if "element" in defined_type else defined_type["type"]
                 except:
-                    raise Exception ("Array's (%s, %s) defined dimensions  and ArrayAccess dimentions %s mismatch" % (p[0],scope_node["location"], node.location))
+                    raise Exception ("Array's (%s, %s) defined dimensions and ArrayAccess' dimensions %s mismatch." % (p[0],scope_node["location"], node.location))
 
             type_ = p[1]["type"]
             for i in range (node.array_index):
