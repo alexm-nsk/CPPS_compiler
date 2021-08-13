@@ -631,7 +631,7 @@ def export_array_access_to_json (node, parent_node, slot = 0):
                 #number of [...] in the expression:
                 access_length = len (node.inline_indices)
                 defined_type = p[1]["type"]
-                # basically see if there is enough dimensions in array's definition for the eamount of definitions we use
+                # basically see if there is enough dimensions in array's definition for the ammount of definitions we use
                 # in our ArrayAccess:
                 try:
                     for i in range(access_length):
