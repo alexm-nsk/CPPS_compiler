@@ -63,7 +63,8 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
-    #print (src_type, dst_type)
+   # print (from_, to, "\n")
+   # print (src_type,"\n",  dst_type, "\n")
     return [
                 {
                     "index"  : src_index,
@@ -602,7 +603,7 @@ def export_array_access_to_json (node, parent_node, slot = 0):
                     for i in range(access_length):
                         defined_type = defined_type["element"] if "element" in defined_type else defined_type["type"]
                 except:
-                    raise Exception ("Array's (%s, %s) defined dimensions and ArrayAccess' dimensions %s mismatch." % (p[0],scope_node["location"], node.location))
+                    raise Exception ("Array's (%s, %s) defined dimensions are smaller than ArrayAccess' dimensions (%s)." % (p[0],scope_node["location"], node.location))
 
             type_ = p[1]["type"]
             for i in range (node.array_index):
@@ -632,11 +633,12 @@ def export_array_access_to_json (node, parent_node, slot = 0):
             if not node.subarray:
                 final_edge = make_json_edge(node.node_id, current_scope, 0, slot, True)
 
-            array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, False, parameter = True)
+                array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, False, parameter = False)
+            else:
+                array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, False, parameter = True)
 
             sub_nodes = []
             sub_edges = []
-
 
             if node.subarray:
                 subarray = node.subarray.emit_json(node.node_id, slot = 0)
