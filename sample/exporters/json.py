@@ -627,7 +627,7 @@ def export_array_access_to_json (node, parent_node, slot = 0):
             # array_index is a number (beginning from zero) of a "[ index ]" block in "A[][index][]...[]"
 
             #check if array's measurements correspond to what we request in here:
-            if "inline_indices" in node.__dict__: #means it's the top node
+            if "inline_indices" in node.__dict__: #means it's the first ArrayAccess node
                 #number of [...] in the expression:
                 access_length = len (node.inline_indices)
                 defined_type = p[1]["type"]
@@ -662,7 +662,6 @@ def export_array_access_to_json (node, parent_node, slot = 0):
 
             index_nodes = node.index.emit_json( node.node_id, 1)
 
-            #final_edge = make_json_edge(node.node_id, parent_node, 0, slot, True)
             # we create final edge aimed at scope node only when it's a terminal ArrayAccess-node
             if not node.subarray:
                 final_edges = [make_json_edge(node.node_id, current_scope, 0, slot, True)]
@@ -679,8 +678,8 @@ def export_array_access_to_json (node, parent_node, slot = 0):
                 sub_nodes = subarray["nodes"]
                 sub_edges = subarray["edges"] + subarray["final_edges"]
 
-            return dict(nodes = [ret_val] + index_nodes["nodes"] + sub_nodes,
-                        edges = index_nodes["edges"] + [array_input_edge] + index_nodes["final_edges"] + sub_edges,
+            return dict(nodes       = [ret_val] + index_nodes["nodes"] + sub_nodes,
+                        edges       = index_nodes["edges"] + [array_input_edge] + index_nodes["final_edges"] + sub_edges,
                         final_edges = final_edges)
 
     # if we didn't find it, raise an exception:
