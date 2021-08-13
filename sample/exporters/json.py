@@ -574,7 +574,8 @@ def export_array_access_to_json (node, parent_node, slot = 0):
     # TODO check with array's definition if types and dimensions match
 
     # need to get array's type:
-    params = json_nodes[current_scope]["params"]
+    params     = json_nodes[current_scope]["params"]
+    scope_node = json_nodes[current_scope]
 
     if not params:
         raise Exception ("Error accessing the array: current scope doesn't have any variables", node.location)
@@ -589,6 +590,20 @@ def export_array_access_to_json (node, parent_node, slot = 0):
             # need to lower dimensions of the array in "type" according to node's index:
             # i.e. array of array of integer -> array of integer
             # array_index is a number (beginning from zero) of a "[ index ]" block in "A[][index][]...[]"
+
+            #check if array's measurements correspond to what we request in here:
+            if "inline_indices" in node.__dict__: #means it's the top node
+                #number of [...] in the expression:
+                access_length = len (node.inline_indices)
+                defined_type = p[1]["type"]
+                # basically see if there is enough dimensions in array's definition for the eamount of definitions we use
+                # in our ArrayAccess:
+                try:
+                    for i in range(access_length):
+                        defined_type = defined_type["element"] if "element" in defined_type else defined_type["type"]
+                except:
+                    raise Exception ("Array's (%s, %s) defined dimensions  and ArrayAccess dimentions %s mismatch" % (p[0],scope_node["location"], node.location))
+
             type_ = p[1]["type"]
             for i in range (node.array_index):
                 type_ = type_["element"]
@@ -616,13 +631,13 @@ def export_array_access_to_json (node, parent_node, slot = 0):
             # we create final edge aimed at scope node only when it's a terminal ArrayAccess-node
             if not node.subarray:
                 final_edge = make_json_edge(node.node_id, current_scope, 0, slot, True)
-            
+
             array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, False, parameter = True)
 
             sub_nodes = []
             sub_edges = []
-            
-            
+
+
             if node.subarray:
                 subarray = node.subarray.emit_json(node.node_id, slot = 0)
                 sub_nodes = subarray["nodes"]
@@ -630,7 +645,7 @@ def export_array_access_to_json (node, parent_node, slot = 0):
 
             return dict(nodes = [ret_val] + index_nodes["nodes"] + sub_nodes,
                         edges = index_nodes["edges"] + [array_input_edge] + index_nodes["final_edges"] + sub_edges,
-                        final_edges = [final_edge] if not node.subarray else [])# if it's not a terminal AA dont return final_edge yet
+                        final_edges = [final_edge] if not node.subarray else [])# if it's not a terminal AA don't return final_edge yet
 
     # if we didn't find it, raise an exception:
     raise Exception ("Array %s not found in this scope!(%s)" % (node.name, node.location))
