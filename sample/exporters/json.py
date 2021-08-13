@@ -41,6 +41,24 @@ json_nodes = {}
 
 #---------------------------------------------------------------------------------------------
 
+def check_type_matching(c_src_type, c_dst_type, from_, to):
+
+    if c_src_type != c_dst_type:
+        #print ([k for k in ast_.node.Node.nodes])
+        src_node = ast_.node.Node.nodes[from_]
+        dst_node = ast_.node.Node.nodes[to]
+        print (c_src_type, c_dst_type,"\n",  src_node, dst_node, current_scope)
+
+        summary = ""
+        if current_scope == to:
+            summary = "function or scope return type doesn't match the returned value"
+
+        raise(Exception("Type mismatch between %s and %s (%s)" %
+                    (src_node.location, dst_node.location, summary)))
+
+
+#---------------------------------------------------------------------------------------------
+
 
 def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = False):
 
@@ -66,7 +84,7 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
         print(exc_type, fname, exc_tb.tb_lineno)
     #print (from_, to, "\n")
     #print (src_type,"\n",  dst_type, "\n", src_type==dst_type)
-    
+
     #check if parameters match:
     #make copies for comparison (we are going to remove locations)
     def remove_locations(dict_):
@@ -75,22 +93,12 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
             if type(v)==dict:
                 dict_[k] = remove_locations(v)
         return (dict_)
-        
+
     c_src_type = remove_locations(copy.deepcopy(src_type))
     c_dst_type = remove_locations(copy.deepcopy(dst_type))
-    
-    src_node = ast_.node.Node.nodes[from_]
-    dst_node = ast_.node.Node.nodes[to]
-    
-    summary = ""
-    if current_scope == to:
-        summary = "function or scope return type doesn't match the returned value"
-    
-    if c_src_type != c_dst_type:
-        raise(Exception("Type mismatch between %s and %s (%s)" % 
-                    (src_node.location, dst_node.location, summary)))
-        
-        
+
+    check_type_matching(c_src_type, c_dst_type, from_, to)
+
     return [
                 {
                     "index"  : src_index,

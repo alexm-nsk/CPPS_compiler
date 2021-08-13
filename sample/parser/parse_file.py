@@ -77,9 +77,9 @@ class TreeVisitor(NodeVisitor):
         if end_row == 1: end_row += self.column_offset
 
         return "{}:{}-{}:{}".format(start_row + self.line_offset,
-                                    start_column + 1,
+                                    start_column,
                                     end_row + self.line_offset,
-                                    end_column + 1)
+                                    end_column)
 
     # rule: type          = ("array" _ "of" _ type ) / std_type
     def visit_type(self, node, visited_children):
@@ -166,9 +166,7 @@ class TreeVisitor(NodeVisitor):
     def visit_call(self, node, visited_children):
 
         args = unpack_rec_list(visited_children[5])
-
         function_name = visited_children[1]
-
         ret_val = Call(**dict(function_name = function_name,
                               args = args,
                               location = self.get_location(node))

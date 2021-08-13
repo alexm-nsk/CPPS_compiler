@@ -30,6 +30,7 @@ from exporters.llvm import *
 
 
 class Node:
+    
     nodes = {}
     node_counter = 0
 
@@ -109,11 +110,11 @@ class If(Node):
         super().__init__(**kwargs)
         for cond in self.condition:
             cond.node_id  = Node.get_node_id()
+            Node.nodes[cond.node_id] = cond
 
         for name, branch in self.branches.items():
             branch["node_id"]  = Node.get_node_id()
-            for br in branch:
-                pass
+            Node.nodes[branch["node_id"]] = branch
 
         self.name = "if_"
 
@@ -128,6 +129,7 @@ class Algebraic(Node):
         super().__init__(**kwargs, no_id = True)
 
         self.name = "algebraic"
+        
 
     def emit_json(self, parent_node, slot = 0):
         return (export_algebraic_to_json(self, parent_node, slot))
