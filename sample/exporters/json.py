@@ -33,6 +33,7 @@ import sys, os
 
 from ast_.port import *
 from sisal_type.sisal_type import *
+from ast_.node import *
 
 current_scope = ""
 json_nodes = {}
@@ -63,8 +64,33 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
-   # print (from_, to, "\n")
-   # print (src_type,"\n",  dst_type, "\n")
+    #print (from_, to, "\n")
+    #print (src_type,"\n",  dst_type, "\n", src_type==dst_type)
+    
+    #check if parameters match:
+    #make copies for comparison (we are going to remove locations)
+    def remove_locations(dict_):
+        for k,v in dict_.items():
+            if k=="location": dict_[k]=""
+            if type(v)==dict:
+                dict_[k] = remove_locations(v)
+        return (dict_)
+        
+    c_src_type = remove_locations(copy.deepcopy(src_type))
+    c_dst_type = remove_locations(copy.deepcopy(dst_type))
+    
+    src_node = ast_.node.Node.nodes[from_]
+    dst_node = ast_.node.Node.nodes[to]
+    
+    summary = ""
+    if current_scope == to:
+        summary = "function or scope return type doesn't match the returned value"
+    
+    if c_src_type != c_dst_type:
+        raise(Exception("Type mismatch between %s and %s (%s)" % 
+                    (src_node.location, dst_node.location, summary)))
+        
+        
     return [
                 {
                     "index"  : src_index,
@@ -632,7 +658,6 @@ def export_array_access_to_json (node, parent_node, slot = 0):
             # we create final edge aimed at scope node only when it's a terminal ArrayAccess-node
             if not node.subarray:
                 final_edge = make_json_edge(node.node_id, current_scope, 0, slot, True)
-
                 array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, False, parameter = False)
             else:
                 array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, False, parameter = True)
