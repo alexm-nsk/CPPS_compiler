@@ -59,6 +59,8 @@ def check_type_matching(c_src_type, c_dst_type, from_, to):
 
 #---------------------------------------------------------------------------------------------
 
+# "parent" means destination node contains the source node so we connect source node's output
+# with destination (parent) node's output instead of it's input
 
 def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = False):
 
@@ -505,8 +507,6 @@ def export_algebraic_to_json (node, parent_node, fslot = 0):
 
 def export_identifier_to_json (node, parent_node, slot = 0):
 
-    # TODO check the case with loop to self in "then"
-
     parent = json_nodes[ parent_node ]
     scope = json_nodes[ current_scope ]
     final_edge = {}
@@ -638,27 +638,26 @@ def export_array_access_to_json (node, parent_node, slot = 0):
                         defined_type = defined_type["element"] if "element" in defined_type else defined_type["type"]
                 except:
                     raise Exception ("Array's (%s, %s) defined dimensions are smaller than ArrayAccess' dimensions (%s)." % (p[0],scope_node["location"], node.location))
-
+            
+            # strip "array of"s according to current dimension:
             type_ = p[1]["type"]
             for i in range (node.array_index):
                 type_ = type_["element"]
-
-            # generate ports:
-            in_ports = [dict(node_Id = node.node_id, type = type_, index = 0),
-                        dict(node_Id = node.node_id, type = dict(location = "not applicable", name = "integer"), index = 1)]
-
-            #                                               we put out a type_["element"]
-            out_ports = [dict(node_Id = node.node_id, type = type_["element"], index = 0)]
-
-            ret_val = dict(
+            
+            # form our dict taht we will turn into json
+            json_node = dict(
                                 name = "ArrayAccess",
                                 location = node.location,
-                                inPorts = in_ports,
-                                outPorts = out_ports,
+                                
+                                inPorts = [dict(node_Id = node.node_id, type = type_, index = 0),
+                                           dict(node_Id = node.node_id, type = dict(location = "not applicable", name = "integer"), index = 1)],
+                                           
+                                outPorts = [dict(node_Id = node.node_id, type = type_["element"], index = 0)],
+                                
                                 id = node.node_id
                             )
 
-            json_nodes[node.node_id] = ret_val
+            json_nodes[node.node_id] = json_node
 
             index_nodes = node.index.emit_json( node.node_id, 1)
 
@@ -678,7 +677,7 @@ def export_array_access_to_json (node, parent_node, slot = 0):
                 sub_nodes = subarray["nodes"]
                 sub_edges = subarray["edges"] + subarray["final_edges"]
 
-            return dict(nodes       = [ret_val] + index_nodes["nodes"] + sub_nodes,
+            return dict(nodes       = [json_node] + index_nodes["nodes"] + sub_nodes,
                         edges       = index_nodes["edges"] + [array_input_edge] + index_nodes["final_edges"] + sub_edges,
                         final_edges = final_edges)
 
