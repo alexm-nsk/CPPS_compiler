@@ -47,7 +47,7 @@ def check_type_matching(c_src_type, c_dst_type, from_, to):
         #print ([k for k in ast_.node.Node.nodes])
         src_node = ast_.node.Node.nodes[from_]
         dst_node = ast_.node.Node.nodes[to]
-        print (c_src_type, c_dst_type,"\n",  src_node, dst_node, current_scope)
+        #print (c_src_type, c_dst_type,"\n",  src_node, dst_node, current_scope)
 
         summary = ""
         if current_scope == to:
@@ -97,7 +97,7 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
     c_src_type = remove_locations(copy.deepcopy(src_type))
     c_dst_type = remove_locations(copy.deepcopy(dst_type))
 
-    check_type_matching(c_src_type, c_dst_type, from_, to)
+    #check_type_matching(c_src_type, c_dst_type, from_, to)
 
     return [
                 {
@@ -665,9 +665,10 @@ def export_array_access_to_json (node, parent_node, slot = 0):
             #final_edge = make_json_edge(node.node_id, parent_node, 0, slot, True)
             # we create final edge aimed at scope node only when it's a terminal ArrayAccess-node
             if not node.subarray:
-                final_edge = make_json_edge(node.node_id, current_scope, 0, slot, True)
+                final_edges = [make_json_edge(node.node_id, current_scope, 0, slot, True)]
                 array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, False, parameter = False)
             else:
+                final_edges = []
                 array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, False, parameter = True)
 
             sub_nodes = []
@@ -680,7 +681,7 @@ def export_array_access_to_json (node, parent_node, slot = 0):
 
             return dict(nodes = [ret_val] + index_nodes["nodes"] + sub_nodes,
                         edges = index_nodes["edges"] + [array_input_edge] + index_nodes["final_edges"] + sub_edges,
-                        final_edges = [final_edge] if not node.subarray else [])# if it's not a terminal AA don't return final_edge yet
+                        final_edges = final_edges)
 
     # if we didn't find it, raise an exception:
     raise Exception ("Array %s not found in this scope!(%s)" % (node.name, node.location))
