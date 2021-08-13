@@ -585,7 +585,13 @@ def export_array_access_to_json (node, parent_node, slot = 0):
         # params go in pairs["name", {description}], so p[0] is the name
         # and we compare it with name of arrray requested:
         if p[0] == node.name:
+            
+            # need to lower dimensions of the array in "type" according to node's index:
+            # i.e. array of array of integer -> array of integer
+            
             type_ = p[1]["type"]
+            for i in range (node.array_index):
+                type_ = type_["element"]
 
             in_ports = [dict(node_Id = node.node_id, type = type_, index = 0),
                         dict(node_Id = node.node_id, type = dict(location = "not applicable", name = "integer"), index = 1)]

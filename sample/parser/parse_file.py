@@ -241,7 +241,7 @@ class TreeVisitor(NodeVisitor):
     #----------------------------------------------------
     #
     #----------------------------------------------------
-    # rule: array_access       = ( identifier / array_access ) _ "[" _ number_literal  _"]"
+    # rule: array_access       = identifier  (_ "[" _ array_index  _"]")+
     def visit_array_access(self, node, visited_children):
         array_name  = visited_children[0].name
 
@@ -249,13 +249,14 @@ class TreeVisitor(NodeVisitor):
 
         # creates a "nested doll" of Array objects
         # it facilitates the numeration of nodes
-        def make_array(index = 0):
+        def make_array(index = 0, array_index = 0):
             if index < len(indices):
                 return ArrayAccess(
                                 name     = array_name,
                                 location = self.get_location(node),
                                 index    = indices[index],
-                                subarray = make_array(index + 1),
+                                subarray = make_array(index + 1, array_index + 1),
+                                array_index = array_index
                             )
 
         array = make_array()
