@@ -63,7 +63,7 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
-
+    #print (src_type, dst_type)
     return [
                 {
                     "index"  : src_index,
@@ -585,14 +585,15 @@ def export_array_access_to_json (node, parent_node, slot = 0):
         # params go in pairs["name", {description}], so p[0] is the name
         # and we compare it with name of arrray requested:
         if p[0] == node.name:
-            
+
             # need to lower dimensions of the array in "type" according to node's index:
             # i.e. array of array of integer -> array of integer
-            
+            # array_index is a number (beginning from zero) of a "[ index ]" block in "A[][index][]...[]"
             type_ = p[1]["type"]
             for i in range (node.array_index):
                 type_ = type_["element"]
 
+            # generate ports:
             in_ports = [dict(node_Id = node.node_id, type = type_, index = 0),
                         dict(node_Id = node.node_id, type = dict(location = "not applicable", name = "integer"), index = 1)]
 
@@ -611,20 +612,25 @@ def export_array_access_to_json (node, parent_node, slot = 0):
 
             index_nodes = node.index.emit_json( node.node_id, 1)
 
-            final_edge = make_json_edge(node.node_id, parent_node, 0, slot, True)
+            #final_edge = make_json_edge(node.node_id, parent_node, 0, slot, True)
+            # we create final edge aimed at scope node only when it's a terminal ArrayAccess-node
+            if not node.subarray:
+                final_edge = make_json_edge(node.node_id, current_scope, 0, slot, True)
+            
             array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, False, parameter = True)
 
             sub_nodes = []
             sub_edges = []
-
+            
+            
             if node.subarray:
                 subarray = node.subarray.emit_json(node.node_id, slot = 0)
                 sub_nodes = subarray["nodes"]
-                sub_edges = subarray["edges"] + subarray["final_edges"]                
+                sub_edges = subarray["edges"] + subarray["final_edges"]
 
             return dict(nodes = [ret_val] + index_nodes["nodes"] + sub_nodes,
                         edges = index_nodes["edges"] + [array_input_edge] + index_nodes["final_edges"] + sub_edges,
-                        final_edges = [final_edge] )
+                        final_edges = [final_edge] if not node.subarray else [])# if it's not a terminal AA dont return final_edge yet
 
     # if we didn't find it, raise an exception:
     raise Exception ("Array %s not found in this scope!(%s)" % (node.name, node.location))

@@ -95,7 +95,7 @@ def make_node(node):
                 e[0]["nodeId"],e[1]["nodeId"],
                 source_port_type + str(e[0]["index"])
                 , target_port_type + str(e[1]["index"]),
-                e[0]["type"])
+                e[1]["type"])
 
         return edges_string
 

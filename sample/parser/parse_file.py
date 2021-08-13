@@ -77,9 +77,9 @@ class TreeVisitor(NodeVisitor):
         if end_row == 1: end_row += self.column_offset
 
         return "{}:{}-{}:{}".format(start_row + self.line_offset,
-                                    start_column,
+                                    start_column + 1,
                                     end_row + self.line_offset,
-                                    end_column)
+                                    end_column + 1)
 
     # rule: type          = ("array" _ "of" _ type ) / std_type
     def visit_type(self, node, visited_children):
@@ -246,6 +246,7 @@ class TreeVisitor(NodeVisitor):
         array_name  = visited_children[0].name
 
         indices = [index_group[3] for index_group in visited_children[1]]
+        #indices.reverse()
 
         # creates a "nested doll" of Array objects
         # it facilitates the numeration of nodes
