@@ -30,7 +30,7 @@ from exporters.llvm import *
 
 
 class Node:
-    
+
     nodes = {}
     node_counter = 0
 
@@ -60,8 +60,10 @@ class Node:
         pass
 
     def emit_llvm(self, scope = None):
-        class_name = self.__class__.__name__
-        return eval ( "export_" + class_name.lower() + "_to_llvm(self, scope)")
+        if not type(self).emitjson:
+            class_name = self.__class__.__name__
+            type(self).emitjson = eval ( "export_" + class_name.lower() + "_to_llvm");
+        return type(self).emitjson(self, scope)
 
     def __repr__(self):
         return (str(self.__dict__))
@@ -121,7 +123,7 @@ class If(Node):
     def emit_json(self, parent_node, slot = 0):
         return (export_if_to_json(self, parent_node, slot))
 
-        
+
 class Algebraic(Node):
 
     def __init__(self, *args, **kwargs):
@@ -129,7 +131,7 @@ class Algebraic(Node):
         super().__init__(**kwargs, no_id = True)
 
         self.name = "algebraic"
-        
+
 
     def emit_json(self, parent_node, slot = 0):
         return (export_algebraic_to_json(self, parent_node, slot))
