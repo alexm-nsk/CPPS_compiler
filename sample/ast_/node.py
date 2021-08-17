@@ -62,8 +62,8 @@ class Node:
     def emit_llvm(self, scope = None):
         if not type(self).emitjson:
             class_name = self.__class__.__name__
-            type(self).emitjson = eval ( "export_" + class_name.lower() + "_to_llvm");
-        return type(self).emitjson(self, scope)
+            type(self).emitllvm = eval ( "export_" + class_name.lower() + "_to_llvm");
+        return type(self).emitllvm(self, scope)
 
     def __repr__(self):
         return (str(self.__dict__))
