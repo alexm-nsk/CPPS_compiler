@@ -191,7 +191,7 @@ field_sub_table = dict(
 
 def export_function_to_json(node, parent_node, slot = 0):
 
-    global current_scope, json_nodes
+    global current_scope
 
     current_scope = node.node_id
     ret_val = {}
@@ -413,6 +413,7 @@ def gen_ports(ins, outs, node_id):
 
 
 def return_type(left, right):
+
     if left == "real" or right == "real":
         return "real"
     else:
@@ -639,24 +640,24 @@ def export_array_access_to_json (node, parent_node, slot):
                         defined_type = defined_type["element"] if "element" in defined_type else defined_type["type"]
                 except:
                     raise Exception ("Array's (%s, %s) defined dimensions are smaller than ArrayAccess' dimensions (%s)." % (var_name,scope_node["location"], node.location))
-            
+
             # strip "array of"s according to current dimension:
             type_ = var_desc["type"]
             for i in range (node.array_index):
                 type_ = type_["element"]
-            
+
             # form our dict that we will turn into json
             json_node = dict(
                                 name = "ArrayAccess",
                                 location = node.location,
-                                
+
                                 inPorts = [dict(node_Id = node.node_id, type = type_, index = 0),
-                                           dict(node_Id = node.node_id, type = 
-                                                    dict(location = "not applicable", name = "integer"), 
+                                           dict(node_Id = node.node_id, type =
+                                                    dict(location = "not applicable", name = "integer"),
                                            index = 1)],
-                                           
+
                                 outPorts = [dict(node_Id = node.node_id, type = type_["element"], index = 0)],
-                                
+
                                 id = node.node_id
                             )
 
