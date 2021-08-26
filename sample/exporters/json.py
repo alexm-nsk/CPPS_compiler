@@ -100,7 +100,7 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
     c_src_type = remove_locations(copy.deepcopy(src_type))
     c_dst_type = remove_locations(copy.deepcopy(dst_type))
 
-    check_type_matching(c_src_type, c_dst_type, from_, to)
+    #check_type_matching(c_src_type, c_dst_type, from_, to)
 
     return [
                 {
@@ -422,7 +422,7 @@ def return_type(left, right):
 #---------------------------------------------------------------------------------------------
 
 
-def export_algebraic_to_json (node, parent_node, fslot = 0):
+def export_algebraic_to_json (node, parent_node, slot = 0):
 
     return_nodes = []
     return_edges = []
@@ -494,7 +494,7 @@ def export_algebraic_to_json (node, parent_node, fslot = 0):
     # the node that puts out result of this algebraic expression:
     final_node = get_nodes(exp)["id"]
     #     Here we check if target node is the scope, this determines wether we target our output edge at "in" or "out" port
-    final_edge = make_json_edge(final_node, parent_node, 0, fslot, parent = (parent_node == current_scope))
+    final_edge = make_json_edge(final_node, parent_node, 0, slot, parent = (parent_node == current_scope))
 
     # TODO is this necessary?
     if(not "edges" in json_nodes[parent_node]):
@@ -632,7 +632,7 @@ def export_array_access_to_json (node, parent_node, slot = 0):
                 #number of [...] in the expression:
                 access_length = len (node.inline_indices)
                 defined_type = var_desc["type"]
-                # basically see if there is enough dimensions in array's definition for the ammount of definitions we use
+                # check if there is enough dimensions in array's definition for the ammount of definitions we use
                 # in our ArrayAccess:
                 try:
                     for i in range(access_length):
