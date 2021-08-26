@@ -365,7 +365,7 @@ def export_call_to_json (node, parent_node, slot, current_scope):
     args_edges = []
 
     for i, arg in enumerate(node.args):
-        children = arg[0].emit_json(node.node_id, 0, current_scope)
+        children = arg.emit_json(node.node_id, 0, current_scope)
         args_nodes.extend ( children ["nodes"] )
         args_edges.extend ( children ["edges"] + children ["final_edges"])
 
