@@ -181,7 +181,7 @@ def export_literal_to_llvm(literal_node, scope):
 def export_call_to_llvm(function_call_node, scope):
 
     name = function_call_node.function_name.name
-    args = [ arg[0].emit_llvm(scope) for arg in function_call_node.args ]
+    args = [ arg.emit_llvm(scope) for arg in function_call_node.args ]
 
     # ~ Call function fn with arguments args, a sequence of values.
     # ~ cconv is the optional calling convention.
