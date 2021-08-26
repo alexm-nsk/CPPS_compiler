@@ -51,7 +51,8 @@ def check_type_matching(c_src_type, c_dst_type, from_, to):
 
         summary = ""
         if current_scope == to:
-            summary = "function or scope return type doesn't match the returned value"
+            summary = "function or scope return type doesn't match the returned value (%s vs. %s)" \
+                            % (c_src_type["name"], c_dst_type["name"])
 
         raise(Exception("Type mismatch between %s and %s (%s)" %
                     (src_node.location, dst_node.location, summary)))
@@ -99,7 +100,7 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
     c_src_type = remove_locations(copy.deepcopy(src_type))
     c_dst_type = remove_locations(copy.deepcopy(dst_type))
 
-    #check_type_matching(c_src_type, c_dst_type, from_, to)
+    check_type_matching(c_src_type, c_dst_type, from_, to)
 
     return [
                 {
@@ -617,10 +618,10 @@ def export_array_access_to_json (node, parent_node, slot = 0):
 
     # find this array in scope's parameters:
     for array_index_in_params, p in enumerate(params):
-
+        var_name, var_desc = p
         # params go in pairs["name", {description}], so p[0] is the name
         # and we compare it with name of arrray requested:
-        if p[0] == node.name:
+        if var_name == node.name:
 
             # need to lower dimensions of the array in "type" according to node's index:
             # i.e. array of array of integer -> array of integer
@@ -630,17 +631,17 @@ def export_array_access_to_json (node, parent_node, slot = 0):
             if "inline_indices" in node.__dict__: #means it's the first ArrayAccess node
                 #number of [...] in the expression:
                 access_length = len (node.inline_indices)
-                defined_type = p[1]["type"]
+                defined_type = var_desc["type"]
                 # basically see if there is enough dimensions in array's definition for the ammount of definitions we use
                 # in our ArrayAccess:
                 try:
                     for i in range(access_length):
                         defined_type = defined_type["element"] if "element" in defined_type else defined_type["type"]
                 except:
-                    raise Exception ("Array's (%s, %s) defined dimensions are smaller than ArrayAccess' dimensions (%s)." % (p[0],scope_node["location"], node.location))
+                    raise Exception ("Array's (%s, %s) defined dimensions are smaller than ArrayAccess' dimensions (%s)." % (var_name,scope_node["location"], node.location))
             
             # strip "array of"s according to current dimension:
-            type_ = p[1]["type"]
+            type_ = var_desc["type"]
             for i in range (node.array_index):
                 type_ = type_["element"]
             
