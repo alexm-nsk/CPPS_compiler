@@ -160,12 +160,12 @@ class TreeVisitor(NodeVisitor):
 
     # exp (_ "," _ exp)*
     def visit_args_list(self, node, visited_children):
-        return visited_children
+        return unpack_rec_list(visited_children)
 
     # !("function" _) identifier _ lpar _ args_list _ rpar
     def visit_call(self, node, visited_children):
 
-        args = unpack_rec_list(visited_children[5])
+        args = visited_children[5]
         function_name = visited_children[1]
         ret_val = Call(**dict(function_name = function_name,
                               args = [a[0] for a in args],
