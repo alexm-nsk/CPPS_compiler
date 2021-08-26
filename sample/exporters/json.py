@@ -191,8 +191,6 @@ field_sub_table = dict(
 
 def export_function_to_json(node, parent_node, slot = 0, current_scope = None):
 
-    #global current_scope
-
     current_scope = node.node_id
     ret_val = {}
 
@@ -445,9 +443,10 @@ def export_algebraic_to_json (node, parent_node, slot, current_scope):
                 # find the argument with identifier's name in scope's paramaeters:
                 identifier_slot = -1
                 for n, p in enumerate(json_nodes[current_scope]["params"]):
-                    if(p[0] == name):
+                    var_name, var_type = p
+                    if(var_name == name):
                         identifier_slot = n
-                        type_ = p[1]["type"]["name"]
+                        type_ = var_type["type"]["name"]
                         break
                 # if we haven't found it, raise an exception:
                 if identifier_slot == -1:
