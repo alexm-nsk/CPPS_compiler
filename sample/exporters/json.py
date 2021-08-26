@@ -335,7 +335,7 @@ def export_if_to_json(node, parent_node, slot):
 #---------------------------------------------------------------------------------------------
 
 
-def export_call_to_json (node, parent_node, slot = 0):
+def export_call_to_json (node, parent_node, slot):
 
     function_name = node.function_name.name
 
@@ -422,7 +422,7 @@ def return_type(left, right):
 #---------------------------------------------------------------------------------------------
 
 
-def export_algebraic_to_json (node, parent_node, slot = 0):
+def export_algebraic_to_json (node, parent_node, slot):
 
     return_nodes = []
     return_edges = []
@@ -521,7 +521,7 @@ def export_identifier_to_json (node, parent_node, slot = 0):
 #---------------------------------------------------------------------------------------------
 
 
-def export_literal_to_json (node, parent_node, slot = 0):
+def export_literal_to_json (node, parent_node, slot):
 
     ret_val = dict(
                     id = node.node_id,
@@ -569,7 +569,7 @@ operator_in_type_map = {
 #---------------------------------------------------------------------------------------------
 
 
-def export_bin_to_json (node, parent_node, slot = 0):
+def export_bin_to_json (node, parent_node, slot):
 
     ret_val = dict(
                     id = node.node_id,
@@ -606,7 +606,7 @@ def export_bin_to_json (node, parent_node, slot = 0):
 #---------------------------------------------------------------------------------------------
 
 
-def export_array_access_to_json (node, parent_node, slot = 0):
+def export_array_access_to_json (node, parent_node, slot):
     # TODO check with array's definition if types and dimensions match
 
     # need to get array's type:
