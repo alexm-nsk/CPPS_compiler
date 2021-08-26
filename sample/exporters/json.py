@@ -35,7 +35,7 @@ from ast_.port import *
 from sisal_type.sisal_type import *
 from ast_.node import *
 
-current_scope = ""
+
 json_nodes = {}
 
 
@@ -189,9 +189,9 @@ field_sub_table = dict(
 #---------------------------------------------------------------------------------------------
 
 
-def export_function_to_json(node, parent_node, slot = 0):
+def export_function_to_json(node, parent_node, slot = 0, current_scope = None):
 
-    global current_scope
+    #global current_scope
 
     current_scope = node.node_id
     ret_val = {}
@@ -214,7 +214,7 @@ def export_function_to_json(node, parent_node, slot = 0):
     ret_val["edges"] = []
 
     for n, child in enumerate(node.nodes):
-        json_child = child.emit_json( node.node_id , n)
+        json_child = child.emit_json( node.node_id, n, current_scope)
 
         ret_val["nodes"].extend(json_child["nodes"])
         ret_val["edges"] += json_child["edges"] + json_child["final_edges"]
@@ -228,9 +228,8 @@ def export_function_to_json(node, parent_node, slot = 0):
 #---------------------------------------------------------------------------------------------
 
 
-def export_if_to_json(node, parent_node, slot):
+def export_if_to_json(node, parent_node, slot, current_scope):
 
-    global current_scope
     scope = current_scope
     ret_val = {}
 
@@ -291,7 +290,7 @@ def export_if_to_json(node, parent_node, slot):
         for n, child_node in enumerate(branch["nodes"]):
 
             current_scope = branch["node_id"]
-            children = child_node.emit_json(current_scope, n)
+            children = child_node.emit_json(current_scope, n, current_scope)
             current_scope = scope
 
             json_branch["edges"].extend(children["edges"] + children["final_edges"])
@@ -312,7 +311,7 @@ def export_if_to_json(node, parent_node, slot):
     json_nodes[node.condition[0].node_id] = ret_val["condition"]
 
     current_scope = node.condition[0].node_id
-    condition_children = node.condition[0].emit_json(node.condition[0].node_id)
+    condition_children = node.condition[0].emit_json(node.condition[0].node_id, 0, current_scope)
     ret_val["condition"]["edges"] += condition_children["edges"] + condition_children["final_edges"]
     ret_val["condition"]["nodes"] =  condition_children["nodes"]
     current_scope = scope
@@ -335,7 +334,7 @@ def export_if_to_json(node, parent_node, slot):
 #---------------------------------------------------------------------------------------------
 
 
-def export_call_to_json (node, parent_node, slot):
+def export_call_to_json (node, parent_node, slot, current_scope):
 
     function_name = node.function_name.name
 
@@ -368,7 +367,7 @@ def export_call_to_json (node, parent_node, slot):
     args_edges = []
 
     for i, arg in enumerate(node.args):
-        children = arg[0].emit_json(node.node_id)
+        children = arg[0].emit_json(node.node_id, 0, current_scope)
         args_nodes.extend ( children ["nodes"] )
         args_edges.extend ( children ["edges"] + children ["final_edges"])
 
@@ -423,7 +422,7 @@ def return_type(left, right):
 #---------------------------------------------------------------------------------------------
 
 
-def export_algebraic_to_json (node, parent_node, slot):
+def export_algebraic_to_json (node, parent_node, slot, current_scope):
 
     return_nodes = []
     return_edges = []
@@ -457,7 +456,7 @@ def export_algebraic_to_json (node, parent_node, slot):
                 return dict(id = current_scope, slot = identifier_slot, type = type_, parameter = True)
             else:
 
-                nodes = operand.emit_json(current_scope)
+                nodes = operand.emit_json(current_scope, 0, current_scope)
                 return_nodes.extend(nodes["nodes"])
                 return_edges.extend(nodes["edges"])
                 type_ = nodes["nodes"][0]["outPorts"][0]["type"]["name"]
@@ -470,7 +469,7 @@ def export_algebraic_to_json (node, parent_node, slot):
             left  = chunk[  : 1]
             right = chunk[2 :  ]
 
-            op_json = operator.emit_json(parent_node)["nodes"]
+            op_json = operator.emit_json(parent_node, 0, current_scope)["nodes"]
             return_nodes.extend(op_json)
 
             left_node = get_nodes(left)
@@ -507,7 +506,7 @@ def export_algebraic_to_json (node, parent_node, slot):
 #---------------------------------------------------------------------------------------------
 
 
-def export_identifier_to_json (node, parent_node, slot = 0):
+def export_identifier_to_json (node, parent_node, slot, current_scope):
 
     parent = json_nodes[ parent_node ]
     scope = json_nodes[ current_scope ]
@@ -522,7 +521,7 @@ def export_identifier_to_json (node, parent_node, slot = 0):
 #---------------------------------------------------------------------------------------------
 
 
-def export_literal_to_json (node, parent_node, slot):
+def export_literal_to_json (node, parent_node, slot, current_scope):
 
     ret_val = dict(
                     id = node.node_id,
@@ -570,7 +569,7 @@ operator_in_type_map = {
 #---------------------------------------------------------------------------------------------
 
 
-def export_bin_to_json (node, parent_node, slot):
+def export_bin_to_json (node, parent_node, slot, current_scope):
 
     ret_val = dict(
                     id = node.node_id,
@@ -607,7 +606,7 @@ def export_bin_to_json (node, parent_node, slot):
 #---------------------------------------------------------------------------------------------
 
 
-def export_array_access_to_json (node, parent_node, slot):
+def export_array_access_to_json (node, parent_node, slot, current_scope):
     # TODO check with array's definition if types and dimensions match
 
     # need to get array's type:
@@ -663,7 +662,7 @@ def export_array_access_to_json (node, parent_node, slot):
 
             json_nodes[node.node_id] = json_node
 
-            index_nodes = node.index.emit_json( node.node_id, 1)
+            index_nodes = node.index.emit_json( node.node_id, 1, current_scope)
 
             # we create final edge aimed at scope node only when it's a terminal (the final dimension's) ArrayAccess-node
             # i.e A[][][][*this one*]
@@ -679,7 +678,7 @@ def export_array_access_to_json (node, parent_node, slot):
             sub_edges = []
 
             if node.subarray:
-                subarray = node.subarray.emit_json(node.node_id, slot = 0)
+                subarray = node.subarray.emit_json(node.node_id, slot, current_scope)
                 sub_nodes = subarray["nodes"]
                 sub_edges = subarray["edges"] + subarray["final_edges"]
 

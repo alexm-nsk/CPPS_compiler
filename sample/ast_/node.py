@@ -60,7 +60,7 @@ class Node:
         pass
 
     def emit_llvm(self, scope = None):
-        if not type(self).emitjson:
+        if not getattr(type(self),"emitllvm", None):
             class_name = self.__class__.__name__
             type(self).emitllvm = eval ( "export_" + class_name.lower() + "_to_llvm");
         return type(self).emitllvm(self, scope)
@@ -81,8 +81,8 @@ class Function(Node):
         super().__init__(**kwargs)
         Function.functions[self.function_name] = self
 
-    def emit_json(self, parent_node, slot = 0):
-            return export_function_to_json(self, parent_node)
+    def emit_json(self, parent_node, slot = 0, current_scope = None):
+            return export_function_to_json(self, parent_node,slot, current_scope)
 
     def emit_graphml(self, parent_node):
             return export_function_to_graphml(self, parent_node)
@@ -93,8 +93,8 @@ class Bin(Node):
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
 
-    def emit_json(self, parent_node, slot = 0):
-        return (export_bin_to_json(self, parent_node, slot))
+    def emit_json(self, parent_node, slot, current_scope):
+        return (export_bin_to_json(self, parent_node, slot, current_scope))
 
 
 class Call(Node):
@@ -102,8 +102,8 @@ class Call(Node):
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
 
-    def emit_json(self, parent_node, slot = 0):
-        return export_call_to_json(self, parent_node, slot)
+    def emit_json(self, parent_node, slot, current_scope):
+        return export_call_to_json(self, parent_node, slot, current_scope)
 
 
 class If(Node):
@@ -120,8 +120,8 @@ class If(Node):
 
         self.name = "if_"
 
-    def emit_json(self, parent_node, slot = 0):
-        return (export_if_to_json(self, parent_node, slot))
+    def emit_json(self, parent_node, slot, current_scope):
+        return (export_if_to_json(self, parent_node, slot, current_scope))
 
 
 class Algebraic(Node):
@@ -133,8 +133,8 @@ class Algebraic(Node):
         self.name = "algebraic"
 
 
-    def emit_json(self, parent_node, slot = 0):
-        return (export_algebraic_to_json(self, parent_node, slot))
+    def emit_json(self, parent_node, slot, current_scope):
+        return (export_algebraic_to_json(self, parent_node, slot, current_scope))
 
 
 class Identifier(Node):
@@ -142,8 +142,8 @@ class Identifier(Node):
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs, no_id = True)
 
-    def emit_json(self, parent_node, slot = 0):
-        return (export_identifier_to_json(self, parent_node, slot))
+    def emit_json(self, parent_node, slot, current_scope):
+        return (export_identifier_to_json(self, parent_node, slot, current_scope))
 
 
 class Literal(Node):
@@ -151,8 +151,8 @@ class Literal(Node):
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
 
-    def emit_json(self, parent_node, slot = 0):
-        return (export_literal_to_json(self, parent_node, slot))
+    def emit_json(self, parent_node, slot, current_scope):
+        return (export_literal_to_json(self, parent_node, slot, current_scope))
 
 
 class ArrayAccess(Node):
@@ -160,5 +160,5 @@ class ArrayAccess(Node):
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
 
-    def emit_json(self, parent_node, slot = 0):
-        return (export_array_access_to_json(self, parent_node, slot))
+    def emit_json(self, parent_node, slot, current_scope):
+        return (export_array_access_to_json(self, parent_node, slot, current_scope))
