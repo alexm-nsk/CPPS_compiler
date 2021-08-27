@@ -58,7 +58,7 @@ class Node:
 
     def emit_cpp(self):
         pass
-
+    
     def emit_llvm(self, scope = None):
         if not getattr(type(self),"emitllvm", None):
             class_name = self.__class__.__name__
