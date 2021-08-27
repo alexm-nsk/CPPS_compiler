@@ -605,7 +605,7 @@ def export_bin_to_json (node, parent_node, slot, current_scope):
 #---------------------------------------------------------------------------------------------
 
 
-def export_array_access_to_json (node, parent_node, slot, current_scope):
+def export_arrayaccess_to_json (node, parent_node, slot, current_scope):
     # TODO check with array's definition if types and dimensions match
 
     # need to get array's type:

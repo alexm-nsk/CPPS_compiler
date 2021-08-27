@@ -167,9 +167,9 @@ class TreeVisitor(NodeVisitor):
 
         args = visited_children[5]
         function_name = visited_children[1]
-        ret_val = Call(**dict(function_name = function_name,
+        ret_val = Call(function_name = function_name,
                               args = args,
-                              location = self.get_location(node))
+                              location = self.get_location(node)
                           )
         return ret_val
 
