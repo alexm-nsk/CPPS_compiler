@@ -70,7 +70,7 @@ class Node:
             class_name = self.__class__.__name__
             type(self).emitjson = eval ( "export_" + class_name.lower() + "_to_json");
         return type(self).emitjson(self, parent_node, slot, current_scope)
-        
+
 
     def __repr__(self):
         return (str(self.__dict__))
@@ -97,14 +97,12 @@ class Function(Node):
 
 class Bin(Node):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(**kwargs)
+    pass
 
 
 class Call(Node):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(**kwargs)
+    pass
 
 
 class If(Node):
@@ -133,17 +131,13 @@ class Algebraic(Node):
 
 class Identifier(Node):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(**kwargs, no_id = True)
-
+    pass
 
 class Literal(Node):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(**kwargs)
+    pass
 
 
 class ArrayAccess(Node):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(**kwargs)
+    pass
