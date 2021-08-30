@@ -66,10 +66,10 @@ class Node:
         return type(self).__emit_llvm__(self, scope)
 
     def emit_json(self, parent_node, slot, current_scope):
-        if not getattr(type(self),"_emit_json_", None):
+        if not getattr(type(self),"__emit_json__", None):
             class_name = self.__class__.__name__
-            type(self)._emit_json_ = globals() [ "export_" + class_name.lower() + "_to_json"];
-        return type(self)._emit_json_(self, parent_node, slot, current_scope)
+            type(self).__emit_json__ = globals() [ "export_" + class_name.lower() + "_to_json"];
+        return type(self).__emit_json__(self, parent_node, slot, current_scope)
 
     def __repr__(self):
         return (str(self.__dict__))
