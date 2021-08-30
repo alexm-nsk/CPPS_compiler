@@ -225,7 +225,7 @@ class TreeVisitor(NodeVisitor):
 
         condition_node = visited_children[2]
         then_node      = {"nodes": visited_children[6]}
-        elseifs         = {"nodes": visited_children[8]} 
+        elseifs        = {"nodes": visited_children[8]} 
         else_node      = {"nodes": visited_children[12]}
         branches = dict(then = then_node, else_ = else_node)
 
