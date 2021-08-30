@@ -317,7 +317,6 @@ def parse_file(input_text):
 
     function_matches = re.finditer("function.*?end function", input_text, re.DOTALL)
 
-
     # parse functions separately:
 
     parsed_functions = []

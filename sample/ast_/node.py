@@ -58,7 +58,7 @@ class Node:
 
     def emit_cpp(self):
         pass
-    
+
     def emit_llvm(self, scope = None):
         if not getattr(type(self),"emitllvm", None):
             class_name = self.__class__.__name__
@@ -70,7 +70,6 @@ class Node:
             class_name = self.__class__.__name__
             type(self).emitjson = eval ( "export_" + class_name.lower() + "_to_json");
         return type(self).emitjson(self, parent_node, slot, current_scope)
-
 
     def __repr__(self):
         return (str(self.__dict__))
