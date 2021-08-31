@@ -121,12 +121,17 @@ class If(Node):
 
 class Algebraic(Node):
 
-    pass
+    def __init__(self, *args, **kwargs):
+        super().__init__(**kwargs, no_id = True)
+
 
 
 class Identifier(Node):
 
-    pass
+    def __init__(self, *args, **kwargs):
+        super().__init__(**kwargs, no_id = True)
+
+
 
 class Literal(Node):
 
