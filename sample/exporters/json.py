@@ -41,6 +41,17 @@ json_nodes = {}
 
 #---------------------------------------------------------------------------------------------
 
+
+def make_port(index, node_id, type_):
+    return dict(
+                index = 0,
+                nodeId = node_id,
+                type = type_.emit_json()
+            )
+
+
+#---------------------------------------------------------------------------------------------
+
 def check_type_matching(c_src_type, c_dst_type, from_, to):
 
     if c_src_type != c_dst_type:
@@ -526,19 +537,10 @@ def export_literal_to_json (node, parent_node, slot, current_scope):
                     id = node.node_id,
                     location = node.location,
                     inPorts = [],
-                    outPorts = [
-                                    dict(
-                                            index = 0,
-                                            nodeId = node.node_id,
-                                            type = dict(
-                                                        location = "not applicable",
-                                                        name     = "integer" #TODO put the type here
-                                                    ),
-                                        )
-                                ],
+                    outPorts = [ make_port(0, node.node_id, IntegerType() ) ],
                     value = node.value,
                     name = "Literal"
-                )
+                  )
 
     json_nodes[node.node_id] = ret_val
     final_edge = make_json_edge(node.node_id, parent_node, 0, slot, parent = (parent_node == current_scope))
