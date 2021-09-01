@@ -88,16 +88,6 @@ class Function(Node):
             return export_function_to_graphml(self, parent_node)
 
 
-class Bin(Node):
-
-    pass
-
-
-class Call(Node):
-
-    pass
-
-
 class If(Node):
 
     def __init__(self, *args, **kwargs):
@@ -119,12 +109,10 @@ class Algebraic(Node):
         super().__init__(**kwargs, no_id = True)
 
 
-
 class Identifier(Node):
 
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs, no_id = True)
-
 
 
 class Literal(Node):
@@ -133,5 +121,15 @@ class Literal(Node):
 
 
 class ArrayAccess(Node):
+
+    pass
+
+
+class Bin(Node):
+
+    pass
+
+
+class Call(Node):
 
     pass
