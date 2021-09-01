@@ -50,15 +50,6 @@ class Node:
         # TODO consider list of allowed props (https://stackoverflow.com/questions/8187082/how-can-you-set-class-attributes-from-variable-arguments-kwargs-in-python)
         self.__dict__.update(kwargs)
 
-    def emit_obj(self):
-        pass
-
-    def emit_json(self):
-        pass
-
-    def emit_cpp(self):
-        pass
-
     def emit_llvm(self, scope = None):
         if not getattr(type(self),"__emit_llvm__", None):
             class_name = self.__class__.__name__
@@ -70,6 +61,9 @@ class Node:
             class_name = self.__class__.__name__
             type(self).__emit_json__ = globals() [ "export_" + class_name.lower() + "_to_json"];
         return type(self).__emit_json__(self, parent_node, slot, current_scope)
+
+    def emit_cpp(self):
+        pass
 
     def __repr__(self):
         return (str(self.__dict__))
