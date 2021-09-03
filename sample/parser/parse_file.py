@@ -228,8 +228,8 @@ class TreeVisitor(NodeVisitor):
         elseifs        = {"nodes": visited_children[8]} 
         
         # ~ for n,e in enumerate(elseifs["nodes"]):
-            # ~ print ("cond", e[2])
-            # ~ print ("then", e[6])
+            # ~ print ("cond\n  ", e[2][0])
+            # ~ print ("then\n  ", e[6][0])
             # ~ print()
             
         # ~ print()
