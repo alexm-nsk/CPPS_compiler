@@ -260,14 +260,8 @@ def copy_ports_and_params(target, src_node):
 
 
 def create_out_ports_for_condition_node(number, node_id):
-    return [    dict (
-                                        index = n,
-                                        nodeId = node_id,
-                                        type = {"location":"not applicable",
-                                                "name" : "Boolean"}
-                             )
-                             for n in range(number)
-                       ]
+    return [ make_port(n , node_id, BooleanType()) for n in range(number) ]
+
 
 #---------------------------------------------------------------------------------------------
 
