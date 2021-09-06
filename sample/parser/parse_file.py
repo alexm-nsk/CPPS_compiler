@@ -219,29 +219,36 @@ class TreeVisitor(NodeVisitor):
     #----------------------------------------------------
     #
     #----------------------------------------------------
-    # rule: if       = "if" _ exp _ "then" _ exp _ "else" _ exp _ "end if"
+    # rule: if = "if" _ exp _ "then" _ exp _ ("elseif" _ exp _ "then" _ exp _)*  (_ "else" _ exp )? _ "end if"
 
     def visit_if(self, node, visited_children):
 
-        condition_node = visited_children[2]
-        then_node      = {"nodes": visited_children[6]}
-        elseifs        = {"nodes": visited_children[8]} 
-        
-        # ~ for n,e in enumerate(elseifs["nodes"]):
-            # ~ print ("cond\n  ", e[2][0])
-            # ~ print ("then\n  ", e[6][0])
-            # ~ print()
-            
-        # ~ print()
-        
-        else_node      = {"nodes": visited_children[9][0][3]}
-        #print (else_node["nodes"])
-        branches = dict(then = then_node, else_ = else_node)
+        condition_nodes = visited_children[2]
+        then_node       = visited_children[6]
+        else_nodes      = visited_children[9][0][3]
+        elseifs = []
+
+        for n,e in enumerate(visited_children[8]):
+            condition_nodes.append(e[2][0])
+            elseifs.append(e[6][0])
+
+        retval = dict(conditions   = condition_nodes,
+                        then         = then_node,
+                        elseif_nodes = elseifs,
+                        else_nodes   = else_nodes,
+                        location     = self.get_location(node))
+
+        # ~ for k, v in retval.items():
+            # ~ print(k, ":\n   ", v)
+            # ~ print ()
+
 
         return If(
-                        branches  = branches,
-                        condition =  condition_node,
-                        location  = self.get_location(node),
+                        conditions   = condition_nodes,
+                        then         = then_node,
+                        elseif_nodes = elseifs,
+                        else_nodes   = else_nodes,
+                        location     = self.get_location(node),
                     )
 
 
