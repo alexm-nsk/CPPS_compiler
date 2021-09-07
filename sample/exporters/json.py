@@ -270,20 +270,20 @@ def generate_condition(ret_val, node, parent_node, slot, current_scope):
 
     ret_val["condition"]          = {}
     condition                     = ret_val["condition"]
-    condition["id"]               = ast_.node.Node.get_node_id()
+    condition["id"]               = node.conditions["id"]
     json_nodes[ condition["id"] ] = condition
 
     condition["location"] = "not applicable"
     condition["name"]     = "Condition"
 
     copy_ports_and_params(condition, json_nodes[current_scope])
-    condition["outPorts"] = create_out_ports_for_condition_node( len(node.conditions), condition["id"] )
+    condition["outPorts"] = create_out_ports_for_condition_node( len(node.conditions["nodes"]), condition["id"] )
 
     condition["edges"]    = []
     condition["nodes"]    = []
 
 
-    for port, cond in enumerate(node.conditions):
+    for port, cond in enumerate(node.conditions["nodes"]):
         subnodes    = cond.emit_json( condition["id"], port, condition["id"] )
         nodes       = subnodes["nodes"]
         edges       = subnodes["edges"] + subnodes["final_edges"]
@@ -299,13 +299,13 @@ def generate_branches(ret_val, node, parent_node, slot, current_scope):
     ret_val["branches"] = []
     branches_list = []
 
-    branches_list.append(dict(name = "Then", nodes = node.then_nodes))
+    branches_list.append(dict(name = "Then", nodes = node.then_nodes["nodes"], id = node.then_nodes["id"]))
     for n, elseif in enumerate(node.elseif_nodes):
-        branches_list.append(dict(name = "ElseIf", nodes = elseif))
-    branches_list.append(dict(name = "Else", nodes = node.else_nodes))
+        branches_list.append(dict(name = "ElseIf", nodes = elseif["nodes"], id = elseif["id"]))
+    branches_list.append(dict(name = "Else", nodes = node.else_nodes["nodes"], id = node.else_nodes["id"]))
 
     for branch in branches_list:
-        id_   = ast_.node.Node.get_node_id()
+        id_   = branch["id"]
         type_ = IntegerType()
         new_branch = dict(
                             name     = branch["name"],

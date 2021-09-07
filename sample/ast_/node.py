@@ -90,19 +90,15 @@ class Function(Node):
 
 class If(Node):
 
-    pass
-    # ~ def __init__(self, *args, **kwargs):
-        # ~ super().__init__(**kwargs)
-        # ~ for cond in self.condition:
-            # ~ cond.node_id  = Node.get_node_id()
-            # ~ Node.nodes[cond.node_id] = cond
-
-        # ~ for name, branch in self.branches.items():
-            # ~ branch["node_id"]  = Node.get_node_id()
-            # ~ Node.nodes[branch["node_id"]] = branch
-
-        # ~ self.name = "if_"
-
+    def __init__(self, *args, **kwargs):
+        super().__init__(**kwargs)
+        for n, elseif in enumerate(self.elseif_nodes):
+            self.elseif_nodes[n] = dict(id = Node.get_node_id(), nodes = elseif)
+        
+        self.conditions = dict(id = Node.get_node_id(), nodes = self.conditions)
+        self.else_nodes = dict(id = Node.get_node_id(), nodes = self.else_nodes)
+        self.then_nodes = dict(id = Node.get_node_id(), nodes = self.then_nodes)
+        
 
 class Algebraic(Node):
 

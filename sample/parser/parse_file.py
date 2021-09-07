@@ -239,11 +239,6 @@ class TreeVisitor(NodeVisitor):
                         else_nodes   = else_nodes,
                         location     = self.get_location(node))
 
-        # ~ for k, v in retval.items():
-            # ~ print(k, ":\n   ", v)
-            # ~ print ()
-
-
         return If(
                         conditions   = condition_nodes,
                         then_nodes   = then_nodes,
