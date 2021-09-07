@@ -283,8 +283,8 @@ def generate_condition(ret_val, node, parent_node, slot, current_scope):
     condition["nodes"]    = []
     
     
-    for slot, cond in enumerate(node.conditions):
-        subnodes    = cond.emit_json( condition["nodeId"], slot, condition["nodeId"] )
+    for port, cond in enumerate(node.conditions):
+        subnodes    = cond.emit_json( condition["nodeId"], port, condition["nodeId"] )
         nodes       = subnodes["nodes"]
         edges       = subnodes["edges"] + subnodes["final_edges"]
         condition ["nodes"].extend(nodes)
@@ -296,7 +296,10 @@ def generate_condition(ret_val, node, parent_node, slot, current_scope):
 
 def generate_branches(ret_val, node, parent_node, slot, current_scope):
     ret_val["branches"] = []
-
+    for elseif in node.elseif_nodes:
+        print (elseif)
+    for else_ in node.else_nodes:
+        print (else_)
 
 #---------------------------------------------------------------------------------------------
 

@@ -226,11 +226,12 @@ class TreeVisitor(NodeVisitor):
         condition_nodes = visited_children[2]
         then_node       = visited_children[6]
         else_nodes      = visited_children[9][0][3]
+        
         elseifs = []
 
         for n,e in enumerate(visited_children[8]):
             condition_nodes.append(e[2][0])
-            elseifs.append(e[6][0])
+            elseifs.append(e[6])
 
         retval = dict(conditions   = condition_nodes,
                         then         = then_node,

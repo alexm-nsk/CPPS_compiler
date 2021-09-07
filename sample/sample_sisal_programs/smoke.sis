@@ -2,11 +2,11 @@ function Fib( M  : integer returns integer)
   if M < 2 then
     M
   elseif M >2 then
-    M + 1 
+    M + 1,10
   elseif M > 4 then
     M + 2
   else
-    Fib(M - 1) + Fib(M - 2)
+    Fib(M - 1) + Fib(M - 2),2,3
     
     
   end if
