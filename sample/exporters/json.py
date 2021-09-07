@@ -284,7 +284,6 @@ def generate_condition(ret_val, node, parent_node, slot, current_scope):
     
     
     for slot, cond in enumerate(node.conditions):
-        #print (slot, cond)
         subnodes    = cond.emit_json( condition["nodeId"], slot, condition["nodeId"] )
         nodes       = subnodes["nodes"]
         edges       = subnodes["edges"] + subnodes["final_edges"]
