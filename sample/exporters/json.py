@@ -321,7 +321,7 @@ def generate_branches(ret_val, node, parent_node, slot, current_scope):
         copy_ports_and_params(new_branch, json_nodes[current_scope])
         new_branch["outPorts"] = [make_port(n, id_, type_) for n in range(len(branch["nodes"]))]
         
-        # get the start location of first node and end location of last node and construct a
+        # get the start location of first node and the end location of last node and construct a
         # "location" for this branch
 
         location = ("|".join([br.location for br in branch["nodes"]])).split("-")
@@ -338,7 +338,9 @@ def generate_branches(ret_val, node, parent_node, slot, current_scope):
 
         ret_val["branches"].append(new_branch)
 
+
 #---------------------------------------------------------------------------------------------
+
 
 def export_if_to_json(node, parent_node, slot, current_scope):
 
@@ -360,89 +362,9 @@ def export_if_to_json(node, parent_node, slot, current_scope):
     generate_condition (ret_val, node, parent_node, slot, current_scope)
     generate_branches  (ret_val, node, parent_node, slot, current_scope)
 
-# ~ conditions   = condition_nodes,
-# ~ then         = then_node,
-# ~ elseif_nodes = elseifs,
-# ~ else_nodes   = else_nodes,
-# ~ location     = self.get_location(node),
-
-    # ~ for br_name, branch in ret_val["branches"].items():
-
-        # ~ inPorts  = copy.deepcopy(json_nodes[parent_node]["inPorts"])
-        # ~ outPorts = copy.deepcopy(json_nodes[parent_node]["outPorts"])
-        # ~ params   = copy.deepcopy(json_nodes[current_scope]["params"])
-
-        # ~ #TODO check that outports number matches subnodes outputs
-        # ~ # copy ports from parent node and change node_id in our copies to current node:
-        # ~ for iP in inPorts: iP["nodeId"]         = branch["node_id"]
-        # ~ for oP in outPorts: oP["nodeId"]        = branch["node_id"]
-        # ~ for param in params: param[1]["nodeId"] = branch["node_id"]
-
-        # ~ json_branch   =    dict(
-                                    # ~ name     = field_sub_table[br_name],
-                                    # ~ id       = branch["node_id"],
-                                    # ~ inPorts  = inPorts,
-                                    # ~ outPorts = outPorts,
-                                    # ~ params   = params,
-                                    # ~ # TODO make location here:
-                                    # ~ #location = branch["nodes"].location,
-                                    # ~ nodes    = [],
-                                    # ~ edges    = []
-                                # ~ )
-        # ~ json_branches.append(json_branch)
-        # ~ json_nodes[branch["node_id"]] = json_branch
-
-        # ~ if len(branch["nodes"]) != len(outPorts):
-            # ~ # connect all node locations (in src. code) into one string:
-            # ~ locations = ", ".join(  list(map(lambda x: x.location, branch["nodes"]))  )
-
-
-            # ~ raise Exception("Output port number doesn't match the number of return values! (nodes at "
-                                            # ~ + locations + ")")
-
-        # ~ for n, child_node in enumerate(branch["nodes"]):
-
-            # ~ current_scope = branch["node_id"]
-            # ~ children = child_node.emit_json(current_scope, n, current_scope)
-            # ~ current_scope = scope
-
-            # ~ json_branch["edges"].extend(children["edges"] + children["final_edges"])
-            # ~ json_branch["nodes"].extend(children["nodes"])
-
-
-    # ~ ret_val["branches"]  = json_branches
-
-    # ~ # process the condition:__________________________________________________________________
-
-    # ~ #                             TODO  ↓          ↓ cond has to be boolean
-    # ~ inPorts, outPorts = gen_ports(["integer"], ["boolean"], node.condition[0].node_id)
-
-    # ~ ret_val["condition"] = dict(outPorts = outPorts,
-                                # ~ inPorts  = inPorts ,
-                                # ~ params   = json_nodes[current_scope]["params"])
-
-    # ~ json_nodes[node.condition[0].node_id] = ret_val["condition"]
-
-    # ~ current_scope = node.condition[0].node_id
-    # ~ condition_children = node.condition[0].emit_json(node.condition[0].node_id, 0, current_scope)
-    # ~ ret_val["condition"]["edges"] += condition_children["edges"] + condition_children["final_edges"]
-    # ~ ret_val["condition"]["nodes"] =  condition_children["nodes"]
-    # ~ current_scope = scope
-
-    # ~ ret_val["condition"].update (dict(
-                                        # ~ name       = "Condition",
-                                        # ~ id         = node.condition[0].node_id,
-                                        # ~ location   = node.condition[0].location,
-                                    # ~ ))
-
-    # ~ json_nodes[ node.node_id ].update( ret_val )
-
-    # ~ # the edge that connects this (If) node with parent node:
-
     final_edge = make_json_edge(node.node_id, parent_node, 0, slot)
 
     return dict(nodes = [ret_val], edges = [], final_edges = [final_edge])
-   # return dict(nodes = [], edges = [], final_edges = [])
 
 
 #---------------------------------------------------------------------------------------------
