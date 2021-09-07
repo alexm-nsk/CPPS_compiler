@@ -241,17 +241,17 @@ def copy_ports_and_params(target, src_node):
     if "inPorts" in src_node:
         target["inPorts"]  = copy.deepcopy(src_node["inPorts"])
         for i in target["inPorts"]:
-            i["nodeId"] = target["nodeId"]
+            i["nodeId"] = target["id"]
 
     if "outPorts" in src_node:
         target["outPorts"] = copy.deepcopy(src_node["outPorts"])
         for i in target["outPorts"]:
-            i["nodeId"] = target["nodeId"]
+            i["nodeId"] = target["id"]
 
     if "params" in src_node:
         target["params"]   = copy.deepcopy(src_node["params"])
         for i in target["params"]:
-            i[1]["nodeId"] = target["nodeId"]
+            i[1]["nodeId"] = target["id"]
 
     return target
 
@@ -267,24 +267,24 @@ def create_out_ports_for_condition_node(number, node_id):
 
 
 def generate_condition(ret_val, node, parent_node, slot, current_scope):
-    
-    ret_val["condition"]  = {}
-    condition             = ret_val["condition"]
-    condition["nodeId"]   = ast_.node.Node.get_node_id()
-    json_nodes[ condition["nodeId"] ] = condition
-    
+
+    ret_val["condition"]          = {}
+    condition                     = ret_val["condition"]
+    condition["id"]               = ast_.node.Node.get_node_id()
+    json_nodes[ condition["id"] ] = condition
+
     condition["location"] = "not applicable"
     condition["name"]     = "Condition"
-    
+
     copy_ports_and_params(condition, json_nodes[current_scope])
-    condition["outPorts"] = create_out_ports_for_condition_node( len(node.conditions), condition["nodeId"] )
-    
+    condition["outPorts"] = create_out_ports_for_condition_node( len(node.conditions), condition["id"] )
+
     condition["edges"]    = []
     condition["nodes"]    = []
-    
-    
+
+
     for port, cond in enumerate(node.conditions):
-        subnodes    = cond.emit_json( condition["nodeId"], port, condition["nodeId"] )
+        subnodes    = cond.emit_json( condition["id"], port, condition["id"] )
         nodes       = subnodes["nodes"]
         edges       = subnodes["edges"] + subnodes["final_edges"]
         condition ["nodes"].extend(nodes)
@@ -295,11 +295,40 @@ def generate_condition(ret_val, node, parent_node, slot, current_scope):
 
 
 def generate_branches(ret_val, node, parent_node, slot, current_scope):
+
     ret_val["branches"] = []
-    for elseif in node.elseif_nodes:
-        print (elseif)
-    for else_ in node.else_nodes:
-        print (else_)
+    branches_list = []
+
+    branches_list.append(dict(name = "Then", nodes = node.then_nodes))
+    for n, elseif in enumerate(node.elseif_nodes):
+        branches_list.append(dict(name = "ElseIf", nodes = elseif))
+    branches_list.append(dict(name = "Else", nodes = node.else_nodes))
+
+    for branch in branches_list:
+        id_   = ast_.node.Node.get_node_id()
+        type_ = IntegerType()
+        new_branch = dict(
+                            name     = branch["name"],
+                            location = "TODO",
+                            #outPorts = [],#[make_port(n, id_, type_) for n in range(len(branch["nodes"]))],
+                            #inPorts  = [],#copy.deepcopy(json_nodes[current_scope]["inPorts"]),
+                            id       = id_,
+                            #params   = [],#copy.deepcopy(json_nodes[current_scope]["params"]),
+                            edges    = [],
+                            nodes    = []
+                         )
+        copy_ports_and_params(new_branch, json_nodes[current_scope])
+        new_branch["outPorts"] = [make_port(n, id_, type_) for n in range(len(branch["nodes"]))]
+        json_nodes[id_] = new_branch
+
+        for port, child_node in enumerate(branch["nodes"]):
+            nodes_and_edges = child_node.emit_json(id_, port, id_)
+            nodes = nodes_and_edges["nodes"]
+            edges = nodes_and_edges["edges"] + nodes_and_edges["final_edges"]
+            json_nodes[id_]["nodes"].extend(nodes)
+            json_nodes[id_]["edges"].extend(edges)
+
+        ret_val["branches"].append(new_branch)
 
 #---------------------------------------------------------------------------------------------
 
@@ -309,10 +338,10 @@ def export_if_to_json(node, parent_node, slot, current_scope):
 
     ret_val["name"]     = "If"
     ret_val["location"] = node.location
-    ret_val["nodeId"]   = node.node_id
+    ret_val["id"]   = node.node_id
     ret_val["edges"]    = []
     ret_val["nodes"]    = []
-    
+
     copy_ports_and_params(ret_val, json_nodes[current_scope])
 
     # ~ # register this node in the global dict:

@@ -1,6 +1,6 @@
 function Fib( M  : integer returns integer)
   if M < 2 then
-    M
+    M,2
   elseif M >2 then
     M + 1,10
   elseif M > 4 then

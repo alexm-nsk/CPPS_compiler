@@ -224,7 +224,7 @@ class TreeVisitor(NodeVisitor):
     def visit_if(self, node, visited_children):
 
         condition_nodes = visited_children[2]
-        then_node       = visited_children[6]
+        then_nodes      = visited_children[6]
         else_nodes      = visited_children[9][0][3]
         
         elseifs = []
@@ -234,7 +234,7 @@ class TreeVisitor(NodeVisitor):
             elseifs.append(e[6])
 
         retval = dict(conditions   = condition_nodes,
-                        then         = then_node,
+                        then         = then_nodes,
                         elseif_nodes = elseifs,
                         else_nodes   = else_nodes,
                         location     = self.get_location(node))
@@ -246,7 +246,7 @@ class TreeVisitor(NodeVisitor):
 
         return If(
                         conditions   = condition_nodes,
-                        then         = then_node,
+                        then_nodes   = then_nodes,
                         elseif_nodes = elseifs,
                         else_nodes   = else_nodes,
                         location     = self.get_location(node),
