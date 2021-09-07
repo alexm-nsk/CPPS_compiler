@@ -1,15 +1,7 @@
 function Fib( M  : integer returns integer)
   if M < 2 then
-    M,2
-  elseif M >2 then
-    M + 1,10
-  elseif M > 4 then
-    M + 2
+    M
   else
-    Fib(M - 1) + Fib(M - 2),2,3
+    Fib(M - 1) + Fib(M - 2)
   end if
-end function
-
-function main(returns integer)
-    Fib(12)
 end function

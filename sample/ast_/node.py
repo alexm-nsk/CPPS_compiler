@@ -96,8 +96,8 @@ class If(Node):
             self.elseif_nodes[n] = dict(id = Node.get_node_id(), nodes = elseif)
         
         self.conditions = dict(id = Node.get_node_id(), nodes = self.conditions)
-        self.else_nodes = dict(id = Node.get_node_id(), nodes = self.else_nodes)
         self.then_nodes = dict(id = Node.get_node_id(), nodes = self.then_nodes)
+        self.else_nodes = dict(id = Node.get_node_id(), nodes = self.else_nodes)
         
 
 class Algebraic(Node):
