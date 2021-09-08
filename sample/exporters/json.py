@@ -235,7 +235,7 @@ def export_function_to_json(node, parent_node, slot = 0, current_scope = None):
 
 #---------------------------------------------------------------------------------------------
 
-
+# duplicates ports and parameters from src_node and changes "nodeId" to target's id
 def copy_ports_and_params(target, src_node):
 
     if "inPorts" in src_node:
@@ -300,13 +300,20 @@ def generate_branches(ret_val, node, parent_node, slot, current_scope):
     branches_list = []
 
     branches_list.append(dict(name = "Then", nodes = node.then_nodes["nodes"], id = node.then_nodes["id"]))
+
     for n, elseif in enumerate(node.elseif_nodes):
         branches_list.append(dict(name = "ElseIf", nodes = elseif["nodes"], id = elseif["id"]))
+
     branches_list.append(dict(name = "Else", nodes = node.else_nodes["nodes"], id = node.else_nodes["id"]))
 
     for branch in branches_list:
+
         id_   = branch["id"]
-        type_ = IntegerType()
+
+#        json_nodes[current_scope]["outPorts"]
+
+        # ~ type_ = IntegerType()
+
         new_branch = dict(
                             name     = branch["name"],
                             location = "",
@@ -319,8 +326,8 @@ def generate_branches(ret_val, node, parent_node, slot, current_scope):
                          )
 
         copy_ports_and_params(new_branch, json_nodes[current_scope])
-        new_branch["outPorts"] = [make_port(n, id_, type_) for n in range(len(branch["nodes"]))]
-        
+ #       new_branch["outPorts"] = [make_port(n, id_, type_[n]) for n in range(len(branch["nodes"]))]
+
         # get the start location of first node and the end location of last node and construct a
         # "location" for this branch
 
@@ -348,7 +355,7 @@ def export_if_to_json(node, parent_node, slot, current_scope):
 
     ret_val["name"]     = "If"
     ret_val["location"] = node.location
-    ret_val["id"]   = node.node_id
+    ret_val["id"]       = node.node_id
     ret_val["edges"]    = []
     ret_val["nodes"]    = []
 
@@ -405,7 +412,7 @@ def export_call_to_json (node, parent_node, slot, current_scope):
     for i, arg in enumerate(node.args):
         children = arg.emit_json(node.node_id, 0, current_scope)
         args_nodes.extend ( children ["nodes"] )
-        args_edges.extend ( children ["edges"] + children ["final_edges"])
+        args_edges.extend ( children ["edges"] + children ["final_edges"] )
 
     json_nodes[node.node_id].update ( ret_val )
 
