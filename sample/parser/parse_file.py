@@ -225,8 +225,12 @@ class TreeVisitor(NodeVisitor):
 
         condition_nodes = visited_children[2]
         then_nodes      = visited_children[6]
-        else_nodes      = visited_children[9][0][3]
-        
+        #print ()
+        if type(visited_children[9]) == Node and visited_children[9].text != "":
+            else_nodes      = visited_children[9][0][3]
+        else:
+            else_nodes = []
+            
         elseifs = []
 
         for n,e in enumerate(visited_children[8]):
