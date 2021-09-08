@@ -321,7 +321,7 @@ def generate_branches(ret_val, node, parent_node, slot, current_scope):
                             nodes    = []
                          )
 
-        copy_ports_and_params(new_branch, json_nodes[current_scope])
+        copy_ports_and_params(new_branch, json_nodes[parent_node])
 
         # get the start location of first node and the end location of last node and construct a
         # "location" for this branch
@@ -361,8 +361,8 @@ def export_if_to_json(node, parent_node, slot, current_scope):
 
     json_branches = []
 
-    generate_condition (ret_val, node, parent_node, slot, current_scope)
-    generate_branches  (ret_val, node, parent_node, slot, current_scope)
+    generate_condition (ret_val, node, node.node_id, slot, current_scope)
+    generate_branches  (ret_val, node, node.node_id, slot, current_scope)
 
     final_edge = make_json_edge(node.node_id, parent_node, 0, slot)
 
