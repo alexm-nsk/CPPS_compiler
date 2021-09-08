@@ -310,10 +310,6 @@ def generate_branches(ret_val, node, parent_node, slot, current_scope):
 
         id_   = branch["id"]
 
-#        json_nodes[current_scope]["outPorts"]
-
-        # ~ type_ = IntegerType()
-
         new_branch = dict(
                             name     = branch["name"],
                             location = "",
@@ -326,7 +322,6 @@ def generate_branches(ret_val, node, parent_node, slot, current_scope):
                          )
 
         copy_ports_and_params(new_branch, json_nodes[current_scope])
- #       new_branch["outPorts"] = [make_port(n, id_, type_[n]) for n in range(len(branch["nodes"]))]
 
         # get the start location of first node and the end location of last node and construct a
         # "location" for this branch
