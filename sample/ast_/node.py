@@ -92,6 +92,9 @@ class If(Node):
 
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
+        
+        # give the conditions and branches ids:
+        
         for n, elseif in enumerate(self.elseif_nodes):
             self.elseif_nodes[n] = dict(id = Node.get_node_id(), nodes = elseif)
         
