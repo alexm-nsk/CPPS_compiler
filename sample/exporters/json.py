@@ -266,7 +266,7 @@ def create_out_ports_for_condition_node(number, node_id):
 #---------------------------------------------------------------------------------------------
 
 
-def generate_condition(ret_val, node, parent_node, slot, current_scope):
+def generate_conditions(ret_val, node, parent_node, slot, current_scope):
 
     ret_val["condition"]          = {}
     condition                     = ret_val["condition"]
@@ -361,8 +361,8 @@ def export_if_to_json(node, parent_node, slot, current_scope):
 
     json_branches = []
 
-    generate_condition (ret_val, node, node.node_id, slot, current_scope)
-    generate_branches  (ret_val, node, node.node_id, slot, current_scope)
+    generate_conditions (ret_val, node, node.node_id, slot, current_scope)
+    generate_branches   (ret_val, node, node.node_id, slot, current_scope)
 
     final_edge = make_json_edge(node.node_id, parent_node, 0, slot)
 
