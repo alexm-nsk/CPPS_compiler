@@ -719,6 +719,49 @@ def export_arrayaccess_to_json (node, parent_node, slot, current_scope):
     # if we didn't find it, raise an exception:
     raise Exception ("Array %s not found in this scope!(%s)" % (node.name, node.location))
 
+def pull_value_from_scope(name, current_scope, location):
 
-def visit_old_value_to_json (node, parent_node, slot, current_scope):
-    pass
+    params = json_nodes[current_scope]["params"]
+    for array_index_in_params, p in enumerate(params):
+        var_name, var_desc = p
+        if var_name == name:
+            return var_desc["type"]
+
+    raise Exception ("Identifier %s not found in this scope!(%s)" % (name, location))
+
+def export_oldvalue_to_json (node, parent_node, slot, current_scope):
+    type_ = pull_value_from_scope(node.name, current_scope, node.location)
+    return dict(
+                    outPorts = [],
+                    inPorts  = [],
+                    id       = node.node_id,
+                    name     = "OldValue",
+                    location = node.location
+                )
+
+
+# ~ {
+# ~ "name": "OldValue",
+# ~ "location": "5:15-5:20",
+# ~ "outPorts": [
+  # ~ {
+    # ~ "nodeId": "node9",
+    # ~ "type": {
+      # ~ "location": "not applicable",
+      # ~ "name": "integer"
+    # ~ },
+    # ~ "index": 0
+  # ~ }
+# ~ ],
+# ~ "inPorts": [
+  # ~ {
+    # ~ "nodeId": "node9",
+    # ~ "type": {
+      # ~ "location": "not applicable",
+      # ~ "name": "integer"
+    # ~ },
+    # ~ "index": 0
+  # ~ }
+# ~ ],
+# ~ "id": "node9"
+# ~ },

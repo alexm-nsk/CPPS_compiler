@@ -282,8 +282,9 @@ class TreeVisitor(NodeVisitor):
     #
     #----------------------------------------------------
 
+    # old = "old" _ identifier
     def visit_old(self, node, visited_children):
-        return visited_children
+        return OldValue(identifier = visited_children[2], location = self.get_location(node))
         
     def visit_for_while(self, node, visited_children):
         return visited_children

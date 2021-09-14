@@ -120,7 +120,11 @@ class Literal(Node):
     pass
     
 class OldValue(Node):
-
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(**kwargs)
+        print (self.emit_json(0,0,0))
+         
     pass
 
 class ArrayAccess(Node):
