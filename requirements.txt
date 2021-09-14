@@ -1,3 +1,4 @@
 nose
 llvmlite
 sphinx
+parsimonious
