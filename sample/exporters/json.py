@@ -718,3 +718,7 @@ def export_arrayaccess_to_json (node, parent_node, slot, current_scope):
 
     # if we didn't find it, raise an exception:
     raise Exception ("Array %s not found in this scope!(%s)" % (node.name, node.location))
+
+
+def visit_old_value_to_json (node, parent_node, slot, current_scope):
+    pass

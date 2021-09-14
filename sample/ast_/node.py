@@ -118,7 +118,10 @@ class Identifier(Node):
 class Literal(Node):
 
     pass
+    
+class OldValue(Node):
 
+    pass
 
 class ArrayAccess(Node):
 

@@ -282,6 +282,26 @@ class TreeVisitor(NodeVisitor):
     #
     #----------------------------------------------------
 
+    def visit_old(self, node, visited_children):
+        return visited_children
+        
+    def visit_for_while(self, node, visited_children):
+        return visited_children
+        
+    def visit_statements(self, node, visited_children):
+        return visited_children
+    
+    def visit_assignment(self, node, visited_children):
+        return visited_children
+    
+    def visit_reduction(self, node, visited_children):
+        return visited_children
+    
+    
+    #----------------------------------------------------
+    #
+    #----------------------------------------------------
+
     def visit_brackets_algebraic(self, node, visited_children):
         return visited_children[2]
 
