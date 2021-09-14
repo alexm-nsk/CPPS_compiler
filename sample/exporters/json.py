@@ -730,10 +730,11 @@ def pull_value_from_scope(name, current_scope, location):
     raise Exception ("Identifier %s not found in this scope!(%s)" % (name, location))
 
 def export_oldvalue_to_json (node, parent_node, slot, current_scope):
+
     type_ = pull_value_from_scope(node.name, current_scope, node.location)
     return dict(
-                    outPorts = [],
-                    inPorts  = [],
+                    outPorts = [make_port(0, node.node_id, type_)],
+                    inPorts  = [make_port(0, node.node_id, type_)],
                     id       = node.node_id,
                     name     = "OldValue",
                     location = node.location
