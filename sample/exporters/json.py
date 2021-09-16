@@ -766,3 +766,10 @@ def export_oldvalue_to_json (node, parent_node, slot, current_scope):
 # ~ ],
 # ~ "id": "node9"
 # ~ },
+
+   
+def export_loop_to_json (node, parent_node, slot, current_scope):
+    #print (type(node.ret))
+    return dict(nodes       = [],
+                edges       = [],
+                final_edges = [])

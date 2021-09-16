@@ -102,7 +102,10 @@ class If(Node):
         self.then_nodes = dict(id = Node.get_node_id(), nodes = self.then_nodes)
         self.else_nodes = dict(id = Node.get_node_id(), nodes = self.else_nodes)
         
-
+class Loop(Node):
+    
+    pass
+    
 class Algebraic(Node):
 
     def __init__(self, *args, **kwargs):
@@ -144,5 +147,17 @@ class Bin(Node):
 
 
 class Call(Node):
+
+    pass
+    
+class Reduction(Node):
+
+    pass
+    
+class Sum(Reduction):
+
+    pass
+    
+class Value(Reduction):
 
     pass

@@ -289,10 +289,12 @@ class TreeVisitor(NodeVisitor):
     # "for" _ "initial" _ statements _ while _  "end" _ "for"
     # while = "while" _ lpar _ exp _ rpar _ "repeat" _ statements _ "returns" _ reduction
     def visit_for_while(self, node, visited_children):
-        print (visited_children[4])
-        return dict(
 
-                    )
+        return Loop( init      = visited_children[4],
+                    # 6 is while
+                     loop_test = visited_children[6][4],
+                     loop_body = visited_children[6][10],
+                     ret       = visited_children[6][14])
 
     # ~ statements         = (statement _)*
     # ~ statement          = assignment
@@ -309,9 +311,16 @@ class TreeVisitor(NodeVisitor):
         identifier = visited_children[0]
         value      = visited_children[4]
         return Assignment(identifier = identifier, value = value)
+    
+    # ~ reduction_sum      = "sum" _ "of" _ exp
+    def visit_reduction_sum(self, node, visited_children):
 
-    def visit_reduction(self, node, visited_children):
-        return visited_children
+        return Sum(exp = visited_children[4])
+
+    # ~ reduction_value    = "value"   _ "of" _ exp
+    def visit_reduction_value(self, node, visited_children):
+
+        return Value(exp = visited_children[4])
 
 
     #----------------------------------------------------
@@ -338,6 +347,9 @@ class TreeVisitor(NodeVisitor):
         return visited_children[0]
 
     def visit_array_index(self, node, visited_children):
+        return visited_children[0]
+        
+    def visit_reduction(self, node, visited_children):
         return visited_children[0]
 
     # this passes through any nodes for which we don't have a visit_smth(...) method defined
