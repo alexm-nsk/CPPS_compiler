@@ -306,6 +306,7 @@ class TreeVisitor(NodeVisitor):
 
         identifier = visited_children[0]
         value      = visited_children[4]
+
         return Assignment(identifier = identifier, value = value)
 
     # ~ reduction_sum      = "sum" _ "of" _ exp

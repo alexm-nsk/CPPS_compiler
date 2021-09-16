@@ -766,10 +766,26 @@ def export_oldvalue_to_json (node, parent_node, slot, current_scope):
 # ~ ],
 # ~ "id": "node9"
 # ~ },
+def export_sum_to_json(node, parent_node, slot, current_scope):
+    pass
 
-   
+def export_value_to_json(node, parent_node, slot, current_scope):
+    
+    return dict(
+                 name = "Reduction",
+                    
+                )
+
 def export_loop_to_json (node, parent_node, slot, current_scope):
-    #print (type(node.ret))
-    return dict(nodes       = [],
+    # ~ init
+    # ~ loop_test
+    # ~ loop_body
+    # ~ ret
+    retval = {}
+    json_nodes[node.node_id] = retval
+    
+    nodes = [node.ret.emit_json(node.node_id, 0, current_scope)]
+
+    return dict(nodes       = [nodes],
                 edges       = [],
                 final_edges = [])
