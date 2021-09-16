@@ -136,28 +136,26 @@ class OldValue(Node):
          
     pass
 
-class ArrayAccess(Node):
 
+class ArrayAccess(Node):
     pass
 
 
 class Bin(Node):
-
     pass
 
 
 class Call(Node):
-
     pass
+
     
 class Reduction(Node):
-
     pass
+
     
 class Sum(Reduction):
-
     pass
-    
-class Value(Reduction):
 
+
+class Value(Reduction):
     pass

@@ -766,22 +766,37 @@ def export_oldvalue_to_json (node, parent_node, slot, current_scope):
 # ~ ],
 # ~ "id": "node9"
 # ~ },
+
+
 def export_sum_to_json(node, parent_node, slot, current_scope):
-    
+
     return dict(
                  nodes = [],
                  edges = [],
                  final_edges = []
                 )
 
+
 def export_value_to_json(node, parent_node, slot, current_scope):
-    
-    retval = dict(name = "Reduction")
+
+    retval = dict(
+                    name     = "Returns",
+                    location = "not applicable",
+                    # TODO make appropriate type (get it from type of the variable we
+                    # get the value of
+                    outPorts = [make_port(0,node.node_id, IntegerType())],
+                    inPorts  = [],
+                    id       = node.node_id,
+                    params   = []
+                 )
+
     return dict(
-                 nodes = [],
-                 edges = [],
+                 nodes       = [retval],
+                 edges       = [],
                  final_edges = []
                 )
+
+
 
 def export_loop_to_json (node, parent_node, slot, current_scope):
     # ~ init
@@ -795,10 +810,11 @@ def export_loop_to_json (node, parent_node, slot, current_scope):
                     nodes     = [],#\
                     edges     = [],#/ both empty
                     location  = node.location
-                    # ~ params    =                
                  )
+
     copy_ports_and_params(retval, json_nodes[current_scope])
     json_nodes[node.node_id] = retval
+
     reduction_json = node.ret.emit_json(node.node_id, 0, current_scope)
     retval["reduction"] = reduction_json["nodes"]
 
