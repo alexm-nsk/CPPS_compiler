@@ -230,7 +230,7 @@ class TreeVisitor(NodeVisitor):
             else_nodes      = visited_children[9][0][3]
         else:
             else_nodes = []
-            
+
         elseifs = []
 
         for n,e in enumerate(visited_children[8]):
@@ -285,24 +285,35 @@ class TreeVisitor(NodeVisitor):
     # old = "old" _ identifier
     def visit_old(self, node, visited_children):
         return OldValue(name = visited_children[2], location = self.get_location(node))
-        
+
     # "for" _ "initial" _ statements _ while _  "end" _ "for"
+    # while = "while" _ lpar _ exp _ rpar _ "repeat" _ statements _ "returns" _ reduction
     def visit_for_while(self, node, visited_children):
         print (visited_children[4])
         return dict(
-                        
+
                     )
-        
+
+    # ~ statements         = (statement _)*
+    # ~ statement          = assignment
+    # ~ assignment         = identifier _ ":=" _ exp_singular
+
     def visit_statements(self, node, visited_children):
-        return visited_children
-    
+
+        statements = [statement[0] for statement in visited_children]
+
+        return statements
+
     def visit_assignment(self, node, visited_children):
-        return visited_children
-    
+
+        identifier = visited_children[0]
+        value      = visited_children[4]
+        return Assignment(identifier = identifier, value = value)
+
     def visit_reduction(self, node, visited_children):
         return visited_children
-    
-    
+
+
     #----------------------------------------------------
     #
     #----------------------------------------------------

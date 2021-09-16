@@ -119,6 +119,12 @@ class Literal(Node):
 
     pass
     
+class Assignment(Node):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(**kwargs, no_id = True)
+
+    
 class OldValue(Node):
     
     # ~ def __init__(self, *args, **kwargs):
