@@ -225,7 +225,7 @@ class TreeVisitor(NodeVisitor):
 
         condition_nodes = visited_children[2]
         then_nodes      = visited_children[6]
-        #print ()
+
         if type(visited_children[9]) == Node and visited_children[9].text != "":
             else_nodes      = visited_children[9][0][3]
         else:
@@ -236,12 +236,6 @@ class TreeVisitor(NodeVisitor):
         for n,e in enumerate(visited_children[8]):
             condition_nodes.append(e[2][0])
             elseifs.append(e[6])
-
-        retval = dict(conditions   = condition_nodes,
-                        then         = then_nodes,
-                        elseif_nodes = elseifs,
-                        else_nodes   = else_nodes,
-                        location     = self.get_location(node))
 
         return If(
                         conditions   = condition_nodes,
@@ -284,17 +278,19 @@ class TreeVisitor(NodeVisitor):
 
     # old = "old" _ identifier
     def visit_old(self, node, visited_children):
-        return OldValue(name = visited_children[2], location = self.get_location(node))
+
+        return OldValue( name     = visited_children[2],
+                         location = self.get_location(node))
 
     # "for" _ "initial" _ statements _ while _  "end" _ "for"
     # while = "while" _ lpar _ exp _ rpar _ "repeat" _ statements _ "returns" _ reduction
     def visit_for_while(self, node, visited_children):
 
+        while_ = visited_children[6]
         return Loop( init      = visited_children[4],
-                    # 6 is while
-                     loop_test = visited_children[6][4],
-                     loop_body = visited_children[6][10],
-                     ret       = visited_children[6][14])
+                     loop_test = while_[4],
+                     loop_body = while_[10],
+                     ret       = while_[14])
 
     # ~ statements         = (statement _)*
     # ~ statement          = assignment
@@ -311,7 +307,7 @@ class TreeVisitor(NodeVisitor):
         identifier = visited_children[0]
         value      = visited_children[4]
         return Assignment(identifier = identifier, value = value)
-    
+
     # ~ reduction_sum      = "sum" _ "of" _ exp
     def visit_reduction_sum(self, node, visited_children):
 
@@ -348,7 +344,7 @@ class TreeVisitor(NodeVisitor):
 
     def visit_array_index(self, node, visited_children):
         return visited_children[0]
-        
+
     def visit_reduction(self, node, visited_children):
         return visited_children[0]
 
