@@ -767,13 +767,20 @@ def export_oldvalue_to_json (node, parent_node, slot, current_scope):
 # ~ "id": "node9"
 # ~ },
 def export_sum_to_json(node, parent_node, slot, current_scope):
-    pass
+    
+    return dict(
+                 nodes = [],
+                 edges = [],
+                 final_edges = []
+                )
 
 def export_value_to_json(node, parent_node, slot, current_scope):
     
+    retval = dict(name = "Reduction")
     return dict(
-                 name = "Reduction",
-                    
+                 nodes = [],
+                 edges = [],
+                 final_edges = []
                 )
 
 def export_loop_to_json (node, parent_node, slot, current_scope):
@@ -781,11 +788,21 @@ def export_loop_to_json (node, parent_node, slot, current_scope):
     # ~ loop_test
     # ~ loop_body
     # ~ ret
-    retval = {}
-    json_nodes[node.node_id] = retval
-    
-    nodes = [node.ret.emit_json(node.node_id, 0, current_scope)]
 
-    return dict(nodes       = [nodes],
+    retval = dict(
+                    name      = "LoopExpression",
+                    id        = node.node_id,
+                    nodes     = [],#\
+                    edges     = [],#/ both empty
+                    location  = node.location
+                    # ~ params    =                
+                 )
+    copy_ports_and_params(retval, json_nodes[current_scope])
+    json_nodes[node.node_id] = retval
+    reduction_json = node.ret.emit_json(node.node_id, 0, current_scope)
+    retval["reduction"] = reduction_json["nodes"]
+
+    return dict(
+                nodes       = [retval],
                 edges       = [],
                 final_edges = [])

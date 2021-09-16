@@ -290,7 +290,8 @@ class TreeVisitor(NodeVisitor):
         return Loop( init      = visited_children[4],
                      loop_test = while_[4],
                      loop_body = while_[10],
-                     ret       = while_[14])
+                     ret       = while_[14],
+                     location  = self.get_location(node))
 
     # ~ statements         = (statement _)*
     # ~ statement          = assignment
