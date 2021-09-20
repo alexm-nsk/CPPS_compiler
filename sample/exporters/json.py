@@ -798,9 +798,37 @@ def export_value_to_json(node, parent_node, slot, current_scope):
                  final_edges = []
                 )
 
-def create_init_for_loop(retval, parent_node, slot, current_scope):
-    
-    pass
+
+def create_init_for_loop(node, retval, parent_node, slot, current_scope):
+
+    nodes = []
+    edges = []
+
+    init = dict(
+                    name     = "init",
+                    location = "not applicable",
+                    outPorts = [],
+                    inPorts  = [],
+                    id       = node.init_id,
+                    params   = [],
+                    edges    = edges,
+                    nodes    = nodes,
+                    results  = [
+                                        [
+                                            "name",
+                                             dict(
+                                                    nodeId = node.init_id,
+                                                    type   = IntegerType().emit_json(),
+                                                    index = 0
+                                                 )
+                                        ]
+                                ]
+                )
+
+    copy_ports_and_params(init, json_nodes[current_scope])
+
+    retval["init"] = init
+
 
 def export_loop_to_json (node, parent_node, slot, current_scope):
     # ~ init
@@ -819,7 +847,7 @@ def export_loop_to_json (node, parent_node, slot, current_scope):
     copy_ports_and_params(retval, json_nodes[current_scope])
     json_nodes[node.node_id] = retval
 
-    create_init_for_loop(retval, parent_node, slot, current_scope)
+    create_init_for_loop(node, retval, parent_node, slot, current_scope)
     # ~ reduction_json = node.ret.emit_json(node.node_id, 0, current_scope)
     # ~ retval["reduction"] = reduction_json["nodes"]
 

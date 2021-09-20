@@ -103,7 +103,16 @@ class If(Node):
         self.else_nodes = dict(id = Node.get_node_id(), nodes = self.else_nodes)
         
 class Loop(Node):
-    
+     # ~ while_ = visited_children[6]
+    # ~ return Loop( init      = visited_children[4],
+                 # ~ loop_test = while_[4],
+                 # ~ loop_body = while_[10],
+                 # ~ ret       = while_[14],
+                 # ~ location  = self.get_location(node))
+    def __init__(self, *args, **kwargs):
+       super().__init__(**kwargs, no_id = False)
+       self.init_id = Node.get_node_id()
+
     pass
     
 class Algebraic(Node):
