@@ -799,13 +799,15 @@ def export_value_to_json(node, parent_node, slot, current_scope):
                 )
 
 
+#used to create loop's initiaization
 def create_init_for_loop(node, retval, parent_node, slot, current_scope):
 
     nodes = []
     edges = []
-
+    for i in node.init:
+        print (i)
     init = dict(
-                    name     = "init",
+                    name     = "Init",
                     location = "not applicable",
                     outPorts = [],
                     inPorts  = [],
@@ -814,14 +816,14 @@ def create_init_for_loop(node, retval, parent_node, slot, current_scope):
                     edges    = edges,
                     nodes    = nodes,
                     results  = [
-                                        [
-                                            "name",
-                                             dict(
-                                                    nodeId = node.init_id,
-                                                    type   = IntegerType().emit_json(),
-                                                    index = 0
-                                                 )
-                                        ]
+                                    [
+                                        "name",
+                                         dict(
+                                                nodeId = node.init_id,
+                                                type   = IntegerType().emit_json(),
+                                                index = 0
+                                             )
+                                    ]
                                 ]
                 )
 

@@ -307,7 +307,7 @@ class TreeVisitor(NodeVisitor):
 
         identifier = visited_children[0]
         value      = visited_children[4]
-
+        #print ("value", value)
         return Assignment(identifier = identifier, value = value)
 
     # ~ reduction_sum      = "sum" _ "of" _ exp
@@ -348,6 +348,9 @@ class TreeVisitor(NodeVisitor):
         return visited_children[0]
 
     def visit_reduction(self, node, visited_children):
+        return visited_children[0]
+
+    def visit_statement(self, node, visited_children):
         return visited_children[0]
 
     # this passes through any nodes for which we don't have a visit_smth(...) method defined

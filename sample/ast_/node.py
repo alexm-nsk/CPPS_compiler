@@ -92,16 +92,16 @@ class If(Node):
 
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
-        
+
         # give the conditions and branches ids:
-        
+
         for n, elseif in enumerate(self.elseif_nodes):
             self.elseif_nodes[n] = dict(id = Node.get_node_id(), nodes = elseif)
-        
+
         self.conditions = dict(id = Node.get_node_id(), nodes = self.conditions)
         self.then_nodes = dict(id = Node.get_node_id(), nodes = self.then_nodes)
         self.else_nodes = dict(id = Node.get_node_id(), nodes = self.else_nodes)
-        
+
 class Loop(Node):
      # ~ while_ = visited_children[6]
     # ~ return Loop( init      = visited_children[4],
@@ -114,7 +114,7 @@ class Loop(Node):
        self.init_id = Node.get_node_id()
 
     pass
-    
+
 class Algebraic(Node):
 
     def __init__(self, *args, **kwargs):
@@ -130,19 +130,32 @@ class Identifier(Node):
 class Literal(Node):
 
     pass
-    
-class Assignment(Node):
+
+
+class Statement(Node):
 
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs, no_id = True)
+    pass
 
-    
+class Assignment(Statement):
+
+    #def __init__(self, *args, **kwargs):
+     #   super().__init__(**kwargs, no_id = False)
+     
+    def __repr__(self):
+        return (str([self.identifier, self.value]))
+
+    def __str__(self):
+        return (str(self.__dict__))
+
+
 class OldValue(Node):
-    
+
     # ~ def __init__(self, *args, **kwargs):
         # ~ super().__init__(**kwargs)
         # ~ print (self.emit_json(0,0,0))
-         
+
     pass
 
 
@@ -157,11 +170,11 @@ class Bin(Node):
 class Call(Node):
     pass
 
-    
+
 class Reduction(Node):
     pass
 
-    
+
 class Sum(Reduction):
     pass
 
