@@ -719,6 +719,7 @@ def export_arrayaccess_to_json (node, parent_node, slot, current_scope):
     # if we didn't find it, raise an exception:
     raise Exception ("Array %s not found in this scope!(%s)" % (node.name, node.location))
 
+
 def pull_value_from_scope(name, current_scope, location):
 
     params = json_nodes[current_scope]["params"]
@@ -728,6 +729,7 @@ def pull_value_from_scope(name, current_scope, location):
             return var_desc["type"]
 
     raise Exception ("Identifier %s not found in this scope!(%s)" % (name, location))
+
 
 def export_oldvalue_to_json (node, parent_node, slot, current_scope):
 
@@ -796,7 +798,9 @@ def export_value_to_json(node, parent_node, slot, current_scope):
                  final_edges = []
                 )
 
-
+def create_init_for_loop(retval, parent_node, slot, current_scope):
+    
+    pass
 
 def export_loop_to_json (node, parent_node, slot, current_scope):
     # ~ init
@@ -815,8 +819,9 @@ def export_loop_to_json (node, parent_node, slot, current_scope):
     copy_ports_and_params(retval, json_nodes[current_scope])
     json_nodes[node.node_id] = retval
 
-    reduction_json = node.ret.emit_json(node.node_id, 0, current_scope)
-    retval["reduction"] = reduction_json["nodes"]
+    create_init_for_loop(retval, parent_node, slot, current_scope)
+    # ~ reduction_json = node.ret.emit_json(node.node_id, 0, current_scope)
+    # ~ retval["reduction"] = reduction_json["nodes"]
 
     return dict(
                 nodes       = [retval],
