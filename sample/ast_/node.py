@@ -111,6 +111,7 @@ class Loop(Node):
                  # ~ location  = self.get_location(node))
     def __init__(self, *args, **kwargs):
        super().__init__(**kwargs, no_id = False)
+       # sub_nodes will have their own IDs so we calculate them
        self.init_id = Node.get_node_id()
 
     pass
@@ -135,13 +136,13 @@ class Literal(Node):
 class Statement(Node):
 
     def __init__(self, *args, **kwargs):
-        super().__init__(**kwargs, no_id = False)
+        super().__init__(**kwargs, no_id = True)
     pass
 
 class Assignment(Statement):
 
     #def __init__(self, *args, **kwargs):
-     #  super().__init__(**kwargs, no_id = False)
+     #  super().__init__(**kwargs, no_id = True)
      
     
     pass
