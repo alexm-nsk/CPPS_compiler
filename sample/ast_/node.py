@@ -135,26 +135,19 @@ class Literal(Node):
 class Statement(Node):
 
     def __init__(self, *args, **kwargs):
-        super().__init__(**kwargs, no_id = True)
+        super().__init__(**kwargs, no_id = False)
     pass
 
 class Assignment(Statement):
 
     #def __init__(self, *args, **kwargs):
-     #   super().__init__(**kwargs, no_id = False)
+     #  super().__init__(**kwargs, no_id = False)
      
-    def __repr__(self):
-        return (str([self.identifier, self.value]))
-
-    def __str__(self):
-        return (str(self.__dict__))
+    
+    pass
 
 
 class OldValue(Node):
-
-    # ~ def __init__(self, *args, **kwargs):
-        # ~ super().__init__(**kwargs)
-        # ~ print (self.emit_json(0,0,0))
 
     pass
 
