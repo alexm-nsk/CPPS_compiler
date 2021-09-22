@@ -21,8 +21,23 @@
 #  MA 02110-1301, USA.
 #
 #
+
+import compiler.nodes
+
+
+def parse_json(json_data):
+
+    for function in json_data["functions"]:
+        #print ([key for key in function])
+        for edge in function["edges"]:
+            print (f"{edge[0]['nodeId']} to {edge[1]['nodeId']}" )
+
+    return []
+
+
 def main(args):
     pass
+
 
 if __name__ == '__main__':
 

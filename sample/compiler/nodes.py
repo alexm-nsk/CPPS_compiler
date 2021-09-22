@@ -22,12 +22,18 @@
 #
 #
 
+class Edge:
+    
+    def __init__(self, from_, to, type_):
+        pass
 
 class Node:
     pass
 
+
 class Function(Node):
     pass
+
 
 class If(Node):
     pass

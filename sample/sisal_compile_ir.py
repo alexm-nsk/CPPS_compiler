@@ -22,13 +22,9 @@
 #  
 #  
 
-from parser.parse_file import parse_file
-
 import os, json, re
-import compiler.json_parser
+from compiler.json_parser import *
 
-def parse(input_text):
-    return parse_file(input_text)
 
 def main(args):
 
@@ -48,10 +44,9 @@ def main(args):
             
             module_name = input_file_name.split("/")[-1]
             module_name = re.sub("\..*", ".ll", module_name)
-            print(module_name)
+            # ~ print(module_name)
             ir_data = json.loads(file_contents)
-            #print (ir_data["functions"])
-
+            parse_json(ir_data)
 
         except Exception as e:
             if "--debug" in args:
