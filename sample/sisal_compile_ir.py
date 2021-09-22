@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  sisal_compile.py
+#  sisal_compile_ir.py
 #  
 #  Copyright 2021 alexm
 #  
@@ -24,9 +24,7 @@
 
 from parser.parse_file import parse_file
 
-import re
-import os, json
-from ast_.node import *
+import os, json, re
 
 def parse(input_text):
     return parse_file(input_text)
@@ -34,7 +32,7 @@ def parse(input_text):
 def main(args):
 
     if ( len( args ) < 2 ):
-        print ( "usage: python sisal_parse.py source_code.sis" )
+        print ( "usage: python sisal_parse.py ir.json / ir.gml" )
     else:
 
         input_file_name = args[1]
@@ -46,12 +44,12 @@ def main(args):
             return 1
 
         try:
-            output = parse(file_contents)
             
             module_name = input_file_name.split("/")[-1]
             module_name = re.sub("\..*", ".ll", module_name)
-            code = create_module(output, module_name)
-            print (code)
+            print(module_name)
+            ir_data = json.loads(file_contents)
+            print (ir_data["functions"])
 
 
         except Exception as e:
