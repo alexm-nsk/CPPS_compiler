@@ -799,13 +799,27 @@ def export_value_to_json(node, parent_node, slot, current_scope):
                 )
 
 
+
+def export_assignment_to_json(node, parent_node, slot, current_scope):
+
+    value_ast = node.value.emit_json (parent_node, slot, current_scope)
+    print (value_ast["nodes"])
+
+    return dict(
+                nodes       = [],
+                edges       = [],
+                final_edges = []
+               )
+
 #used to create loop's initiaization
 def create_init_for_loop(node, retval, parent_node, slot, current_scope):
 
     nodes = []
     edges = []
-    for i in node.init:
-        print (i)
+
+    for n, i in enumerate(node.init):        
+        init_ast = i.emit_json(parent_node, 0,current_scope)
+
     init = dict(
                     name     = "Init",
                     location = "not applicable",
