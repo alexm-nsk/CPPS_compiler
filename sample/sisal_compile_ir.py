@@ -25,6 +25,7 @@
 from parser.parse_file import parse_file
 
 import os, json, re
+import compiler.json_parser
 
 def parse(input_text):
     return parse_file(input_text)
@@ -49,7 +50,7 @@ def main(args):
             module_name = re.sub("\..*", ".ll", module_name)
             print(module_name)
             ir_data = json.loads(file_contents)
-            print (ir_data["functions"])
+            #print (ir_data["functions"])
 
 
         except Exception as e:

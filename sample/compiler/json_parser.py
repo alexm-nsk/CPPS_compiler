@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  nodes.py
+#  json_parser.py
 #
 #  Copyright 2021 alexm
 #
@@ -21,13 +21,10 @@
 #  MA 02110-1301, USA.
 #
 #
-
-
-class Node:
+def main(args):
     pass
 
-class Function(Node):
-    pass
+if __name__ == '__main__':
 
-class If(Node):
-    pass
+    import sys
+    sys.exit(main(sys.argv))
