@@ -22,15 +22,16 @@
 #
 #
 
-import compiler.nodes
-
+from compiler.nodes import *
 
 def parse_json(json_data):
 
     for function in json_data["functions"]:
-        #print ([key for key in function])
-        for edge in function["edges"]:
-            print (f"{edge[0]['nodeId']} to {edge[1]['nodeId']}" )
+        Function (**function)
+        # ~ print (function["functionName"])
+        # ~ for edge in function["edges"]:
+            # ~ print (f"{edge[0]['nodeId']} to {edge[1]['nodeId']}" )
+            # ~ Edge.edges.append(f"{edge[0]['nodeId']} to {edge[1]['nodeId']}")
 
     return []
 

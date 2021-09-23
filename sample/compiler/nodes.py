@@ -22,17 +22,84 @@
 #
 #
 
-class Edge:
-    
-    def __init__(self, from_, to, type_):
+# ~ class Edge:
+
+    # ~ edges = []
+
+    # ~ def __init__(self, from_, to, type_):
+        # ~ pass
+from compiler.json_parser import *
+
+class Port:
+
+    def __init__(self, port_data):
         pass
 
-class Node:
-    pass
 
+name_replace_table = dict(
+                            functionName = "name",
+
+
+                            )
+
+def sub_name(name):
+
+    if name in name_replace_table:
+        return name_replace_table[name]
+
+    return name
+
+
+class Node:
+    nodes = {}
+    def __init__(self, *args, **kwargs):
+
+        for key, value in kwargs.items():
+            print (sub_name(key), value)
+
+
+def get_type(type_object):
+    return dict(
+                    location = type_object["location"],
+                    name = type_object["name"]
+                )
+
+
+def get_ports(ports):
+
+    return [
+            dict(
+                 node_id = p["nodeId"],
+                 type = get_type(p["type"])
+                 )
+            for p in ports
+            ]
+
+def get_edges(edges):
+    for e in edges:
+        from_, to = e
+        print (from_, to)
+
+# ~ name
+# ~ location
+# ~ outPorts
+# ~ inPorts
+# ~ id
+# ~ params
+# ~ edges
+# ~ nodes
 
 class Function(Node):
-    pass
+
+    def __init__(self, *args, **kwargs):
+        self.in_ports  = get_ports(kwargs["inPorts"] )
+        self.out_ports = get_ports(kwargs["outPorts"])
+        self.name      = kwargs["functionName"]
+        self.location  = kwargs["location"]
+        self.id        = kwargs["id"]
+        self.edges     = get_edges(kwargs["edges"])
+        
+        print (self.__dict__)
 
 
 class If(Node):

@@ -44,7 +44,7 @@ def main(args):
             
             module_name = input_file_name.split("/")[-1]
             module_name = re.sub("\..*", ".ll", module_name)
-            # ~ print(module_name)
+
             ir_data = json.loads(file_contents)
             parse_json(ir_data)
 
