@@ -22,13 +22,20 @@
 #
 #
 
-# ~ class Edge:
 
-    # ~ edges = []
-
-    # ~ def __init__(self, from_, to, type_):
-        # ~ pass
 from compiler.json_parser import *
+
+
+class Edge:
+
+    edges = []
+
+    def __init__(self, from_, to, from_type, to_type):
+        self.from_= from_
+        self.to   = to
+        self.from_type = from_type
+        self.to_type = to_type
+
 
 class Port:
 
@@ -41,6 +48,7 @@ name_replace_table = dict(
 
 
                             )
+
 
 def sub_name(name):
 
@@ -75,29 +83,39 @@ def get_ports(ports):
             for p in ports
             ]
 
+
 def get_edges(edges):
+
     for e in edges:
         from_, to = e
         print (from_, to)
 
-# ~ name
-# ~ location
-# ~ outPorts
-# ~ inPorts
-# ~ id
-# ~ params
-# ~ edges
-# ~ nodes
+
+def get_params(params):
+
+    ret_params = {}
+    for p in params:
+        name, data = p
+        ret_params[name] = dict(
+                                type  = get_type(data["type"]),
+                                index = data["index"]
+                                )
+
+    return ret_params
+
 
 class Function(Node):
 
     def __init__(self, *args, **kwargs):
+
         self.in_ports  = get_ports(kwargs["inPorts"] )
         self.out_ports = get_ports(kwargs["outPorts"])
         self.name      = kwargs["functionName"]
         self.location  = kwargs["location"]
         self.id        = kwargs["id"]
         self.edges     = get_edges(kwargs["edges"])
+        self.params    = get_params(kwargs["params"])
+        self.nodes     = []
         
         print (self.__dict__)
 
