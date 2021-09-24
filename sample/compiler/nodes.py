@@ -27,7 +27,7 @@ from compiler.json_parser import *
 
 
 class Type:
-    
+
     def __init__(self, location, name):
         self.location = location
         self.name     = name
@@ -37,7 +37,7 @@ class Type:
 
 
 def get_type(type_object):
-    
+
     return Type(
                     location = type_object["location"],
                     name     = type_object["name"]
@@ -59,7 +59,9 @@ def get_edges(edges):
 
     for e in edges:
         from_, to = e
-        #return Edge(from_["nodeId"], to["nodeId"]
+        return Edge(from_["nodeId"],            to["nodeId"],
+                    get_type ( from_["type"] ), get_type ( to["type"] ),
+                    from_["index"],             to["index"])
 
 
 def get_params(params):
@@ -76,7 +78,7 @@ def get_params(params):
 
 
 def parse_node(node):
-    
+
     name = node["name"]
     if name == "Lambda":
         return Function(node)
@@ -88,12 +90,16 @@ class Edge:
 
     edges = []
 
-    def __init__(self, from_, to, from_type, to_type):
-        self.from_     = from_
-        self.to        = to
-        self.from_type = from_type
-        self.to_type   = to_type
+    def __init__(self, from_, to, from_type, to_type, from_index, to_index):
+        self.from_      = from_
+        self.to         = to
+        self.from_type  = from_type
+        self.to_type    = to_type
+        self.from_index = from_index
+        self.to_index   = to_index
 
+    def __repr__(self):
+        return str(self.__dict__)
 
 class Port:
 
@@ -105,10 +111,10 @@ class Node:
     nodes = {}
     def __init__(self, node):
         Node.nodes[node["id"]] = self
-    
+
     def __repr__(self):
         return str(self.__dict__)
-    
+
 
 class If(Node):
 
@@ -123,7 +129,7 @@ class If(Node):
         self.params    = get_params(node["params"])
         self.nodes     = [ parse_node(n) for n in node["nodes"] ]
 
-    
+
 class Function(Node):
 
     def __init__(self, node):
