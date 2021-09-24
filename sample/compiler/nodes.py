@@ -115,16 +115,24 @@ class Node:
     def __repr__(self):
         return str(self.__dict__)
 
-
+class Condition(Node):
+    def __init__(self, condition):
+        super().__init__(condition)
+        self.name     = condition["name"]
+        self.location = condition["location"]
+        pass
+        
+class Branch(Node):
+    def __init__(self, branch):
+        super().__init__(branch)        
+        self.name     = branch["name"]
+        self.location = branch["location"]
+        self.edges    = get_edges(branch["edges"])
+        self.nodes    = [ parse_node(node) for node in branch["nodes"] ]
+            
 class If(Node):
     
-    class Condition(Node):
-        def __init__(self, node):
-            pass
-        
-    class Branch(Node):
-        def __init__(self, node):
-            pass
+    
     
     def __init__(self, node):
         super().__init__(node)
@@ -136,8 +144,8 @@ class If(Node):
         self.edges     = get_edges(node["edges"])
         self.params    = get_params(node["params"])
         self.nodes     = [ parse_node(n) for n in node["nodes"] ]
-        self.condition = If.Condition(node["condition"])
-        self.branches  = [If.Branch(branch) for branch in node["branches"] ]
+        self.condition = Condition(node["condition"])
+        self.branches  = [Branch(branch) for branch in node["branches"] ]
 
 
 class Function(Node):
