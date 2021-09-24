@@ -98,18 +98,23 @@ def parse_nodes(nodes):
     return [ parse_node(node) for node in nodes ]
 
 
-def read_common_fields(self, node):
+def parse_json_fields(self, node):
 
-    if ("name" in node ):     self.name      = node["name"]
-    if ("location" in node ): self.location  = node["location"]
-    if ("id" in node ):       self.id        = node["id"]
-    if ("nodes" in node ):    self.nodes     = parse_nodes(node["nodes"])
-    if ("edges" in node ):    self.edges     = get_edges(node["edges"])
-    if ("inPorts" in node ):  self.in_ports  = get_ports(node["inPorts"] )
-    if ("outPorts" in node ): self.out_ports = get_ports(node["outPorts"])
-    if ("params" in node ):   self.params    = get_params(node["params"])
-
-
+    if ("name" in node ):         self.name      = node["name"]
+    if ("location" in node ):     self.location  = node["location"]
+    if ("id" in node ):           self.id        = node["id"]
+    if ("nodes" in node ):        self.nodes     = parse_nodes(node["nodes"])
+    if ("edges" in node ):        self.edges     = get_edges(node["edges"])
+    if ("inPorts" in node ):      self.in_ports  = get_ports(node["inPorts"] )
+    if ("outPorts" in node ):     self.out_ports = get_ports(node["outPorts"])
+    if ("params" in node ):       self.params    = get_params(node["params"])
+    if ("condition" in node ):    self.condition = parse_node (node["condition"])
+    if ("branches" in node ):     self.branches  = parse_nodes(node["branches"])
+    if ("functionName" in node ): self.function_name = node["functionName"]
+    if ("operator" in node ):     self.operator = node["operator"]
+    if ("callee" in node ):       self.callee = node["callee"]
+    
+    
 class Type:
 
     def __init__(self, location, name):
@@ -160,46 +165,31 @@ class Node:
 
     def __init__(self, node):
         Node.nodes[node["id"]] = self
-        read_common_fields (self, node)
+        parse_json_fields (self, node)
 
     def __repr__(self):
         return str(self.__dict__)
 
 
 class Condition(Node):
-
-    def __init__(self, node):
-        super().__init__(node)
+    pass
 
 
 class Branch(Node):
-
-    def __init__(self, node):
-        super().__init__(node)
+    pass
 
 
 class If(Node):
+    pass
 
-    def __init__(self, node):
-        super().__init__(node)
-        self.condition = parse_node (node["condition"])
-        self.branches  = parse_nodes(node["branches"])
-
-
+    
 class Function(Node):
-
-    def __init__(self, node):
-        super().__init__(node)
-        self.function_name = node["functionName"]
+    pass
 
 
 class Binary(Node):
-    def __init__(self, node):
-        super().__init__(node)
-        self.operator = node["operator"]
+    pass
 
 
 class FucntionCall(Node):
-    def __init__(self, node):
-        super().__init__(node)
-        self.callee = node["callee"]
+    pass
