@@ -26,8 +26,19 @@
 from compiler.json_parser import *
 
 
+class Type:
+    
+    def __init__(self, location, name):
+        self.location = location
+        self.name     = name
+
+    def __repr__(self):
+        return str(self.__dict__)
+
+
 def get_type(type_object):
-    return dict(
+    
+    return Type(
                     location = type_object["location"],
                     name     = type_object["name"]
                 )
