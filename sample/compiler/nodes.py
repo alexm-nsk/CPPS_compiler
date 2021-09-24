@@ -29,16 +29,6 @@ from compiler.json_parser import *
 BRANCH_NAMES = ["Else", "ElseIf", "Then"]
 
 
-class Type:
-
-    def __init__(self, location, name):
-        self.location = location
-        self.name     = name
-
-    def __repr__(self):
-        return str(self.__dict__)
-
-
 def get_type(type_object):
 
     return Type(
@@ -52,7 +42,8 @@ def get_ports(ports):
     return [
                 Port(
                  node_id = p["nodeId"],
-                 type    = get_type(p["type"])
+                 type    = get_type(p["type"]),
+                 index   = p["index"]
                 )
                 for p in ports
             ]
@@ -89,8 +80,44 @@ def parse_node(node):
     elif name == "If":
         return If(node)
 
+    elif name == "Condition":
+        return Condition(node)
+
+    elif name == "Binary":
+        return Binary(node)
+        
+    elif name == "FunctionCall":
+        return FucntionCall(node)
+
     elif name in BRANCH_NAMES:
         return Branch(node)
+
+
+def parse_nodes(nodes):
+
+    return [ parse_node(node) for node in nodes ]
+
+
+def read_common_fields(self, node):
+
+    if ("name" in node ):     self.name      = node["name"]
+    if ("location" in node ): self.location  = node["location"]
+    if ("id" in node ):       self.id        = node["id"]
+    if ("nodes" in node ):    self.nodes     = parse_nodes(node["nodes"])
+    if ("edges" in node ):    self.edges     = get_edges(node["edges"])
+    if ("inPorts" in node ):  self.in_ports  = get_ports(node["inPorts"] )
+    if ("outPorts" in node ): self.out_ports = get_ports(node["outPorts"])
+    if ("params" in node ):   self.params    = get_params(node["params"])
+
+
+class Type:
+
+    def __init__(self, location, name):
+        self.location = location
+        self.name     = name
+
+    def __repr__(self):
+        return str(self.__dict__)
 
 
 class Edge:
@@ -106,6 +133,7 @@ class Edge:
         self.to_type    = to_type
         self.from_index = from_index
         self.to_index   = to_index
+
         Edge.edges.append(self)
         if not from_ in Edge.edges_from: Edge.edges_from[from_] = []
         if not to    in Edge.edges_to  : Edge.edges_to  [to   ] = []
@@ -118,14 +146,18 @@ class Edge:
 
 class Port:
 
-    def __init__(self, node_id, type):
-        self.node_id = node_id,
+    def __init__(self, node_id, type, index):
+        self.node_id = node_id
         self.type    = type
+        self.index   = index
 
+    def __repr__(self):
+        return str(self.__dict__)
 
 class Node:
 
     nodes = {}
+
     def __init__(self, node):
         Node.nodes[node["id"]] = self
         read_common_fields (self, node)
@@ -134,23 +166,6 @@ class Node:
         return str(self.__dict__)
 
 
-def parse_nodes(nodes):
-    
-    return [ parse_node(node) for node in nodes ]
-
-
-def read_common_fields(self, node):
-    
-    if ("name" in node ):     self.name      = node["name"]
-    if ("location" in node ): self.location  = node["location"]
-    if ("nodes" in node ):    self.nodes     = parse_nodes(node["nodes"])
-    if ("edges" in node ):    self.edges     = get_edges(node["edges"])
-    if ("inPorts" in node ):  self.in_ports  = get_ports(node["inPorts"] )
-    if ("outPorts" in node ): self.out_ports = get_ports(node["outPorts"])
-    if ("params" in node ):   self.params    = get_params(node["params"])
-    if ("id" in node ):       self.id        = node["id"]
-    
-    
 class Condition(Node):
 
     def __init__(self, node):
@@ -174,5 +189,17 @@ class If(Node):
 class Function(Node):
 
     def __init__(self, node):
-        super().__init__(node)        
+        super().__init__(node)
         self.function_name = node["functionName"]
+
+
+class Binary(Node):
+    def __init__(self, node):
+        super().__init__(node)
+        self.operator = node["operator"]
+
+
+class FucntionCall(Node):
+    def __init__(self, node):
+        super().__init__(node)
+        self.callee = node["callee"]
