@@ -26,50 +26,10 @@
 from compiler.json_parser import *
 
 
-class Edge:
-
-    edges = []
-
-    def __init__(self, from_, to, from_type, to_type):
-        self.from_= from_
-        self.to   = to
-        self.from_type = from_type
-        self.to_type = to_type
-
-
-class Port:
-
-    def __init__(self, port_data):
-        pass
-
-
-name_replace_table = dict(
-                            functionName = "name",
-
-
-                            )
-
-
-def sub_name(name):
-
-    if name in name_replace_table:
-        return name_replace_table[name]
-
-    return name
-
-
-class Node:
-    nodes = {}
-    def __init__(self, *args, **kwargs):
-
-        for key, value in kwargs.items():
-            print (sub_name(key), value)
-
-
 def get_type(type_object):
     return dict(
                     location = type_object["location"],
-                    name = type_object["name"]
+                    name     = type_object["name"]
                 )
 
 
@@ -78,9 +38,9 @@ def get_ports(ports):
     return [
             dict(
                  node_id = p["nodeId"],
-                 type = get_type(p["type"])
-                 )
-            for p in ports
+                 type    = get_type(p["type"])
+                )
+                for p in ports
             ]
 
 
@@ -88,7 +48,7 @@ def get_edges(edges):
 
     for e in edges:
         from_, to = e
-        print (from_, to)
+        #return Edge(from_["nodeId"], to["nodeId"]
 
 
 def get_params(params):
@@ -104,21 +64,65 @@ def get_params(params):
     return ret_params
 
 
-class Function(Node):
+def parse_node(node):
+    
+    name = node["name"]
+    if name == "Lambda":
+        return Function(node)
+    elif name == "If":
+        return If(node)
 
-    def __init__(self, *args, **kwargs):
 
-        self.in_ports  = get_ports(kwargs["inPorts"] )
-        self.out_ports = get_ports(kwargs["outPorts"])
-        self.name      = kwargs["functionName"]
-        self.location  = kwargs["location"]
-        self.id        = kwargs["id"]
-        self.edges     = get_edges(kwargs["edges"])
-        self.params    = get_params(kwargs["params"])
-        self.nodes     = []
-        
-        print (self.__dict__)
+class Edge:
 
+    edges = []
+
+    def __init__(self, from_, to, from_type, to_type):
+        self.from_     = from_
+        self.to        = to
+        self.from_type = from_type
+        self.to_type   = to_type
+
+
+class Port:
+
+    def __init__(self, port_data):
+        pass
+
+
+class Node:
+    nodes = {}
+    def __init__(self, node):
+        Node.nodes[node["id"]] = self
+    
+    def __repr__(self):
+        return str(self.__dict__)
+    
 
 class If(Node):
-    pass
+
+    def __init__(self, node):
+        super().__init__(node)
+        self.in_ports  = get_ports(node["inPorts"] )
+        self.out_ports = get_ports(node["outPorts"])
+        self.name      = node["name"]
+        self.location  = node["location"]
+        self.id        = node["id"]
+        self.edges     = get_edges(node["edges"])
+        self.params    = get_params(node["params"])
+        self.nodes     = [ parse_node(n) for n in node["nodes"] ]
+
+    
+class Function(Node):
+
+    def __init__(self, node):
+        super().__init__(node)
+        self.in_ports      = get_ports(node["inPorts"] )
+        self.out_ports     = get_ports(node["outPorts"])
+        self.function_name = node["functionName"]
+        self.name          = node["name"]
+        self.location      = node["location"]
+        self.id            = node["id"]
+        self.edges         = get_edges(node["edges"])
+        self.params        = get_params(node["params"])
+        self.nodes         = [ parse_node(n) for n in node["nodes"] ]
