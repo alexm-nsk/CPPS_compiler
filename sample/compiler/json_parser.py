@@ -34,7 +34,7 @@ def parse_json(json_data):
             # ~ Edge.edges.append(f"{edge[0]['nodeId']} to {edge[1]['nodeId']}")
             
     for k, n in Node.nodes.items():
-        print (n.name, n, "\n")
+        print (n.name,"\n   ", n, "\n")
         
     return []
 

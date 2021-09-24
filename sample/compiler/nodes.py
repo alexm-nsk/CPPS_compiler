@@ -76,19 +76,26 @@ def get_params(params):
 
     return ret_params
 
+BRANCH_NAMES = ["Else", "ElseIf", "Then"]
 
 def parse_node(node):
 
     name = node["name"]
     if name == "Lambda":
         return Function(node)
+
     elif name == "If":
         return If(node)
+
+    elif name in BRANCH_NAMES:
+        return Branch(node)
 
 
 class Edge:
 
     edges = []
+    edges_from = {}
+    edges_to   = {}
 
     def __init__(self, from_, to, from_type, to_type, from_index, to_index):
         self.from_      = from_
@@ -97,6 +104,11 @@ class Edge:
         self.to_type    = to_type
         self.from_index = from_index
         self.to_index   = to_index
+        Edge.edges.append(self)
+        if not from_ in Edge.edges_from: Edge.edges_from[from_] = []
+        if not to    in Edge.edges_to  : Edge.edges_to  [to   ] = []
+        Edge.edges_from[from_].append(self)
+        Edge.edges_to  [to   ].append(self)
 
     def __repr__(self):
         return str(self.__dict__)
@@ -108,6 +120,7 @@ class Port:
 
 
 class Node:
+
     nodes = {}
     def __init__(self, node):
         Node.nodes[node["id"]] = self
@@ -115,25 +128,32 @@ class Node:
     def __repr__(self):
         return str(self.__dict__)
 
+
+def parse_nodes(nodes):
+    return [ parse_node(node) for node in nodes ]
+
+
 class Condition(Node):
+
     def __init__(self, condition):
         super().__init__(condition)
         self.name     = condition["name"]
         self.location = condition["location"]
-        pass
-        
+        self.nodes    = parse_nodes(condition["nodes"])
+
+
 class Branch(Node):
+
     def __init__(self, branch):
-        super().__init__(branch)        
+        super().__init__(branch)
         self.name     = branch["name"]
         self.location = branch["location"]
         self.edges    = get_edges(branch["edges"])
-        self.nodes    = [ parse_node(node) for node in branch["nodes"] ]
-            
+        self.nodes    = parse_nodes(branch["nodes"])
+
+
 class If(Node):
-    
-    
-    
+
     def __init__(self, node):
         super().__init__(node)
         self.in_ports  = get_ports(node["inPorts"] )
@@ -145,7 +165,7 @@ class If(Node):
         self.params    = get_params(node["params"])
         self.nodes     = [ parse_node(n) for n in node["nodes"] ]
         self.condition = Condition(node["condition"])
-        self.branches  = [Branch(branch) for branch in node["branches"] ]
+        self.branches  = parse_nodes(node["branches"])
 
 
 class Function(Node):
@@ -160,4 +180,4 @@ class Function(Node):
         self.id            = node["id"]
         self.edges         = get_edges(node["edges"])
         self.params        = get_params(node["params"])
-        self.nodes         = [ parse_node(n) for n in node["nodes"] ]
+        self.nodes         = parse_nodes(node["nodes"])
