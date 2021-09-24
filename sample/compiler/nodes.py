@@ -26,6 +26,9 @@
 from compiler.json_parser import *
 
 
+BRANCH_NAMES = ["Else", "ElseIf", "Then"]
+
+
 class Type:
 
     def __init__(self, location, name):
@@ -77,9 +80,6 @@ def get_params(params):
     return ret_params
 
 
-BRANCH_NAMES = ["Else", "ElseIf", "Then"]
-
-
 def parse_node(node):
 
     name = node["name"]
@@ -128,15 +128,19 @@ class Node:
     nodes = {}
     def __init__(self, node):
         Node.nodes[node["id"]] = self
+        read_common_fields (self, node)
 
     def __repr__(self):
         return str(self.__dict__)
 
 
 def parse_nodes(nodes):
+    
     return [ parse_node(node) for node in nodes ]
 
+
 def read_common_fields(self, node):
+    
     if ("name" in node ):     self.name      = node["name"]
     if ("location" in node ): self.location  = node["location"]
     if ("nodes" in node ):    self.nodes     = parse_nodes(node["nodes"])
@@ -146,38 +150,29 @@ def read_common_fields(self, node):
     if ("params" in node ):   self.params    = get_params(node["params"])
     if ("id" in node ):       self.id        = node["id"]
     
+    
 class Condition(Node):
 
     def __init__(self, node):
         super().__init__(node)
-        read_common_fields (self, node)
+
 
 class Branch(Node):
 
     def __init__(self, node):
         super().__init__(node)
-        read_common_fields (self, node)
 
 
 class If(Node):
 
     def __init__(self, node):
         super().__init__(node)
-        read_common_fields (self, node)
-        self.condition = Condition(node["condition"])
+        self.condition = parse_node (node["condition"])
         self.branches  = parse_nodes(node["branches"])
 
 
 class Function(Node):
 
     def __init__(self, node):
-        super().__init__(node)
-        self.in_ports      = get_ports(node["inPorts"] )
-        self.out_ports     = get_ports(node["outPorts"])
+        super().__init__(node)        
         self.function_name = node["functionName"]
-        self.name          = node["name"]
-        self.location      = node["location"]
-        self.id            = node["id"]
-        self.edges         = get_edges(node["edges"])
-        self.params        = get_params(node["params"])
-        self.nodes         = parse_nodes(node["nodes"])
