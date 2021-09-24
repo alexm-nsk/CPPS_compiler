@@ -103,20 +103,20 @@ def parse_nodes(nodes):
 
 def parse_json_fields(self, node):
 
-    if ("name" in node ):         self.name      = node["name"]
-    if ("location" in node ):     self.location  = node["location"]
-    if ("id" in node ):           self.id        = node["id"]
-    if ("nodes" in node ):        self.nodes     = parse_nodes(node["nodes"])
-    if ("edges" in node ):        self.edges     = get_edges(node["edges"])
-    if ("inPorts" in node ):      self.in_ports  = get_ports(node["inPorts"] )
-    if ("outPorts" in node ):     self.out_ports = get_ports(node["outPorts"])
-    if ("params" in node ):       self.params    = get_params(node["params"])
-    if ("condition" in node ):    self.condition = parse_node (node["condition"])
-    if ("branches" in node ):     self.branches  = parse_nodes(node["branches"])
+    if ("name" in node ):         self.name          = node["name"]
+    if ("location" in node ):     self.location      = node["location"]
+    if ("id" in node ):           self.id            = node["id"]
+    if ("nodes" in node ):        self.nodes         = parse_nodes(node["nodes"])
+    if ("edges" in node ):        self.edges         = get_edges(node["edges"])
+    if ("inPorts" in node ):      self.in_ports      = get_ports(node["inPorts"] )
+    if ("outPorts" in node ):     self.out_ports     = get_ports(node["outPorts"])
+    if ("params" in node ):       self.params        = get_params(node["params"])
+    if ("condition" in node ):    self.condition     = parse_node (node["condition"])
+    if ("branches" in node ):     self.branches      = parse_nodes(node["branches"])
     if ("functionName" in node ): self.function_name = node["functionName"]
-    if ("operator" in node ):     self.operator = node["operator"]
-    if ("callee" in node ):       self.callee = node["callee"]
-    if ("value" in node ):        self.value = node["value"]
+    if ("operator" in node ):     self.operator      = node["operator"]
+    if ("callee" in node ):       self.callee        = node["callee"]
+    if ("value" in node ):        self.value         = node["value"]
 
 
 class Type:
