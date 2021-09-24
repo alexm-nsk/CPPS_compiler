@@ -117,7 +117,15 @@ class Node:
 
 
 class If(Node):
-
+    
+    class Condition(Node):
+        def __init__(self, node):
+            pass
+        
+    class Branch(Node):
+        def __init__(self, node):
+            pass
+    
     def __init__(self, node):
         super().__init__(node)
         self.in_ports  = get_ports(node["inPorts"] )
@@ -128,6 +136,8 @@ class If(Node):
         self.edges     = get_edges(node["edges"])
         self.params    = get_params(node["params"])
         self.nodes     = [ parse_node(n) for n in node["nodes"] ]
+        self.condition = If.Condition(node["condition"])
+        self.branches  = [If.Branch(branch) for branch in node["branches"] ]
 
 
 class Function(Node):
