@@ -85,9 +85,12 @@ def parse_node(node):
 
     elif name == "Binary":
         return Binary(node)
-        
+
     elif name == "FunctionCall":
-        return FucntionCall(node)
+        return FunctionCall(node)
+
+    elif name == "Literal":
+        return Literal(node)
 
     elif name in BRANCH_NAMES:
         return Branch(node)
@@ -113,8 +116,9 @@ def parse_json_fields(self, node):
     if ("functionName" in node ): self.function_name = node["functionName"]
     if ("operator" in node ):     self.operator = node["operator"]
     if ("callee" in node ):       self.callee = node["callee"]
-    
-    
+    if ("value" in node ):        self.value = node["value"]
+
+
 class Type:
 
     def __init__(self, location, name):
@@ -182,7 +186,7 @@ class Branch(Node):
 class If(Node):
     pass
 
-    
+
 class Function(Node):
     pass
 
@@ -191,5 +195,8 @@ class Binary(Node):
     pass
 
 
-class FucntionCall(Node):
+class FunctionCall(Node):
+    pass
+    
+class Literal(Node):
     pass
