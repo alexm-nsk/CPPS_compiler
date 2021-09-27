@@ -50,12 +50,13 @@ def get_ports(ports):
 
 
 def get_edges(edges):
-
+    ret_edges = []
     for e in edges:
         from_, to = e
-        return Edge(from_["nodeId"],            to["nodeId"],
-                    get_type ( from_["type"] ), get_type ( to["type"] ),
-                    from_["index"],             to["index"])
+        ret_edges.append( Edge(from_["nodeId"],            to["nodeId"],
+                      get_type ( from_["type"] ), get_type ( to["type"] ),
+                      from_["index"],             to["index"]) )
+    return ret_edges
 
 
 def get_params(params):
