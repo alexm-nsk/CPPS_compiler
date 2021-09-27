@@ -35,6 +35,9 @@ def parse_json(json_data):
             
     for k, n in Node.nodes.items():
         print (n.name,"\n   ", n, "\n")
+    
+    for n in Edge.edges:
+        print ("\n   ", n, "\n")
         
     return []
 

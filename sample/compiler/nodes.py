@@ -136,6 +136,8 @@ class Edge:
     edges_to   = {}
 
     def __init__(self, from_, to, from_type, to_type, from_index, to_index):
+        
+        print ("edge found!")
         self.from_      = from_
         self.to         = to
         self.from_type  = from_type
