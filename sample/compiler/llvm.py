@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  json_parser.py
+#  llvm.py
 #
 #  Copyright 2021 alexm
 #
@@ -21,32 +21,3 @@
 #  MA 02110-1301, USA.
 #
 #
-
-from compiler.nodes import *
-
-def parse_json(json_data):
-
-    for function in json_data["functions"]:
-        parse_node (function)
-        # ~ print (function["functionName"])
-        # ~ for edge in function["edges"]:
-            # ~ print (f"{edge[0]['nodeId']} to {edge[1]['nodeId']}" )
-            # ~ Edge.edges.append(f"{edge[0]['nodeId']} to {edge[1]['nodeId']}")
-            
-    for k, n in Node.nodes.items():
-        print (n.name,"\n   ", n, "\n")
-    
-    #for n in Edge.edges:
-     #   print ("\n   ", n, "\n")
-        
-    return []
-
-
-def main(args):
-    pass
-
-
-if __name__ == '__main__':
-
-    import sys
-    sys.exit(main(sys.argv))
