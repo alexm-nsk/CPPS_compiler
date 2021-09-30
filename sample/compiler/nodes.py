@@ -180,18 +180,26 @@ class Node:
 
     def __repr__(self):
         return str(self.__dict__)
+        
+    def is_parent(node1, node2):
+        for n in Node.nodes[node2].nodes:
+            if n.id == node1:
+                return True
+        return False
 
 
 class Condition(Node):
-    pass
-
+    
+    def emit_llvm(self, scope):
+        export_condition_to_llvm(self, scope)
 
 class Branch(Node):
     pass
 
 
 class If(Node):
-    pass
+    def emit_llvm(self, scope):
+        export_if_to_llvm(self, scope)
 
 
 class Function(Node):

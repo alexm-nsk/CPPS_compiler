@@ -122,7 +122,6 @@ def export_function_to_llvm(function_node, scope = None):
     function_type = ir.FunctionType( function_node.out_ports[0].type.emit_llvm(), (p for p in arg_types), False )
 
     function = ir.Function(module, function_type, name=function_node.function_name)
-    return
     llvm_functions[function_node.function_name]  = function
 
     # vars_ is a map that connects LLVM identifiers with SISAL names
@@ -137,9 +136,10 @@ def export_function_to_llvm(function_node, scope = None):
 
     builder = ir.IRBuilder(block)
 
-    scope = LlvmScope(builder, vars_, expected_type = function_node.ret_types[0].emit_llvm())
+    scope = LlvmScope(builder, vars_, expected_type = function_node.out_ports[0].type.emit_llvm())
 
     function_result = function_node.nodes[0].emit_llvm(scope)
+    return
     # needed for printf:
     if function_node.function_name == "main":
         fmt_arg = add_bitcaster(builder, module)
@@ -150,7 +150,7 @@ def export_function_to_llvm(function_node, scope = None):
 
 def export_if_to_llvm(if_node, scope):
 
-    condition_result = if_node.condition[0].emit_llvm(scope)
+    condition_result = if_node.condition.emit_llvm(scope)
 
     if_ret_val = scope.builder.alloca(scope.expected_type, name = "if_result_pointer")
 
