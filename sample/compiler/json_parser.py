@@ -23,22 +23,13 @@
 #
 
 from compiler.nodes import *
+from compiler.llvm import *
 
 def parse_json(json_data):
-
-    for function in json_data["functions"]:
-        parse_node (function)
-        # ~ print (function["functionName"])
-        # ~ for edge in function["edges"]:
-            # ~ print (f"{edge[0]['nodeId']} to {edge[1]['nodeId']}" )
-            # ~ Edge.edges.append(f"{edge[0]['nodeId']} to {edge[1]['nodeId']}")
-            
-    for k, n in Node.nodes.items():
-        print (n.name,"\n   ", n, "\n")
-    
-    #for n in Edge.edges:
-     #   print ("\n   ", n, "\n")
-        
+    init_llvm()
+    functions = [parse_node (function) for function in json_data["functions"]]
+    create_module(functions, "module")
+    #print (functions[0].emit_llvm())
     return []
 
 

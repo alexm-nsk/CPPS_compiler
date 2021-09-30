@@ -24,6 +24,7 @@
 
 
 from compiler.json_parser import *
+from compiler.llvm import *
 
 
 BRANCH_NAMES = ["Else", "ElseIf", "Then"]
@@ -128,6 +129,9 @@ class Type:
 
     def __repr__(self):
         return str(self.__dict__)
+    
+    def emit_llvm(self):
+        return ir.IntType(32)
 
 
 class Edge:
@@ -137,8 +141,7 @@ class Edge:
     edges_to   = {}
 
     def __init__(self, from_, to, from_type, to_type, from_index, to_index):
-        
-        print ("edge found!")
+
         self.from_      = from_
         self.to         = to
         self.from_type  = from_type
@@ -166,6 +169,7 @@ class Port:
     def __repr__(self):
         return str(self.__dict__)
 
+
 class Node:
 
     nodes = {}
@@ -191,7 +195,9 @@ class If(Node):
 
 
 class Function(Node):
-    pass
+    
+    def emit_llvm(self):
+        export_function_to_llvm(self)
 
 
 class Binary(Node):
@@ -200,6 +206,7 @@ class Binary(Node):
 
 class FunctionCall(Node):
     pass
-    
+
+
 class Literal(Node):
     pass
