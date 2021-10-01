@@ -181,6 +181,8 @@ class Node:
     def __repr__(self):
         return str(self.__dict__)
 
+    #static
+    @staticmethod
     def is_parent(node1, node2):
         for n in Node.nodes[node2].nodes:
             if n.id == node1:
