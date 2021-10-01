@@ -24,7 +24,7 @@
 
 from llvmlite import ir, binding
 from copy import deepcopy
-
+from compiler.nodes import *
 
 llvm_initialized = False
 llvm_functions   = {}
@@ -149,7 +149,8 @@ def export_function_to_llvm(function_node, scope = None):
 
 
 def export_condition_to_llvm(condition_node, scope):
-#    print 
+    # ~ print (Node)
+    print (condition_node.get_result_nodes())
     return None
 
 
@@ -157,8 +158,8 @@ def export_if_to_llvm(if_node, scope):
 
     condition_result = if_node.condition.emit_llvm(scope)
     if_ret_val = scope.builder.alloca(scope.expected_type, name = "if_result_pointer")
-'''
 
+'''
     with scope.builder.if_else(condition_result) as (then, else_):
         with then:
             then_result = if_node.branches["then"]["nodes"][0].emit_llvm(scope)

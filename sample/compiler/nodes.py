@@ -129,7 +129,7 @@ class Type:
 
     def __repr__(self):
         return str(self.__dict__)
-    
+
     def emit_llvm(self):
         return ir.IntType(32)
 
@@ -180,16 +180,20 @@ class Node:
 
     def __repr__(self):
         return str(self.__dict__)
-        
+
     def is_parent(node1, node2):
         for n in Node.nodes[node2].nodes:
             if n.id == node1:
                 return True
         return False
 
+    def get_result_nodes(self):
+        return [( edge.from_, edge )
+            for edge in Edge.edges_to[self.id] if Node.is_parent(edge.from_, self.id)]
+
 
 class Condition(Node):
-    
+
     def emit_llvm(self, scope):
         export_condition_to_llvm(self, scope)
 
@@ -203,7 +207,7 @@ class If(Node):
 
 
 class Function(Node):
-    
+
     def emit_llvm(self):
         export_function_to_llvm(self)
 
@@ -218,6 +222,3 @@ class FunctionCall(Node):
 
 class Literal(Node):
     pass
-
-def get_result_nodes(node):
-    return [edge.from_ for edge in Edge.edges_to[node] if Node.is_parent(edge.from_, node)]
