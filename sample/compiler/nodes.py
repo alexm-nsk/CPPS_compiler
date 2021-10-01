@@ -218,3 +218,6 @@ class FunctionCall(Node):
 
 class Literal(Node):
     pass
+
+def get_result_nodes(node):
+    return [edge.from_ for edge in Edge.edges_to[node]]

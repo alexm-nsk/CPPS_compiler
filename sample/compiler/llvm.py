@@ -105,18 +105,18 @@ def create_module(functions, module_name):
 def export_function_to_llvm(function_node, scope = None):
 
     global module, printf, fmt_arg
-    
+
     arg_types = []
     params    = []
 
     # get types and names of this function's arguments
     for name, type_ in function_node.params.items():
         print (name, type_)
-        #for p in type_["vars"]:        
+        #for p in type_["vars"]:
         arg_types.append(type_["type"].emit_llvm())
         params.append(name)
 
-    
+
     #just one value for now:
     # TODO (make multiresult)
     function_type = ir.FunctionType( function_node.out_ports[0].type.emit_llvm(), (p for p in arg_types), False )
@@ -126,7 +126,7 @@ def export_function_to_llvm(function_node, scope = None):
 
     # vars_ is a map that connects LLVM identifiers with SISAL names
     vars_ = {}
-    
+
     # assign names to llvm function parameters (used when we recall those arguments in function's body):
     for n,p in enumerate(params):
         function.args[n].name = p
@@ -148,11 +148,16 @@ def export_function_to_llvm(function_node, scope = None):
     scope.builder.ret(function_result)
 
 
+def export_condition_to_llvm(condition_node, scope):
+#    print 
+    return None
+
+
 def export_if_to_llvm(if_node, scope):
 
     condition_result = if_node.condition.emit_llvm(scope)
-
     if_ret_val = scope.builder.alloca(scope.expected_type, name = "if_result_pointer")
+'''
 
     with scope.builder.if_else(condition_result) as (then, else_):
         with then:
@@ -163,7 +168,7 @@ def export_if_to_llvm(if_node, scope):
             scope.builder.store(else_result, if_ret_val)
 
     return scope.builder.load (if_ret_val, name="if_result")
-
+'''
 
 def export_algebraic_to_llvm(algebraic_node, scope):
 
