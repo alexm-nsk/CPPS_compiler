@@ -51,6 +51,7 @@ class LlvmScope:
 
 
 def init_llvm(module_name = "microsisal"):
+
     global printf, fmt_arg
     reset_llvm()
 
@@ -60,8 +61,6 @@ def init_llvm(module_name = "microsisal"):
 
     module        = ir.Module( name = module_name )
     module.triple = binding.get_default_triple()
-
-
 
     target         = binding.Target.from_default_triple()
     target_machine = target.create_target_machine()
@@ -111,7 +110,7 @@ def export_function_to_llvm(function_node, scope = None):
 
     # get types and names of this function's arguments
     for name, type_ in function_node.params.items():
-        print (name, type_)
+    #    print (name, type_)
         #for p in type_["vars"]:
         arg_types.append(type_["type"].emit_llvm())
         params.append(name)
@@ -150,7 +149,9 @@ def export_function_to_llvm(function_node, scope = None):
 
 def export_condition_to_llvm(condition_node, scope):
     # ~ print (Node)
-    print (condition_node.get_result_nodes())
+    for node, edge in condition_node.get_result_nodes():
+        print (node)
+        print (edge)
     return None
 
 
