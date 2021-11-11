@@ -133,14 +133,14 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
 def function_gen_params(function):
 
     params = function.params
-    nodeId = function.node_id
+    node_id = function.node_id
 
     ret_val = []
 
     for group in params:
         for n, var in enumerate(group["vars"]):
             ret_val += [
-                [ var.name, emit_type_object(nodeId, group["type"], n, location = var.location) ]
+                [ var.name, emit_type_object(node_id, group["type"], n, location = var.location) ]
             ]
 
     return ret_val
@@ -252,6 +252,32 @@ def copy_ports_and_params(target, src_node):
         target["params"]   = copy.deepcopy(src_node["params"])
         for i in target["params"]:
             i[1]["nodeId"] = target["id"]
+
+    return target
+
+# adds ports and parameters from src_node and changes "nodeId" to target's id
+def add_ports_and_params(target, src_node, inPorts = True, outPorts = True, params = True):
+
+    def process_block(name, param = False):
+
+        if name in src_node:
+            if not name in target: target [name] = []
+            new_items = copy.deepcopy(src_node[name])
+            for n in new_items:
+                if param:
+                    n[1]["index"] += len(target[name])
+                else:
+                    n["index"] += len(target[name])
+            target[name]  += new_items
+            for i in target[name]:
+                if param:
+                    i[1]["nodeId"] = target["id"]
+                else:
+                    i["nodeId"] = target["id"]
+
+    if inPorts:  process_block("inPorts")
+    if outPorts: process_block("outPorts")
+    if params:   process_block("params", True)
 
     return target
 
@@ -459,7 +485,7 @@ def return_type(left, right):
 
 #---------------------------------------------------------------------------------------------
 
-
+#TODO make it return used variables (put them into the scope?)
 def export_algebraic_to_json (node, parent_node, slot, current_scope):
 
     return_nodes = []
@@ -547,8 +573,8 @@ def export_algebraic_to_json (node, parent_node, slot, current_scope):
 
 def export_identifier_to_json (node, parent_node, slot, current_scope):
 
-    parent = json_nodes[ parent_node ]
-    scope = json_nodes[ current_scope ]
+    parent     = json_nodes[ parent_node ]
+    scope      = json_nodes[ current_scope ]
     final_edge = {}
     for n, (name, arg) in enumerate(scope["params"]):
         if name == node.name:
@@ -563,12 +589,12 @@ def export_identifier_to_json (node, parent_node, slot, current_scope):
 def export_literal_to_json (node, parent_node, slot, current_scope):
 
     ret_val = dict(
-                    id = node.node_id,
+                    id       = node.node_id,
                     location = node.location,
-                    inPorts = [],
+                    inPorts  = [],
                     outPorts = [ make_port(0, node.node_id, IntegerType() ) ],
-                    value = node.value,
-                    name = "Literal"
+                    value    = node.value,
+                    name     = "Literal"
                   )
 
     json_nodes[node.node_id] = ret_val
@@ -585,6 +611,8 @@ operator_out_type_map = {
     "+" : "integer",
     "-" : "integer",
     "*" : "integer",
+    "<=" : "integer",
+    ">=" : "integer",
 }
 
 operator_in_type_map = {
@@ -593,6 +621,8 @@ operator_in_type_map = {
     "+" : "integer",
     "-" : "integer",
     "*" : "integer",
+    "<=" : "integer",
+    ">=" : "integer",
 }
 
 
@@ -743,33 +773,6 @@ def export_oldvalue_to_json (node, parent_node, slot, current_scope):
                 )
 
 
-# ~ {
-# ~ "name": "OldValue",
-# ~ "location": "5:15-5:20",
-# ~ "outPorts": [
-  # ~ {
-    # ~ "nodeId": "node9",
-    # ~ "type": {
-      # ~ "location": "not applicable",
-      # ~ "name": "integer"
-    # ~ },
-    # ~ "index": 0
-  # ~ }
-# ~ ],
-# ~ "inPorts": [
-  # ~ {
-    # ~ "nodeId": "node9",
-    # ~ "type": {
-      # ~ "location": "not applicable",
-      # ~ "name": "integer"
-    # ~ },
-    # ~ "index": 0
-  # ~ }
-# ~ ],
-# ~ "id": "node9"
-# ~ },
-
-
 def export_sum_to_json(node, parent_node, slot, current_scope):
 
     return dict(
@@ -798,52 +801,205 @@ def export_value_to_json(node, parent_node, slot, current_scope):
                  final_edges = []
                 )
 
-
-
+#TODO register new variables in the scope
 def export_assignment_to_json(node, parent_node, slot, current_scope):
 
     value_ast = node.value.emit_json (parent_node, slot, current_scope)
-    print (value_ast["nodes"])
+    # ~ print (value_ast["nodes"])
+    # ~ print (node.identifier.name)
+    # ~ scope_node = json_nodes[current_scope]
 
-    return dict(
-                nodes       = [],
-                edges       = [],
-                final_edges = []
-               )
+    #TODO get type from what you get in value:
+    # ~ create_parameter_definition(node.identifier.name, IntegerType(), current_scope)
+    # ~ print ("num_args", len(scope_node["params"]))
 
-#used to create loop's initiaization
+    return value_ast
+            # ~ dict(
+                # ~ nodes       = [],
+                # ~ edges       = [],
+                # ~ final_edges = []
+               # ~ )
+
+
+#---------------------------------------------------------------------------------------------
+# used only for loops
+def create_parameter_definition(name, type_, node_id):
+    node  = json_nodes[node_id]
+    index = 0
+    for p in node["params"]:
+        p[1]["index"] += 1
+    node["params"].insert(0, [ name, emit_type_object(node_id, type_, index, "not applicable") ] )
+
+#---------------------------------------------------------------------------------------------
+# used to create loop's initiaization
+# init doesn't contain variables defined in it as parameters
+# instead, they are placed in preCondition, body and reduction BEFORE function's arguments
+init =  {
+            "name": "Init",
+            "location": "not applicable",
+            "outPorts": [
+              {
+                "nodeId": "node3",
+                "type": {
+                  "location": "not applicable",
+                  "name": "integer"
+                },
+                "index": 0
+              }
+            ],
+            "inPorts": [
+              {
+                "nodeId": "node3",
+                "type": {
+                  "location": "1:16-1:23",
+                  "name": "integer"
+                },
+                "index": 0
+              }
+            ],
+            "id": "node3",
+            "params": [
+              [
+                "N",
+                {
+                  "nodeId": "node3",
+                  "type": {
+                    "location": "1:16-1:23",
+                    "name": "integer"
+                  },
+                  "index": 0
+                }
+              ]
+            ],
+            "edges": [
+              [
+                {
+                  "nodeId": "node4",
+                  "type": {
+                    "location": "not applicable",
+                    "name": "integer"
+                  },
+                  "index": 0
+                },
+                {
+                  "nodeId": "node3",
+                  "type": {
+                    "location": "not applicable",
+                    "name": "integer"
+                  },
+                  "index": 0
+                }
+              ]
+            ],
+            "nodes": [
+              {
+                "name": "Literal",
+                "location": "3:12-3:13",
+                "outPorts": [
+                  {
+                    "nodeId": "node4",
+                    "type": {
+                      "location": "not applicable",
+                      "name": "integer"
+                    },
+                    "index": 0
+                  }
+                ],
+                "inPorts": [],
+                "id": "node4",
+                "value": "0"
+              }
+            ],
+            "results": [
+              [
+                "i",
+                {
+                  "nodeId": "node3",
+                  "type": {
+                    "location": "not applicable",
+                    "name": "integer"
+                  },
+                  "index": 0
+                }
+              ]
+            ]
+}
+
 def create_init_for_loop(node, retval, parent_node, slot, current_scope):
 
     nodes = []
     edges = []
+    results = []
+    out_ports = []
+    in_ports = []
+    id       = node.init_id
 
-    for n, i in enumerate(node.init):        
-        init_ast = i.emit_json(parent_node, 0,current_scope)
+    for n, i in enumerate(node.init):
+        init_ast = i.emit_json(parent_node, 0, current_scope)
+        nodes.append(init_ast["nodes"])
+        edges.append(init_ast["edges"] + init_ast["final_edges"])
+        #json_nodes[current_scope]["params"]
+        out_ports.append(make_port(n, id , IntegerType()))
+        # ~ out_ports.append(make_port(n, id , IntegerType()))
+        results.append(
+                                    [
+                                        i.identifier.name,
+                                        dict(
+                                               nodeId = node.init_id,
+                                               type   = IntegerType().emit_json(),
+                                               index = 0
+                                            )
+                                    ] )
 
     init = dict(
                     name     = "Init",
                     location = "not applicable",
-                    outPorts = [],
-                    inPorts  = [],
-                    id       = node.init_id,
+                    outPorts = out_ports,
+                    inPorts  = in_ports,
+                    id       = id,
                     params   = [],
                     edges    = edges,
                     nodes    = nodes,
-                    results  = [
-                                    [
-                                        "name",
-                                         dict(
-                                                nodeId = node.init_id,
-                                                type   = IntegerType().emit_json(),
-                                                index = 0
-                                             )
-                                    ]
-                                ]
+                    results  = results
                 )
 
-    copy_ports_and_params(init, json_nodes[current_scope])
+    add_ports_and_params(init, json_nodes[current_scope], outPorts = False)
 
     retval["init"] = init
+
+#used to create loop's test
+def create_test_for_loop(node, retval, parent_node, slot, current_scope):
+
+    nodes = []
+    edges = []
+    print ("test:", node.loop_test[0].emit_json( parent_node, slot, current_scope))
+    # ~ for n, i in enumerate(node.init):
+        # ~ init_ast = i.emit_json(parent_node, 0,current_scope)
+
+    # ~ init = dict(
+                    # ~ name     = "Init",
+                    # ~ location = "not applicable",
+                    # ~ outPorts = [],
+                    # ~ inPorts  = [],
+                    # ~ id       = node.init_id,
+                    # ~ params   = [],
+                    # ~ edges    = edges,
+                    # ~ nodes    = nodes,
+                    # ~ results  = [
+                                    # ~ [
+                                        # ~ "name",
+                                         # ~ dict(
+                                                # ~ nodeId = node.init_id,
+                                                # ~ type   = IntegerType().emit_json(),
+                                                # ~ index = 0
+                                             # ~ )
+                                    # ~ ]
+                                # ~ ]
+                # ~ )
+
+    # ~ copy_ports_and_params(init, json_nodes[current_scope])
+
+    # ~ retval["init"] = init
 
 
 def export_loop_to_json (node, parent_node, slot, current_scope):
@@ -864,8 +1020,10 @@ def export_loop_to_json (node, parent_node, slot, current_scope):
     json_nodes[node.node_id] = retval
 
     create_init_for_loop(node, retval, parent_node, slot, current_scope)
-    # ~ reduction_json = node.ret.emit_json(node.node_id, 0, current_scope)
-    # ~ retval["reduction"] = reduction_json["nodes"]
+    # ~ create_test_for_loop(node, retval, parent_node, slot, current_scope)
+
+    #reduction_json = node.ret.emit_json(node.node_id, 0, current_scope)
+    #retval["reduction"] = reduction_json["nodes"]
 
     return dict(
                 nodes       = [retval],
