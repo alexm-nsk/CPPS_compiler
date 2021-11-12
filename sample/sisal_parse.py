@@ -55,15 +55,17 @@ def main(args):
                 graphml_text = make_document(graphs)
                 print (graphml_text)
             else:
-                
+
                 formatted = json.dumps(
                                         dict(
                                              functions = [o.emit_json(None) for o in output],
                                              definitions = []
-                                            ), 
+                                            ),
                                        indent = 1)
-                                        
                 print( formatted )
+                import parser
+                for n, item in parser.parse_file.ast_.node.json_nodes.items():
+                    print (n, item, "\n")
 
         except Exception as e:
             if "--debug" in args:

@@ -74,7 +74,6 @@ def check_type_matching(c_src_type, c_dst_type, from_, to):
 # with destination (parent) node's output instead of it's input
 
 def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = False):
-
     dst_type = None
 
     try:
@@ -91,6 +90,8 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
         dst_type = dst_port["type"]
 
     except Exception as e:
+        # ~ print (from_, to)
+        # ~ print([key for key in json_nodes])
         print ("no dst",str(e),"\n\n", json_nodes[from_],"\n\n", json_nodes[to])
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
@@ -107,6 +108,7 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
                 dict_[k] = remove_locations(v)
         return (dict_)
 
+    # ~ print (src_type, dst_type)
     c_src_type = remove_locations(copy.deepcopy(src_type))
     c_dst_type = remove_locations(copy.deepcopy(dst_type))
 
@@ -834,7 +836,7 @@ def create_parameter_definition(name, type_, node_id):
 # used to create loop's initiaization
 # init doesn't contain variables defined in it as parameters
 # instead, they are placed in preCondition, body and reduction BEFORE function's arguments
-init =  {
+init_example =  {
             "name": "Init",
             "location": "not applicable",
             "outPorts": [
@@ -925,6 +927,9 @@ init =  {
             ]
 }
 
+node8_contents =  {'results': [['i', {'nodeId': 'node8', 'type': {'location': 'not applicable', 'name': 'integer'}, 'index': 0}]], 'outPorts': [{'index': 0, 'nodeId': 'node8', 'type': {'location': 'not applicable', 'name': 'integer'}}], 'inPorts': []}
+
+
 def create_init_for_loop(node, retval, parent_node, slot, current_scope):
 
     nodes = []
@@ -932,40 +937,41 @@ def create_init_for_loop(node, retval, parent_node, slot, current_scope):
     results = []
     out_ports = []
     in_ports = []
-    id       = node.init_id
+    node_id       = node.init_id
+    json_nodes[node_id] = {"results" : [], "outPorts" : [], "inPorts" : [], "id" : node_id}
 
     for n, i in enumerate(node.init):
-        init_ast = i.emit_json(parent_node, 0, current_scope)
-        nodes.append(init_ast["nodes"])
-        edges.append(init_ast["edges"] + init_ast["final_edges"])
-        #json_nodes[current_scope]["params"]
-        out_ports.append(make_port(n, id , IntegerType()))
-        # ~ out_ports.append(make_port(n, id , IntegerType()))
-        results.append(
+        json_nodes[node_id]["outPorts"].append(make_port(n, node_id , IntegerType()))
+        out_ports.append(make_port(n, node_id , IntegerType()))
+        json_nodes[node_id]["results"].append(
                                     [
                                         i.identifier.name,
                                         dict(
-                                               nodeId = node.init_id,
+                                               nodeId = node_id,
                                                type   = IntegerType().emit_json(),
-                                               index = 0
+                                               index = n
                                             )
                                     ] )
 
-    init = dict(
+    print ("SCOPE",current_scope, "NODEID", node_id)
+    add_ports_and_params(json_nodes[node_id], json_nodes[current_scope], outPorts = False, params = True)
+
+    for n, i in enumerate(node.init):
+        init_ast = i.emit_json(node_id, n, node_id)
+        nodes.append(init_ast["nodes"])
+        edges.append(init_ast["edges"] + init_ast["final_edges"])
+        #json_nodes[current_scope]["params"]
+    json_nodes[node_id].update( dict(
                     name     = "Init",
                     location = "not applicable",
                     outPorts = out_ports,
-                    inPorts  = in_ports,
-                    id       = id,
-                    params   = [],
                     edges    = edges,
                     nodes    = nodes,
-                    results  = results
-                )
+                ))
+    print ("NODEID", json_nodes[node_id])
 
-    add_ports_and_params(init, json_nodes[current_scope], outPorts = False)
 
-    retval["init"] = init
+    retval["init"] = json_nodes[node_id]
 
 #used to create loop's test
 def create_test_for_loop(node, retval, parent_node, slot, current_scope):
