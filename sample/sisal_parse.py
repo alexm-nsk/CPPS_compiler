@@ -63,9 +63,6 @@ def main(args):
                                             ),
                                        indent = 1)
                 print( formatted )
-                import parser
-                for n, item in parser.parse_file.ast_.node.json_nodes.items():
-                    print (n, item, "\n")
 
         except Exception as e:
             if "--debug" in args:

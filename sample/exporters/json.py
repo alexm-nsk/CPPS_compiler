@@ -54,10 +54,8 @@ def make_port(index, node_id, type_):
 def check_type_matching(c_src_type, c_dst_type, from_, to):
 
     if c_src_type != c_dst_type:
-        #print ([k for k in ast_.node.Node.nodes])
         src_node = ast_.node.Node.nodes[from_]
         dst_node = ast_.node.Node.nodes[to]
-        #print (c_src_type, c_dst_type,"\n",  src_node, dst_node, current_scope)
 
         summary = ""
         if current_scope == to:
@@ -90,14 +88,10 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
         dst_type = dst_port["type"]
 
     except Exception as e:
-        # ~ print (from_, to)
-        # ~ print([key for key in json_nodes])
         print ("no dst",str(e),"\n\n", json_nodes[from_],"\n\n", json_nodes[to])
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
-    #print (from_, to, "\n")
-    #print (src_type,"\n",  dst_type, "\n", src_type==dst_type)
 
     #check if parameters match:
     #make copies for comparison (we are going to remove locations)
@@ -108,7 +102,6 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
                 dict_[k] = remove_locations(v)
         return (dict_)
 
-    # ~ print (src_type, dst_type)
     c_src_type = remove_locations(copy.deepcopy(src_type))
     c_dst_type = remove_locations(copy.deepcopy(dst_type))
 
@@ -807,13 +800,9 @@ def export_value_to_json(node, parent_node, slot, current_scope):
 def export_assignment_to_json(node, parent_node, slot, current_scope):
 
     value_ast = node.value.emit_json (parent_node, slot, current_scope)
-    # ~ print (value_ast["nodes"])
-    # ~ print (node.identifier.name)
-    # ~ scope_node = json_nodes[current_scope]
 
     #TODO get type from what you get in value:
     # ~ create_parameter_definition(node.identifier.name, IntegerType(), current_scope)
-    # ~ print ("num_args", len(scope_node["params"]))
 
     return value_ast
             # ~ dict(
@@ -953,7 +942,6 @@ def create_init_for_loop(node, retval, parent_node, slot, current_scope):
                                             )
                                     ] )
 
-    print ("SCOPE",current_scope, "NODEID", node_id)
     add_ports_and_params(json_nodes[node_id], json_nodes[current_scope], outPorts = False, params = True)
 
     for n, i in enumerate(node.init):
@@ -968,7 +956,6 @@ def create_init_for_loop(node, retval, parent_node, slot, current_scope):
                     edges    = edges,
                     nodes    = nodes,
                 ))
-    print ("NODEID", json_nodes[node_id])
 
 
     retval["init"] = json_nodes[node_id]
@@ -978,7 +965,6 @@ def create_test_for_loop(node, retval, parent_node, slot, current_scope):
 
     nodes = []
     edges = []
-    print ("test:", node.loop_test[0].emit_json( parent_node, slot, current_scope))
     # ~ for n, i in enumerate(node.init):
         # ~ init_ast = i.emit_json(parent_node, 0,current_scope)
 

@@ -44,17 +44,11 @@ class Node:
         if not ( "no_id" in kwargs and kwargs["no_id"]):
             self.node_id = Node.get_node_id()
             Node.nodes[self.node_id] = self
-            print (self.node_id)
-            # ~ if (self.node_id == "node3"):
-                # ~ print (kwargs)
 
         if "no_id" in kwargs: kwargs.pop("no_id")
 
         # TODO consider list of allowed props (https://stackoverflow.com/questions/8187082/how-can-you-set-class-attributes-from-variable-arguments-kwargs-in-python)
         self.__dict__.update(kwargs)
-        # ~ if (not "no_id" in kwargs):
-            # ~ print(self)
-            # ~ pass
 
     def emit_llvm(self, scope = None):
         if not getattr(type(self),"__emit_llvm__", None):
