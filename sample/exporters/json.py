@@ -575,7 +575,7 @@ def export_identifier_to_json (node, parent_node, slot, current_scope):
     #print (scope["params"])
     for n, (name, arg) in enumerate(scope["params"]):
         if name == node.name:
-            edge = make_json_edge(current_scope,  parent["id"], n, slot, parameter = True, parent = True)
+            edge = make_json_edge(current_scope,  parent["id"], n, slot, parameter = True, parent = (current_scope == parent_node))
 
     return dict(nodes = [], edges = [], final_edges = [edge])
 
