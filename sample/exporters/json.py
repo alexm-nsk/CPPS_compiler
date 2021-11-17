@@ -575,7 +575,9 @@ def export_identifier_to_json (node, parent_node, slot, current_scope):
     #print (scope["params"])
     for n, (name, arg) in enumerate(scope["params"]):
         if name == node.name:
-            edge = make_json_edge(current_scope,  parent["id"], n, slot, parameter = True, parent = (current_scope == parent_node))
+            edge = make_json_edge(current_scope,  parent["id"], n, slot, 
+                                  parameter = True, 
+                                  parent = (current_scope == parent_node))
 
     return dict(nodes = [], edges = [], final_edges = [edge])
 
@@ -823,102 +825,11 @@ def create_parameter_definition(name, type_, node_id):
         p[1]["index"] += 1
     node["params"].insert(0, [ name, emit_type_object(node_id, type_, index, "not applicable") ] )
 
+
 #---------------------------------------------------------------------------------------------
 # used to create loop's initiaization
 # init doesn't contain variables defined in it as parameters
 # instead, they are placed in preCondition, body and reduction BEFORE function's arguments
-init_example =  {
-            "name": "Init",
-            "location": "not applicable",
-            "outPorts": [
-              {
-                "nodeId": "node3",
-                "type": {
-                  "location": "not applicable",
-                  "name": "integer"
-                },
-                "index": 0
-              }
-            ],
-            "inPorts": [
-              {
-                "nodeId": "node3",
-                "type": {
-                  "location": "1:16-1:23",
-                  "name": "integer"
-                },
-                "index": 0
-              }
-            ],
-            "id": "node3",
-            "params": [
-              [
-                "N",
-                {
-                  "nodeId": "node3",
-                  "type": {
-                    "location": "1:16-1:23",
-                    "name": "integer"
-                  },
-                  "index": 0
-                }
-              ]
-            ],
-            "edges": [
-              [
-                {
-                  "nodeId": "node4",
-                  "type": {
-                    "location": "not applicable",
-                    "name": "integer"
-                  },
-                  "index": 0
-                },
-                {
-                  "nodeId": "node3",
-                  "type": {
-                    "location": "not applicable",
-                    "name": "integer"
-                  },
-                  "index": 0
-                }
-              ]
-            ],
-            "nodes": [
-              {
-                "name": "Literal",
-                "location": "3:12-3:13",
-                "outPorts": [
-                  {
-                    "nodeId": "node4",
-                    "type": {
-                      "location": "not applicable",
-                      "name": "integer"
-                    },
-                    "index": 0
-                  }
-                ],
-                "inPorts": [],
-                "id": "node4",
-                "value": "0"
-              }
-            ],
-            "results": [
-              [
-                "i",
-                {
-                  "nodeId": "node3",
-                  "type": {
-                    "location": "not applicable",
-                    "name": "integer"
-                  },
-                  "index": 0
-                }
-              ]
-            ]
-}
-
-node8_contents =  {'results': [['i', {'nodeId': 'node8', 'type': {'location': 'not applicable', 'name': 'integer'}, 'index': 0}]], 'outPorts': [{'index': 0, 'nodeId': 'node8', 'type': {'location': 'not applicable', 'name': 'integer'}}], 'inPorts': []}
 
 
 def create_init_for_loop(node, retval, parent_node, slot, current_scope):
