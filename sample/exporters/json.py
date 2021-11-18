@@ -848,7 +848,6 @@ def create_init_for_loop(node, retval, parent_node, slot, current_scope):
 
     for n, i in enumerate(node.init):
         json_nodes[node_id]["outPorts"].append(make_port(n, node_id , IntegerType()))
-        #out_ports.append(make_port(n, node_id , IntegerType()))
         json_nodes[node_id]["results"].append(
                                     [
                                         i.identifier.name,
@@ -863,11 +862,10 @@ def create_init_for_loop(node, retval, parent_node, slot, current_scope):
         init_ast = i.emit_json(node_id, n, node_id)
         nodes.append(init_ast["nodes"])
         edges.append(init_ast["edges"] + init_ast["final_edges"])
-        #json_nodes[current_scope]["params"]
+
     json_nodes[node_id].update( dict(
                     name     = "Init",
                     location = "not applicable",
-         #           outPorts = out_ports,
                     edges    = edges,
                     nodes    = nodes,
                 ))
@@ -895,8 +893,8 @@ def create_test_for_loop(node, retval, parent_node, slot, current_scope):
     params = []
     for index, param in enumerate(json_nodes[node.init_id]["results"] + json_nodes[current_scope]["params"]):
         new_param = param
-        new_param[1]["index"] = index
         new_param[1]["nodeId"] = node.test_id
+        new_param[1]["index"] = index
         params.append(new_param)
 
     test = dict(
@@ -906,18 +904,6 @@ def create_test_for_loop(node, retval, parent_node, slot, current_scope):
                     inPorts  = in_ports,
                     id       = node.test_id,
                     params   = params,
-                    edges    = edges,
-                    nodes    = nodes,
-                    results  = [
-                                    [
-                                        "name",
-                                         dict(
-                                                nodeId = node.init_id,
-                                                type   = IntegerType().emit_json(),
-                                                index = 0
-                                             )
-                                    ]
-                                ]
                 )
 
     # if nodes request parameters, they will get it from this (test) node as a scope
