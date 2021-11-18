@@ -113,6 +113,7 @@ class Loop(Node):
        super().__init__(**kwargs, no_id = False)
        # sub_nodes will have their own IDs so we calculate them
        self.init_id = Node.get_node_id()
+       self.test_id = Node.get_node_id()
 
     pass
 

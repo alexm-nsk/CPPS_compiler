@@ -24,6 +24,8 @@
 
 # Implements exporting Node and it's descendants into JSON IR
 
+#TODO make fictitious brackets for <=, < , > , >=
+
 #---------------------------------------------------------------------------------------------
 
 import ast_.node
@@ -575,8 +577,8 @@ def export_identifier_to_json (node, parent_node, slot, current_scope):
     #print (scope["params"])
     for n, (name, arg) in enumerate(scope["params"]):
         if name == node.name:
-            edge = make_json_edge(current_scope,  parent["id"], n, slot, 
-                                  parameter = True, 
+            edge = make_json_edge(current_scope,  parent["id"], n, slot,
+                                  parameter = True,
                                   parent = (current_scope == parent_node))
 
     return dict(nodes = [], edges = [], final_edges = [edge])
@@ -843,7 +845,7 @@ def create_init_for_loop(node, retval, parent_node, slot, current_scope):
     json_nodes[node_id] = {"results" : [], "outPorts" : [], "inPorts" : [], "id" : node_id}
 
     add_ports_and_params(json_nodes[node_id], json_nodes[current_scope], outPorts = False, params = True)
-    
+
     for n, i in enumerate(node.init):
         json_nodes[node_id]["outPorts"].append(make_port(n, node_id , IntegerType()))
         #out_ports.append(make_port(n, node_id , IntegerType()))
@@ -856,8 +858,8 @@ def create_init_for_loop(node, retval, parent_node, slot, current_scope):
                                                index = n
                                             )
                                     ] )
-    
-    for n, i in enumerate(node.init):
+
+    # ~ for n, i in enumerate(node.init):
         init_ast = i.emit_json(node_id, n, node_id)
         nodes.append(init_ast["nodes"])
         edges.append(init_ast["edges"] + init_ast["final_edges"])
@@ -873,38 +875,54 @@ def create_init_for_loop(node, retval, parent_node, slot, current_scope):
 
     retval["init"] = json_nodes[node_id]
 
+
 #used to create loop's test
 def create_test_for_loop(node, retval, parent_node, slot, current_scope):
-
+    # retval is what is returned in export_loop_to_json that calls this function
+    # to create the subnode for the loop test (see below)
     nodes = []
     edges = []
-    # ~ for n, i in enumerate(node.init):
-        # ~ init_ast = i.emit_json(parent_node, 0,current_scope)
 
-    # ~ init = dict(
-                    # ~ name     = "Init",
-                    # ~ location = "not applicable",
-                    # ~ outPorts = [],
-                    # ~ inPorts  = [],
-                    # ~ id       = node.init_id,
-                    # ~ params   = [],
-                    # ~ edges    = edges,
-                    # ~ nodes    = nodes,
-                    # ~ results  = [
-                                    # ~ [
-                                        # ~ "name",
-                                         # ~ dict(
-                                                # ~ nodeId = node.init_id,
-                                                # ~ type   = IntegerType().emit_json(),
-                                                # ~ index = 0
-                                             # ~ )
-                                    # ~ ]
-                                # ~ ]
-                # ~ )
+    #copy ports from the scope and put parameters' ports in front of them:
+    in_ports = []
+    for index, port in enumerate(json_nodes[node.init_id]["outPorts"] + json_nodes[current_scope]["inPorts"]):
+        new_port = port;
+        new_port["nodeId"] = node.node_id
+        new_port["index"] = index
+        in_ports.append(new_port)
+
+    # add parameters the same way: first - init's variables, then - all scope's parameters
+    params = []
+    for index, param in enumerate(json_nodes[node.init_id]["results"] + json_nodes[current_scope]["params"]):
+        new_param = param
+        new_param[1]["index"] = index
+        new_param[1]["nodeId"] = node.node_id
+        params.append(new_param)
+
+    test = dict(
+                    name     = "PreCondition",
+                    location = "not applicable",
+                    outPorts = [make_port(0,node.test_id, BooleanType())],
+                    inPorts  = in_ports,
+                    id       = node.test_id,
+                    params   = params,
+                    edges    = edges,
+                    nodes    = nodes,
+                    results  = [
+                                    [
+                                        "name",
+                                         dict(
+                                                nodeId = node.init_id,
+                                                type   = IntegerType().emit_json(),
+                                                index = 0
+                                             )
+                                    ]
+                                ]
+                )
 
     # ~ copy_ports_and_params(init, json_nodes[current_scope])
 
-    # ~ retval["init"] = init
+    retval["preCondition"] = test
 
 
 def export_loop_to_json (node, parent_node, slot, current_scope):
@@ -925,7 +943,7 @@ def export_loop_to_json (node, parent_node, slot, current_scope):
     json_nodes[node.node_id] = retval
 
     create_init_for_loop(node, retval, parent_node, slot, current_scope)
-    # ~ create_test_for_loop(node, retval, parent_node, slot, current_scope)
+    create_test_for_loop(node, retval, parent_node, slot, current_scope)
 
     #reduction_json = node.ret.emit_json(node.node_id, 0, current_scope)
     #retval["reduction"] = reduction_json["nodes"]
