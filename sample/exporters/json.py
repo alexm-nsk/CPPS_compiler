@@ -887,7 +887,7 @@ def create_test_for_loop(node, retval, parent_node, slot, current_scope):
     in_ports = []
     for index, port in enumerate(json_nodes[node.init_id]["outPorts"] + json_nodes[current_scope]["inPorts"]):
         new_port = port;
-        new_port["nodeId"] = node.node_id
+        new_port["nodeId"] = node.test_id
         new_port["index"] = index
         in_ports.append(new_port)
 
@@ -896,7 +896,7 @@ def create_test_for_loop(node, retval, parent_node, slot, current_scope):
     for index, param in enumerate(json_nodes[node.init_id]["results"] + json_nodes[current_scope]["params"]):
         new_param = param
         new_param[1]["index"] = index
-        new_param[1]["nodeId"] = node.node_id
+        new_param[1]["nodeId"] = node.test_id
         params.append(new_param)
 
     test = dict(
@@ -920,7 +920,11 @@ def create_test_for_loop(node, retval, parent_node, slot, current_scope):
                                 ]
                 )
 
-    # ~ copy_ports_and_params(init, json_nodes[current_scope])
+    # if nodes request parameters, they will get it from this (test) node as a scope
+    json_nodes[node.test_id] = test
+    sub_ir = node.loop_test[0].emit_json(node.test_id, 0, node.test_id)
+    json_nodes[node.test_id]["nodes"] = sub_ir["nodes"]
+    json_nodes[node.test_id]["edges"] = sub_ir["edges"] + sub_ir["final_edges"]
 
     retval["preCondition"] = test
 
