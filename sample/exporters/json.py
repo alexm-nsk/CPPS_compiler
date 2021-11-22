@@ -764,15 +764,21 @@ def pull_value_from_scope(name, current_scope, location):
 def export_oldvalue_to_json (node, parent_node, slot, current_scope):
 
     type_ = pull_value_from_scope(node.name, current_scope, node.location)
-    return dict(nodes = [dict(
+
+    retval = dict (
                     outPorts = [make_port(0, node.node_id, type_)],
                     inPorts  = [make_port(0, node.node_id, type_)],
                     id       = node.node_id,
                     name     = "OldValue",
                     location = node.location
-                )],
-                edges = [],
-                final_edge = [])
+                )
+
+    json_nodes[node.node_id] = retval
+            
+    return dict(nodes = [ retval ],
+         edges = [ make_json_edge(current_scope, node.node_id, 0, 0, parameter = True) ],
+         final_edges = [])
+    
 
 
 def export_sum_to_json(node, parent_node, slot, current_scope):
