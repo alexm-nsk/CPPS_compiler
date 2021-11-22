@@ -928,7 +928,7 @@ def create_body_for_loop(node, retval, parent_node, slot, current_scope):
     json_nodes[node.body_id] = body
     copy_ports_and_params(body, retval["preCondition"])
     # ~ print (body)
-    print (node.loop_body[0].emit_json(node.body_id, 0, node.body_id))
+    # ~ print (node.loop_body[0].emit_json(node.body_id, 0, node.body_id))
     retval["body"] = body
 
 
