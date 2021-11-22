@@ -915,6 +915,13 @@ def create_test_for_loop(node, retval, parent_node, slot, current_scope):
     retval["preCondition"] = test
 
 
+#used to create loop's test
+def create_body_for_loop(node, retval, parent_node, slot, current_scope):
+    body = {"name" : "Body", "location": "not applicable", "id" : node.body_id}
+    
+    retval["body"] = body
+
+
 def export_loop_to_json (node, parent_node, slot, current_scope):
     # ~ init
     # ~ loop_test
@@ -934,6 +941,7 @@ def export_loop_to_json (node, parent_node, slot, current_scope):
 
     create_init_for_loop(node, retval, parent_node, slot, current_scope)
     create_test_for_loop(node, retval, parent_node, slot, current_scope)
+    create_body_for_loop(node, retval, parent_node, slot, current_scope)
 
     #reduction_json = node.ret.emit_json(node.node_id, 0, current_scope)
     #retval["reduction"] = reduction_json["nodes"]
