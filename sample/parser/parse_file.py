@@ -278,7 +278,9 @@ class TreeVisitor(NodeVisitor):
 
     # old = "old" _ identifier
     def visit_old(self, node, visited_children):
-
+        # ~ for n, c in enumerate(visited_children):
+            # ~ print (n, ":", c)
+            
         return OldValue( name     = visited_children[2],
                          location = self.get_location(node))
 

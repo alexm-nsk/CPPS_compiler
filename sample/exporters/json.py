@@ -47,7 +47,7 @@ def make_port(index, node_id, type_):
     return dict(
                 index = 0,
                 nodeId = node_id,
-                type = type_.emit_json()
+                type = type_.emit_json() if not type(type_) == dict else type_
             )
 
 
@@ -752,11 +752,10 @@ def export_arrayaccess_to_json (node, parent_node, slot, current_scope):
 
 
 def pull_value_from_scope(name, current_scope, location):
-
     params = json_nodes[current_scope]["params"]
     for array_index_in_params, p in enumerate(params):
         var_name, var_desc = p
-        if var_name == name:
+        if var_name == name.name:
             return var_desc["type"]
 
     raise Exception ("Identifier %s not found in this scope!(%s)" % (name, location))
@@ -765,13 +764,15 @@ def pull_value_from_scope(name, current_scope, location):
 def export_oldvalue_to_json (node, parent_node, slot, current_scope):
 
     type_ = pull_value_from_scope(node.name, current_scope, node.location)
-    return dict(
+    return dict(nodes = [dict(
                     outPorts = [make_port(0, node.node_id, type_)],
                     inPorts  = [make_port(0, node.node_id, type_)],
                     id       = node.node_id,
                     name     = "OldValue",
                     location = node.location
-                )
+                )],
+                edges = [],
+                final_edge = [])
 
 
 def export_sum_to_json(node, parent_node, slot, current_scope):
@@ -918,7 +919,10 @@ def create_test_for_loop(node, retval, parent_node, slot, current_scope):
 #used to create loop's test
 def create_body_for_loop(node, retval, parent_node, slot, current_scope):
     body = {"name" : "Body", "location": "not applicable", "id" : node.body_id}
-    
+    json_nodes[node.body_id] = body
+    copy_ports_and_params(body, retval["preCondition"])
+    # ~ print (body)
+    print (node.loop_body[0].emit_json(node.body_id, 0, node.body_id))
     retval["body"] = body
 
 

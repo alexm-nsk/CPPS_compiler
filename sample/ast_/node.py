@@ -151,7 +151,7 @@ class Assignment(Statement):
 
 class OldValue(Node):
     def __init__(self, *args, **kwargs):
-       super().__init__(**kwargs, no_id = True)
+       super().__init__(**kwargs, no_id = False)
 
     pass
 
