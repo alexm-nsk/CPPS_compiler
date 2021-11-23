@@ -130,7 +130,13 @@ def make_node(node):
         
         # ~ #print ("got a loop!")
         # ~ contents = make_graph( "init", make_node(node["init"] ))
-        contents = make_node(node["body"])
+        contents = make_graph(node["body"]["id"], make_node(node["body"]))
+        contents += make_edges()
+    # ~ elif "init" in node:
+        
+        # ~ #print ("got a loop!")
+        # ~ contents = make_graph( "init", make_node(node["init"] ))
+        contents += make_graph(node["init"]["id"], make_node(node["init"]))
         contents += make_edges()
         # ~ pass
     else:
@@ -139,14 +145,13 @@ def make_node(node):
 # ~ preCondition
 # ~ body
 # ~ reduction
-    try:
-        return f'<node id=\"{node["id"]}\">\n'\
-               f'{indent(props_str)}\n'\
-               f'{indent(ports_str)}\n'\
-               f'{indent(contents)}\n'\
-               f'</node>\n'
-    except:
-        print (node)
+    
+    return f'<node id=\"{node["id"]}\">\n'\
+           f'{indent(props_str)}\n'\
+           f'{indent(ports_str)}\n'\
+           f'{indent(contents)}\n'\
+           f'</node>\n'
+
 
 def emit(IR, nodes):
     global nodemap, json_nodes

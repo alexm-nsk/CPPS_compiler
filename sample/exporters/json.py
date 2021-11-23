@@ -866,8 +866,8 @@ def create_init_for_loop(node, retval, parent_node, slot, current_scope):
 
     # ~ for n, i in enumerate(node.init):
         init_ast = i.emit_json(node_id, n, node_id)
-        nodes.append(init_ast["nodes"])
-        edges.append(init_ast["edges"] + init_ast["final_edges"])
+        nodes.extend(init_ast["nodes"])
+        edges.extend(init_ast["edges"] + init_ast["final_edges"])
 
     json_nodes[node_id].update( dict(
                     name     = "Init",
