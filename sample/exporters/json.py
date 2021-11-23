@@ -774,11 +774,10 @@ def export_oldvalue_to_json (node, parent_node, slot, current_scope):
                 )
 
     json_nodes[node.node_id] = retval
-            
+
     return dict(nodes = [ retval ],
          edges = [ make_json_edge(current_scope, node.node_id, 0, 0, parameter = True) ],
          final_edges = [])
-    
 
 
 def export_sum_to_json(node, parent_node, slot, current_scope):
@@ -922,14 +921,22 @@ def create_test_for_loop(node, retval, parent_node, slot, current_scope):
     retval["preCondition"] = test
 
 
-#used to create loop's test
+#used to create loop's body
 def create_body_for_loop(node, retval, parent_node, slot, current_scope):
-    body = {"name" : "Body", "location": "not applicable", "id" : node.body_id}
-    json_nodes[node.body_id] = body
+    body = {"name" : "Body", "location": "not applicable", "id" : node.body_id, "nodes" : [], "edges" : []}
+    json_nodes[ node.body_id ] = body
     copy_ports_and_params(body, retval["preCondition"])
-    # ~ print (body)
-    # ~ print (node.loop_body[0].emit_json(node.body_id, 0, node.body_id))
+
+    import json
+    for slot, statement in enumerate(node.loop_body):
+        ast = statement.emit_json(node.body_id, slot, node.body_id)        
+        body["nodes"].extend(ast["nodes"])
+        body["edges"].extend(ast["edges"] + ast["final_edges"])
+            
+
+ #   print (json.dumps(body, indent = 1))
     retval["body"] = body
+    # ~ print (node.loop_body)
 
 
 def export_loop_to_json (node, parent_node, slot, current_scope):
