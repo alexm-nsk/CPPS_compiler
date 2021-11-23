@@ -121,12 +121,13 @@ def make_node(node):
         contents = "\n".join([make_node(node) for node in node["nodes"]])
         contents += make_edges()
         contents = make_graph(node["id"]+"_graph", contents)
+    #TODO make test for "If" here:
     elif "branches" in node:
         contents  = make_node(node["condition"])
         contents += make_node(node["branches"][0]) + make_node(node["branches"][1])
         contents += make_edges()
         contents  = make_graph(node["id"]+"_graph", contents)
-    elif "body" in node:
+    elif node["name"] == "LoopExpression":
         
         contents  = "".join(
                             [make_node(node[field]) for field in ["init", "body", "preCondition"]]
