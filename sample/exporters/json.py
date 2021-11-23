@@ -756,18 +756,18 @@ def pull_value_from_scope(name, current_scope, location):
     for array_index_in_params, p in enumerate(params):
         var_name, var_desc = p
         if var_name == name.name:
-            return var_desc["type"]
+            return dict(name = var_name, type = var_desc["type"], index =  array_index_in_params)
 
     raise Exception ("Identifier %s not found in this scope!(%s)" % (name, location))
 
-
+# we find the appropriate in-port by the identifier and connect it to old_value's sole input
 def export_oldvalue_to_json (node, parent_node, slot, current_scope):
 
-    type_ = pull_value_from_scope(node.name, current_scope, node.location)
+    param = pull_value_from_scope(node.name, current_scope, node.location)
 
     retval = dict (
-                    outPorts = [make_port(0, node.node_id, type_)],
-                    inPorts  = [make_port(0, node.node_id, type_)],
+                    outPorts = [make_port(0, node.node_id, param["type"])],
+                    inPorts  = [make_port(0, node.node_id, param["type"])],
                     id       = node.node_id,
                     name     = "OldValue",
                     location = node.location
@@ -776,7 +776,7 @@ def export_oldvalue_to_json (node, parent_node, slot, current_scope):
     json_nodes[node.node_id] = retval
 
     return dict(nodes = [ retval ],
-         edges = [ make_json_edge(current_scope, node.node_id, 0, 0, parameter = True) ],
+         edges = [ make_json_edge(current_scope, node.node_id, param["index"], 0, parameter = True) ],
          final_edges = [])
 
 
@@ -926,17 +926,21 @@ def create_body_for_loop(node, retval, parent_node, slot, current_scope):
     body = {"name" : "Body", "location": "not applicable", "id" : node.body_id, "nodes" : [], "edges" : []}
     json_nodes[ node.body_id ] = body
     copy_ports_and_params(body, retval["preCondition"])
+    body["outPorts"] = []
+    for i, param in enumerate(retval["init"]["results"]):
+        body["outPorts"].append(make_port(i, node.body_id, param[1]["type"]))
 
-    import json
     for slot, statement in enumerate(node.loop_body):
-        ast = statement.emit_json(node.body_id, slot, node.body_id)        
+        ast = statement.emit_json(node.body_id, slot, node.body_id)
         body["nodes"].extend(ast["nodes"])
         body["edges"].extend(ast["edges"] + ast["final_edges"])
-            
 
- #   print (json.dumps(body, indent = 1))
+
+    # ~ import json
+    # ~ print (json.dumps(body, indent = 1))
     retval["body"] = body
-    # ~ print (node.loop_body)
+    
+    
 
 
 def export_loop_to_json (node, parent_node, slot, current_scope):
