@@ -874,6 +874,7 @@ def create_init_for_loop(node, retval, parent_node, slot, current_scope):
                     location = "not applicable",
                     edges    = edges,
                     nodes    = nodes,
+                    # ~ id       =  node_id
                 ))
 
 

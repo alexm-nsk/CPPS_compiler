@@ -126,14 +126,27 @@ def make_node(node):
         contents += make_node(node["branches"][0]) + make_node(node["branches"][1])
         contents += make_edges()
         contents  = make_graph(node["id"]+"_graph", contents)
+    elif "body" in node:
+        
+        # ~ #print ("got a loop!")
+        # ~ contents = make_graph( "init", make_node(node["init"] ))
+        contents = make_node(node["body"])
+        contents += make_edges()
+        # ~ pass
     else:
         contents = make_edges()
-
-    return f'<node id=\"{node["id"]}\">\n'\
-           f'{indent(props_str)}\n'\
-           f'{indent(ports_str)}\n'\
-           f'{indent(contents)}\n'\
-           f'</node>\n'\
+# ~ init
+# ~ preCondition
+# ~ body
+# ~ reduction
+    try:
+        return f'<node id=\"{node["id"]}\">\n'\
+               f'{indent(props_str)}\n'\
+               f'{indent(ports_str)}\n'\
+               f'{indent(contents)}\n'\
+               f'</node>\n'
+    except:
+        print (node)
 
 def emit(IR, nodes):
     global nodemap, json_nodes
