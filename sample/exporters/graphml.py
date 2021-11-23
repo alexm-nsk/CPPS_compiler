@@ -121,7 +121,7 @@ def make_node(node):
         contents = "\n".join([make_node(node) for node in node["nodes"]])
         contents += make_edges()
         contents = make_graph(node["id"]+"_graph", contents)
-    #TODO make test for "If" here:
+    #TODO make test for "If" here: (and add join below)
     elif "branches" in node:
         contents  = make_node(node["condition"])
         contents += make_node(node["branches"][0]) + make_node(node["branches"][1])
