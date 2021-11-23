@@ -128,17 +128,13 @@ def make_node(node):
         contents  = make_graph(node["id"]+"_graph", contents)
     elif "body" in node:
         
-        # ~ #print ("got a loop!")
-        # ~ contents = make_graph( "init", make_node(node["init"] ))
-        contents = make_graph(node["body"]["id"], make_node(node["body"]))
-        contents += make_edges()
-    # ~ elif "init" in node:
+        contents  = "".join(
+                            [make_node(node[field]) for field in ["init", "body", "preCondition"]]
+                            )
         
-        # ~ #print ("got a loop!")
-        # ~ contents = make_graph( "init", make_node(node["init"] ))
-        contents += make_graph(node["init"]["id"], make_node(node["init"]))
+        
         contents += make_edges()
-        # ~ pass
+        contents  = make_graph(node["id"]+"_graph", contents)
     else:
         contents = make_edges()
 # ~ init
