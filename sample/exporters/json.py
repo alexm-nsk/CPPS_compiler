@@ -935,12 +935,9 @@ def create_body_for_loop(node, retval, parent_node, slot, current_scope):
         body["nodes"].extend(ast["nodes"])
         body["edges"].extend(ast["edges"] + ast["final_edges"])
 
-
     # ~ import json
     # ~ print (json.dumps(body, indent = 1))
     retval["body"] = body
-    
-    
 
 
 def export_loop_to_json (node, parent_node, slot, current_scope):

@@ -57,7 +57,7 @@ def make_edge(from_ , to, src_port, dst_port, type):
          f'</edge>'\
 
 props_to_save = { #name in graphml: #name in IR node:
-                  #   ↓                ↓
+                  #   ↓                     ↓
                     "type":         "name",
                     "functionName": "functionName",
                     "value":        "value",
