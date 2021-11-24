@@ -115,6 +115,7 @@ class Loop(Node):
        self.init_id = Node.get_node_id()
        self.test_id = Node.get_node_id()
        self.body_id = Node.get_node_id()
+       self.ret_id  = Node.get_node_id()
 
     pass
 

@@ -863,8 +863,6 @@ def create_init_for_loop(node, retval, parent_node, slot, current_scope):
                                                index = n
                                             )
                                     ] )
-
-    # ~ for n, i in enumerate(node.init):
         init_ast = i.emit_json(node_id, n, node_id)
         nodes.extend(init_ast["nodes"])
         edges.extend(init_ast["edges"] + init_ast["final_edges"])
@@ -928,6 +926,7 @@ def create_body_for_loop(node, retval, parent_node, slot, current_scope):
     json_nodes[ node.body_id ] = body
     copy_ports_and_params(body, retval["preCondition"])
     body["outPorts"] = []
+
     for i, param in enumerate(retval["init"]["results"]):
         body["outPorts"].append(make_port(i, node.body_id, param[1]["type"]))
 
@@ -936,9 +935,21 @@ def create_body_for_loop(node, retval, parent_node, slot, current_scope):
         body["nodes"].extend(ast["nodes"])
         body["edges"].extend(ast["edges"] + ast["final_edges"])
 
-    # ~ import json
-    # ~ print (json.dumps(body, indent = 1))
     retval["body"] = body
+
+
+def create_ret_for_loop(node, retval, parent_node, slot, current_scope):
+    ret = {
+            "name": "Returns", 
+            "location": "not applicable", 
+            "nodes" : [], 
+            "edges": [],
+            "id": node.ret_id
+           }
+    # ~ inPorts
+    # ~ outPorts
+    retval["reduction"] = ret
+    pass
 
 
 def export_loop_to_json (node, parent_node, slot, current_scope):
@@ -961,6 +972,7 @@ def export_loop_to_json (node, parent_node, slot, current_scope):
     create_init_for_loop(node, retval, parent_node, slot, current_scope)
     create_test_for_loop(node, retval, parent_node, slot, current_scope)
     create_body_for_loop(node, retval, parent_node, slot, current_scope)
+    create_ret_for_loop (node, retval, parent_node, slot, current_scope)
 
     #reduction_json = node.ret.emit_json(node.node_id, 0, current_scope)
     #retval["reduction"] = reduction_json["nodes"]
