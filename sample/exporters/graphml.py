@@ -128,12 +128,11 @@ def make_node(node):
         contents += make_edges()
         contents  = make_graph(node["id"]+"_graph", contents)
     elif node["name"] == "LoopExpression":
-        
+
         contents  = "".join(
                             [make_node(node[field]) for field in ["init", "body", "preCondition"]]
                             )
-        
-        
+
         contents += make_edges()
         contents  = make_graph(node["id"]+"_graph", contents)
     else:
@@ -142,7 +141,7 @@ def make_node(node):
 # ~ preCondition
 # ~ body
 # ~ reduction
-    
+
     return f'<node id=\"{node["id"]}\">\n'\
            f'{indent(props_str)}\n'\
            f'{indent(ports_str)}\n'\
