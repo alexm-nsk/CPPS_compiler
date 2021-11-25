@@ -944,10 +944,10 @@ def create_ret_for_loop(node, retval, parent_node, slot, current_scope):
             "location": "not applicable", 
             "nodes" : [], 
             "edges": [],
-            "id": node.ret_id
+            "id": node.ret_id,
+            "inPorts": [],
+            "outPorts": [],
            }
-    # ~ inPorts
-    # ~ outPorts
     retval["reduction"] = ret
     pass
 
