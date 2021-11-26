@@ -925,9 +925,12 @@ def export_value_to_json(node, parent_node, slot, current_scope):
                     name     = "Value",
                     location = "not applicable",
                     # TODO make appropriate type (get it from type of the variable we
-                    # get the value of
+                    # get the value of)
                     outPorts = [make_port(0,node.node_id, IntegerType())],
-                    inPorts  = [],
+                    inPorts  = [
+                                make_port(0,node.node_id, IntegerType()),
+                                make_port(0,node.node_id, BooleanType())
+                                ],
                     id       = node.node_id,
                     params   = []
                  )
