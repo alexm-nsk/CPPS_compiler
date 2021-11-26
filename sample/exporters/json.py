@@ -942,14 +942,13 @@ def create_ret_for_loop(node, retval, parent_node, slot, current_scope):
     ret = {
             "name": "Returns", 
             "location": "not applicable", 
-            "nodes" : [], 
+            "nodes" : [node.ret.emit_json(node.ret_id,0, node.ret_id)], 
             "edges": [],
             "id": node.ret_id,
             "inPorts": [],
             "outPorts": [],
            }
     retval["reduction"] = ret
-    pass
 
 
 def export_loop_to_json (node, parent_node, slot, current_scope):
