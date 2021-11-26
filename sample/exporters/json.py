@@ -789,25 +789,6 @@ def export_sum_to_json(node, parent_node, slot, current_scope):
                 )
 
 
-def export_value_to_json(node, parent_node, slot, current_scope):
-
-    retval = dict(
-                    name     = "Returns",
-                    location = "not applicable",
-                    # TODO make appropriate type (get it from type of the variable we
-                    # get the value of
-                    outPorts = [make_port(0,node.node_id, IntegerType())],
-                    inPorts  = [],
-                    id       = node.node_id,
-                    params   = []
-                 )
-
-    return dict(
-                 nodes       = [retval],
-                 edges       = [],
-                 final_edges = []
-                )
-
 #TODO register new variables in the scope
 def export_assignment_to_json(node, parent_node, slot, current_scope):
 
@@ -938,16 +919,50 @@ def create_body_for_loop(node, retval, parent_node, slot, current_scope):
     retval["body"] = body
 
 
+def export_value_to_json(node, parent_node, slot, current_scope):
+
+    retval = dict(
+                    name     = "Value",
+                    location = "not applicable",
+                    # TODO make appropriate type (get it from type of the variable we
+                    # get the value of
+                    outPorts = [make_port(0,node.node_id, IntegerType())],
+                    inPorts  = [],
+                    id       = node.node_id,
+                    params   = []
+                 )
+
+    return dict(
+                 nodes       = [retval],
+                 edges       = [],
+                 final_edges = []
+                )
+
+
 def create_ret_for_loop(node, retval, parent_node, slot, current_scope):
+
+    ret_id = node.ret_id
+
     ret = {
-            "name": "Returns", 
-            "location": "not applicable", 
-            "nodes" : [node.ret.emit_json(node.ret_id,0, node.ret_id)], 
+            "name": "Returns",
+            "location": "not applicable",
+            "nodes" : [],
             "edges": [],
-            "id": node.ret_id,
+            "id": ret_id,
             "inPorts": [],
             "outPorts": [],
            }
+
+    json_nodes[ret_id] = ret
+
+    ret_ast = node.ret.emit_json( node.ret_id, 0, node.ret_id )
+
+    ret["nodes"].extend(ret_ast["nodes"])
+    ret["edges"].extend(ret_ast["edges"] + ret_ast["final_edges"])
+
+    import json
+    print (json.dumps(ret, indent = 2))
+
     retval["reduction"] = ret
 
 
