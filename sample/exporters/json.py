@@ -934,7 +934,8 @@ def export_value_to_json(node, parent_node, slot, current_scope):
                     id       = node.node_id,
                     params   = []
                  )
-
+    json_nodes[node.node_id] = retval
+    copy_ports_and_params(parent_node, node.node_id)
     return dict(
                  nodes       = [retval],
                  edges       = [],
@@ -949,11 +950,11 @@ def create_ret_for_loop(node, retval, parent_node, slot, current_scope):
     ret = {
             "name": "Returns",
             "location": "not applicable",
+            "outPorts": [],
+            "inPorts": [],
+            "id": ret_id,
             "nodes" : [],
             "edges": [],
-            "id": ret_id,
-            "inPorts": [],
-            "outPorts": [],
            }
 
     json_nodes[ret_id] = ret
