@@ -948,16 +948,17 @@ def create_ret_for_loop(node, retval, parent_node, slot, current_scope):
     ret_id = node.ret_id
 
     ret = {
-            "name": "Returns",
+            "name":     "Returns",
             "location": "not applicable",
             "outPorts": [],
-            "inPorts": [],
-            "id": ret_id,
-            "nodes" : [],
-            "edges": [],
+            "inPorts":  [],
+            "id":       ret_id,
+            "nodes" :   [],
+            "edges":    [],
            }
 
     json_nodes[ret_id] = ret
+    copy_ports_and_params(ret , retval["body"])
 
     ret_ast = node.ret.emit_json( node.ret_id, 0, node.ret_id )
 
