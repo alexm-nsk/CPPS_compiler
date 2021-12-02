@@ -593,7 +593,9 @@ def export_literal_to_json (node, parent_node, slot, current_scope):
                     id       = node.node_id,
                     location = node.location,
                     inPorts  = [],
-                    outPorts = [ make_port(0, node.node_id, IntegerType() ) ],
+                    outPorts = [ make_port(0, node.node_id, 
+                                    node.type if "type" in node.__dict__
+                                    else IntegerType() ) ],
                     value    = node.value,
                     name     = "Literal"
                   )
@@ -939,7 +941,13 @@ def export_value_to_json(node, parent_node, slot, current_scope):
     #TODO make a Literal True here
 
     #true_node = node.Literal(value = True)
-
+    true_node_literal = node.true_literal.emit_json(parent_node, 0, current_scope)["nodes"][0]
+    import json
+    #print (true_node_literal)
+    true_node_edge = make_json_edge(true_node_literal["id"],node.node_id, 0, 1)
+    print (json.dumps(true_node_edge, indent = 2))
+    print (json.dumps(retval, indent = 2))
+    
     return dict(
                  nodes       = [retval],
                  edges       = [],
@@ -981,7 +989,7 @@ def create_ret_for_loop(node, retval, parent_node, slot, current_scope):
 
     import json
     # print ( json.dumps(json_nodes[parent_node]["params"], indent = 2) )
-    print (json.dumps(ret, indent = 2))
+    # ~ print (json.dumps(ret, indent = 2))
 
     retval["reduction"] = ret
 

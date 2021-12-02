@@ -181,5 +181,5 @@ class Value(Reduction):
     def __init__(self, *args, **kwargs):
        super().__init__(**kwargs, no_id = False)
        # this is a placeholder for now
-       self.true_literal = Literal(value = True)
+       self.true_literal = Literal(value = True, type = BooleanType(), location = "not applicable")
     
