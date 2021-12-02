@@ -55,7 +55,7 @@ class BaseType:
 
 class NumberType(BaseType):
     pass
-    
+
 class IntegerType(NumberType):
 
     def __init__(self, location = "not applicable"):
@@ -63,10 +63,10 @@ class IntegerType(NumberType):
 
     def emit_json(self):
         return dict(location = self.location , name = "integer")
-    
+
     def emit_llvm(self):
         return ir.IntType(32)
-        
+
 class VoidType(BaseType):
 
     def __init__(self, location = "not applicable"):
@@ -74,7 +74,7 @@ class VoidType(BaseType):
 
     def emit_json(self):
         return dict(location = self.location , name = "void")
-    
+
     def emit_llvm(self):
         return ir.VoidType()
 
@@ -108,7 +108,7 @@ class CustomType:
     def __init__(self, location):
         self.location = location
 
-    def emit_json():
+    def emit_json(self):
         return dict(location = self.location)
 
 #-------------------------------------------------------------------------------------------
@@ -116,9 +116,9 @@ class CustomType:
 def emit_type_object(node_id, type_description, index, location = None):
 
     type_   = type_description.emit_json()
-    
+
     if location: type_["location"] = location
-    
+
     return dict(
                     nodeId = str(node_id),
                     type   = type_,

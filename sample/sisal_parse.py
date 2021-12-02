@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 #  parse.py
-#`
+#
 #  Copyright 2021 alexm
 #
 #  This program is free software; you can redistribute it and/or modify
@@ -21,6 +21,8 @@
 #  MA 02110-1301, USA.
 #
 #
+
+import json
 
 from parser.parse_file import parse_file
 

@@ -45,7 +45,7 @@ json_nodes = {}
 
 def make_port(index, node_id, type_):
     return dict(
-                index = 0,
+                index = index,
                 nodeId = node_id,
                 type = type_.emit_json() if not type(type_) == dict else type_
             )
@@ -254,7 +254,7 @@ def copy_ports_and_params(target, src_node):
     return target
 
 # adds ports and parameters from src_node and changes "nodeId" to target's id
-def add_ports_and_params(target, src_node, inPorts = True, outPorts = True, params = True):
+def add_ports_and_params(target, src_node, in_ports = True, out_ports = True, params = True):
 
     def process_block(name, param = False):
 
@@ -263,9 +263,9 @@ def add_ports_and_params(target, src_node, inPorts = True, outPorts = True, para
             new_items = copy.deepcopy(src_node[name])
             for n in new_items:
                 if param:
-                    n[1]["index"] += len(target[name])
+                    n[1]["index"] = len(target[name])
                 else:
-                    n["index"] += len(target[name])
+                    n["index"] = len(target[name])
             target[name]  += new_items
             for i in target[name]:
                 if param:
@@ -273,8 +273,8 @@ def add_ports_and_params(target, src_node, inPorts = True, outPorts = True, para
                 else:
                     i["nodeId"] = target["id"]
 
-    if inPorts:  process_block("inPorts")
-    if outPorts: process_block("outPorts")
+    if in_ports:  process_block("inPorts")
+    if out_ports: process_block("outPorts")
     if params:   process_block("params", True)
 
     return target
@@ -831,7 +831,7 @@ def create_init_for_loop(node, retval, parent_node, slot, current_scope):
     node_id       = node.init_id
     json_nodes[node_id] = {"results" : [], "outPorts" : [], "inPorts" : [], "id" : node_id}
 
-    add_ports_and_params(json_nodes[node_id], json_nodes[current_scope], outPorts = False, params = True)
+    add_ports_and_params(json_nodes[node_id], json_nodes[current_scope], out_ports = False, params = True)
 
     for n, i in enumerate(node.init):
         json_nodes[node_id]["outPorts"].append(make_port(n, node_id , IntegerType()))
@@ -936,13 +936,18 @@ def export_value_to_json(node, parent_node, slot, current_scope):
                  )
     json_nodes[node.node_id] = retval
     copy_ports_and_params(parent_node, node.node_id)
+    #TODO make a Literal True here
+
+    #true_node = node.Literal(value = True)
+
     return dict(
                  nodes       = [retval],
                  edges       = [],
                  final_edges = []
                 )
 
-
+# it's a placeholder for now (it simply doubles used variables and adds scope's
+# params)
 def create_ret_for_loop(node, retval, parent_node, slot, current_scope):
 
     ret_id = node.ret_id
@@ -950,22 +955,32 @@ def create_ret_for_loop(node, retval, parent_node, slot, current_scope):
     ret = {
             "name":     "Returns",
             "location": "not applicable",
-            "outPorts": [],
+            "outPorts": [make_port(0,node.node_id, IntegerType())],
             "inPorts":  [],
             "id":       ret_id,
             "nodes" :   [],
             "edges":    [],
+            "params":   [],
            }
 
+    for index, arg in enumerate(node.init):
+        # ret["inPorts"].append(make_port(len(ret["inPorts"]) ,node.node_id, IntegerType()))
+        for double in range(2):
+            ret["inPorts"].append(make_port(len(ret["inPorts"]) ,node.node_id, IntegerType()))
+            ret["params"].append([arg.identifier.name,
+                                  emit_type_object(node.node_id, IntegerType(),
+                                                   len(ret["params"]),
+                                                   "not applicable") ])
+
     json_nodes[ret_id] = ret
-    copy_ports_and_params(ret , retval["body"])
+    add_ports_and_params(ret , json_nodes[current_scope], out_ports = False)
 
     ret_ast = node.ret.emit_json( node.ret_id, 0, node.ret_id )
-
     ret["nodes"].extend(ret_ast["nodes"])
     ret["edges"].extend(ret_ast["edges"] + ret_ast["final_edges"])
 
     import json
+    # print ( json.dumps(json_nodes[parent_node]["params"], indent = 2) )
     print (json.dumps(ret, indent = 2))
 
     retval["reduction"] = ret
