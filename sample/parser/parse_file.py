@@ -320,7 +320,7 @@ class TreeVisitor(NodeVisitor):
     # ~ reduction_value    = "value"   _ "of" _ exp
     def visit_reduction_value(self, node, visited_children):
 
-        return Value(exp = visited_children[4])
+        return Value(value = visited_children[4])
 
 
     #----------------------------------------------------

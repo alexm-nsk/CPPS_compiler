@@ -25,6 +25,7 @@
 # Implements exporting Node and it's descendants into JSON IR
 
 #TODO make fictitious brackets for <=, < , > , >=
+#TODO rename final to output
 
 #---------------------------------------------------------------------------------------------
 
@@ -593,8 +594,9 @@ def export_literal_to_json (node, parent_node, slot, current_scope):
                     id       = node.node_id,
                     location = node.location,
                     inPorts  = [],
-                    outPorts = [ make_port(0, node.node_id, 
+                    outPorts = [ make_port(0, node.node_id,
                                     node.type if "type" in node.__dict__
+                                    # provides default IntegerType if type wasn't provided:
                                     else IntegerType() ) ],
                     value    = node.value,
                     name     = "Literal"
@@ -924,7 +926,8 @@ def create_body_for_loop(node, retval, parent_node, slot, current_scope):
 def export_value_to_json(node, parent_node, slot, current_scope):
 
     retval = dict(
-                    name     = "Value",
+                    name     = "Reduction",
+                    operator = "value",
                     location = "not applicable",
                     # TODO make appropriate type (get it from type of the variable we
                     # get the value of)
@@ -936,22 +939,26 @@ def export_value_to_json(node, parent_node, slot, current_scope):
                     id       = node.node_id,
                     params   = []
                  )
+
     json_nodes[node.node_id] = retval
     copy_ports_and_params(parent_node, node.node_id)
-    #TODO make a Literal True here
 
-    #true_node = node.Literal(value = True)
     true_node_literal = node.true_literal.emit_json(parent_node, 0, current_scope)["nodes"][0]
-    import json
-    #print (true_node_literal)
-    true_node_edge = make_json_edge(true_node_literal["id"],node.node_id, 0, 1)
-    print (json.dumps(true_node_edge, indent = 2))
-    print (json.dumps(retval, indent = 2))
+    # ~ import json
+    # this goes from True-literal to value-node
+    true_node_edge = make_json_edge(true_node_literal["id"], node.node_id, 0, 1)
+    # this goes from scope's (ret) input
+    value_edge     = make_json_edge(current_scope, node.node_id, 0, 0)
+    # this goes from value to scope's (ret's) output
+    final_edge     = make_json_edge(node.node_id, current_scope, 0, 0, parent = True)
     
+    # ~ print (json.dumps(true_node_edge, indent = 2))
+    # ~ print (json.dumps(retval, indent = 2))
+
     return dict(
-                 nodes       = [retval],
-                 edges       = [],
-                 final_edges = []
+                 nodes       = [retval, true_node_literal],
+                 edges       = [true_node_edge, value_edge],
+                 final_edges = [final_edge]
                 )
 
 # it's a placeholder for now (it simply doubles used variables and adds scope's
@@ -989,7 +996,7 @@ def create_ret_for_loop(node, retval, parent_node, slot, current_scope):
 
     import json
     # print ( json.dumps(json_nodes[parent_node]["params"], indent = 2) )
-    # ~ print (json.dumps(ret, indent = 2))
+    print (json.dumps(ret, indent = 2))
 
     retval["reduction"] = ret
 
