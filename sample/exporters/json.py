@@ -944,16 +944,12 @@ def export_value_to_json(node, parent_node, slot, current_scope):
     copy_ports_and_params(parent_node, node.node_id)
 
     true_node_literal = node.true_literal.emit_json(parent_node, 0, current_scope)["nodes"][0]
-    # ~ import json
     # this goes from True-literal to value-node
     true_node_edge = make_json_edge(true_node_literal["id"], node.node_id, 0, 1)
     # this goes from scope's (ret) input
     value_edge     = make_json_edge(current_scope, node.node_id, 0, 0)
     # this goes from value to scope's (ret's) output
     final_edge     = make_json_edge(node.node_id, current_scope, 0, 0, parent = True)
-    
-    # ~ print (json.dumps(true_node_edge, indent = 2))
-    # ~ print (json.dumps(retval, indent = 2))
 
     return dict(
                  nodes       = [retval, true_node_literal],
@@ -979,7 +975,6 @@ def create_ret_for_loop(node, retval, parent_node, slot, current_scope):
            }
 
     for index, arg in enumerate(node.init):
-        # ret["inPorts"].append(make_port(len(ret["inPorts"]) ,node.node_id, IntegerType()))
         for double in range(2):
             ret["inPorts"].append(make_port(len(ret["inPorts"]) ,node.node_id, IntegerType()))
             ret["params"].append([arg.identifier.name,
@@ -994,18 +989,10 @@ def create_ret_for_loop(node, retval, parent_node, slot, current_scope):
     ret["nodes"].extend(ret_ast["nodes"])
     ret["edges"].extend(ret_ast["edges"] + ret_ast["final_edges"])
 
-    import json
-    # print ( json.dumps(json_nodes[parent_node]["params"], indent = 2) )
-    print (json.dumps(ret, indent = 2))
-
     retval["reduction"] = ret
 
 
 def export_loop_to_json (node, parent_node, slot, current_scope):
-    # ~ init
-    # ~ loop_test
-    # ~ loop_body
-    # ~ ret
 
     retval = dict(
                     name      = "LoopExpression",
@@ -1022,9 +1009,6 @@ def export_loop_to_json (node, parent_node, slot, current_scope):
     create_test_for_loop(node, retval, parent_node, slot, current_scope)
     create_body_for_loop(node, retval, parent_node, slot, current_scope)
     create_ret_for_loop (node, retval, parent_node, slot, current_scope)
-
-    #reduction_json = node.ret.emit_json(node.node_id, 0, current_scope)
-    #retval["reduction"] = reduction_json["nodes"]
 
     return dict(
                 nodes       = [retval],
