@@ -934,7 +934,7 @@ def export_value_to_json(node, parent_node, slot, current_scope):
                     outPorts = [make_port(0,node.node_id, IntegerType())],
                     inPorts  = [
                                 make_port(0,node.node_id, IntegerType()),
-                                make_port(0,node.node_id, BooleanType())
+                                make_port(1,node.node_id, BooleanType())
                                 ],
                     id       = node.node_id,
                     params   = []
@@ -942,6 +942,7 @@ def export_value_to_json(node, parent_node, slot, current_scope):
 
     json_nodes[node.node_id] = retval
     copy_ports_and_params(parent_node, node.node_id)
+    del(retval["params"])
 
     true_node_literal = node.true_literal.emit_json(parent_node, 0, current_scope)["nodes"][0]
     # this goes from True-literal to value-node

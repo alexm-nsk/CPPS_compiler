@@ -60,7 +60,7 @@ def main(args):
                                              definitions = []
                                             ),
                                        indent = 1)
-                # ~ print( formatted )
+                print( formatted )
 
         except Exception as e:
             if "--debug" in args:
