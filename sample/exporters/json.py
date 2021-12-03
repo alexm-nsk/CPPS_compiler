@@ -799,14 +799,8 @@ def export_assignment_to_json(node, parent_node, slot, current_scope):
     value_ast = node.value.emit_json (parent_node, slot, current_scope)
 
     #TODO get type from what you get in value:
-    # ~ create_parameter_definition(node.identifier.name, IntegerType(), current_scope)
 
     return value_ast
-            # ~ dict(
-                # ~ nodes       = [],
-                # ~ edges       = [],
-                # ~ final_edges = []
-               # ~ )
 
 
 #---------------------------------------------------------------------------------------------
