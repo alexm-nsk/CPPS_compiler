@@ -61,6 +61,7 @@ def main(args):
                                             ),
                                        indent = 1)
                 print( formatted )
+                # ~ print (len(formatted.split("\n")))
 
         except Exception as e:
             if "--debug" in args:

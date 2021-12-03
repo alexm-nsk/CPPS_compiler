@@ -911,15 +911,18 @@ def create_body_for_loop(node, retval, parent_node, slot, current_scope):
     json_nodes[ node.body_id ] = body
     copy_ports_and_params(body, retval["preCondition"])
     body["outPorts"] = []
+    body["results"]  = [] 
 
     for i, param in enumerate(retval["init"]["results"]):
         body["outPorts"].append(make_port(i, node.body_id, param[1]["type"]))
+        body["results"]. append(param)
 
     for slot, statement in enumerate(node.loop_body):
         ast = statement.emit_json(node.body_id, slot, node.body_id)
         body["nodes"].extend(ast["nodes"])
         body["edges"].extend(ast["edges"] + ast["final_edges"])
 
+    
     retval["body"] = body
 
 
