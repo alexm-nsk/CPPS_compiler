@@ -130,7 +130,7 @@ def make_node(node):
     elif node["name"] == "LoopExpression":
 
         contents  = "".join(
-                            [make_node(node[field]) for field in ["init", "body", "preCondition"]]
+                            [make_node(node[field]) for field in ["init", "body", "preCondition", "reduction"]]
                             )
 
         contents += make_edges()
