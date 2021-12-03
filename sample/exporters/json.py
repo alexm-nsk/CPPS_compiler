@@ -1010,8 +1010,25 @@ def export_loop_to_json (node, parent_node, slot, current_scope):
     create_test_for_loop(node, retval, parent_node, slot, current_scope)
     create_body_for_loop(node, retval, parent_node, slot, current_scope)
     create_ret_for_loop (node, retval, parent_node, slot, current_scope)
-
+    
+    in_edges = []
+    # make edges that connect the scope to whis node
+    for n, param in enumerate(json_nodes[parent_node]["params"]):
+        in_edges.append(
+                        make_json_edge(parent_node, node.node_id,
+                                       n,           n, parameter = True)
+                       )
+        
+    out_edges = []
+    
+    for n, output in enumerate(json_nodes[parent_node]["outPorts"]):
+         out_edges.append(
+                        make_json_edge(node.node_id, parent_node,
+                                       n,            n,
+                                       parent = True)
+                       )
+    
     return dict(
                 nodes       = [retval],
-                edges       = [],
+                edges       = in_edges + out_edges,
                 final_edges = [])

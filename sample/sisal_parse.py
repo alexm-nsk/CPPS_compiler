@@ -57,7 +57,7 @@ def main(args):
                 formatted = json.dumps(
                                         dict(
                                              functions = [o.emit_json(None) for o in output],
-                                             declarations = []
+                                             declarations = {}
                                             ),
                                        indent = 1)
                 print( formatted )
