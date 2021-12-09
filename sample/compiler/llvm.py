@@ -160,9 +160,10 @@ def export_if_to_llvm(if_node, scope):
     condition_result = if_node.condition.emit_llvm(scope)
     if_ret_val = scope.builder.alloca(scope.expected_type, name = "if_result_pointer")
 
-'''
+
     with scope.builder.if_else(condition_result) as (then, else_):
         with then:
+            print (if_node.branches["then"])
             then_result = if_node.branches["then"]["nodes"][0].emit_llvm(scope)
             scope.builder.store(then_result, if_ret_val)
         with else_:
@@ -170,7 +171,7 @@ def export_if_to_llvm(if_node, scope):
             scope.builder.store(else_result, if_ret_val)
 
     return scope.builder.load (if_ret_val, name="if_result")
-'''
+
 
 def export_algebraic_to_llvm(algebraic_node, scope):
 

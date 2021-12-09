@@ -191,27 +191,31 @@ class Node:
             if n.id == node1:
                 return True
         return False
-
+        
+    def emit_llvm(self, scope = None):
+        class_name = self.__class__.__name__
+        globals() [ "export_" + class_name.lower() + "_to_llvm"](self, scope)
 
 class Condition(Node):
 
-    def emit_llvm(self, scope):
-        export_condition_to_llvm(self, scope)
-
+    # ~ def emit_llvm(self, scope):
+        # ~ export_condition_to_llvm(self, scope)
+    pass
 
 class Branch(Node):
     pass
 
 
 class If(Node):
-    def emit_llvm(self, scope):
-        export_if_to_llvm(self, scope)
-
+    # ~ def emit_llvm(self, scope):
+        # ~ export_if_to_llvm(self, scope)
+    pass
 
 class Function(Node):
 
-    def emit_llvm(self):
-        export_function_to_llvm(self)
+    # ~ def emit_llvm(self):
+        # ~ export_function_to_llvm(self)
+    pass
 
 
 class Binary(Node):
