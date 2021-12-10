@@ -29,7 +29,7 @@ from compiler.json_parser import *
 def main(args):
 
     if ( len( args ) < 2 ):
-        print ( "usage: python sisal_parse.py ir.json / ir.gml" )
+        print ( "usage: python sisal_compile_ir.py ir.json / ir.gml" )
     else:
 
         input_file_name = args[1]

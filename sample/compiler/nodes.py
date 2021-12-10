@@ -192,29 +192,28 @@ class Node:
                 return True
         return False
         
-    def emit_llvm(self, scope = None):
+    def emit_llvm(self, scope = None):                
         class_name = self.__class__.__name__
-        globals() [ "export_" + class_name.lower() + "_to_llvm"](self, scope)
+        func_name = "export_" + class_name.lower() + "_to_llvm"
+        if func_name in globals():
+            globals() [ func_name ](self, scope)
+        else:
+            raise Exception (f'compiling {class_name} not implemented')
+
 
 class Condition(Node):
-
-    # ~ def emit_llvm(self, scope):
-        # ~ export_condition_to_llvm(self, scope)
     pass
+
 
 class Branch(Node):
     pass
 
 
 class If(Node):
-    # ~ def emit_llvm(self, scope):
-        # ~ export_if_to_llvm(self, scope)
     pass
 
-class Function(Node):
 
-    # ~ def emit_llvm(self):
-        # ~ export_function_to_llvm(self)
+class Function(Node):
     pass
 
 
