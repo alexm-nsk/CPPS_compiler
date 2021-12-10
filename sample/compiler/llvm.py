@@ -24,7 +24,8 @@
 
 from llvmlite import ir, binding
 from copy import deepcopy
-from compiler.nodes import *
+import compiler.nodes
+
 
 llvm_initialized = False
 llvm_functions   = {}
@@ -102,7 +103,7 @@ def create_module(functions, module_name):
 
 
 def export_function_to_llvm(function_node, scope = None):
-    
+
     global module, printf, fmt_arg
 
     arg_types = []
@@ -138,7 +139,7 @@ def export_function_to_llvm(function_node, scope = None):
     scope = LlvmScope(builder, vars_, expected_type = function_node.out_ports[0].type.emit_llvm())
 
     function_result = function_node.nodes[0].emit_llvm(scope)
-    return
+    # ~ return
     # needed for printf:
     if function_node.function_name == "main":
         fmt_arg = add_bitcaster(builder, module)
@@ -147,11 +148,22 @@ def export_function_to_llvm(function_node, scope = None):
     scope.builder.ret(function_result)
 
 
-def export_condition_to_llvm(condition_node, scope):
+def export_branch_to_llvm(branch_node, scope):
     # ~ print (Node)
-    for node, edge in condition_node.get_result_nodes():
-        print (node)
-        print (edge)
+    #for node, edge in condition_node.get_result_nodes():
+     #   print (node)
+      #  print (edge)
+    return None
+
+
+def export_condition_to_llvm(condition_node, scope):
+    # ~ print (condition_node)
+    # ~ nodes.
+    edges_to = compiler.nodes.Edge.edges_to[condition_node.id]
+    print ()
+    # ~ for node, edge in condition_node.get_result_nodes():
+        # ~ print (node)
+        # ~ print (edge)
     return None
 
 
@@ -162,15 +174,16 @@ def export_if_to_llvm(if_node, scope):
 
     def get_branch(name):
         return next((x for x in if_node.branches if x.name == name), None)
-        
-    with scope.builder.if_else(condition_result) as (then, else_):
-        with then:
-            # ~ print (if_node.branches["then"])
-            then_result = get_branch("Then").emit_llvm(scope)
-            scope.builder.store(then_result, if_ret_val)
-        with else_:
-            else_result = get_branch("Else").emit_llvm(scope)
-            scope.builder.store(else_result, if_ret_val)
+
+    # ~ with scope.builder.if_else(condition_result) as (then, else_):
+        # ~ with then:
+            # ~ pass
+            # ~ #then_result = get_branch("Then").emit_llvm(scope)
+            #print (then_result)
+            # ~ scope.builder.store(then_result, if_ret_val)
+        # ~ with else_:
+            # ~ else_result = get_branch("Else").emit_llvm(scope)
+            # ~ scope.builder.store(else_result, if_ret_val)
 
     return scope.builder.load (if_ret_val, name="if_result")
 
