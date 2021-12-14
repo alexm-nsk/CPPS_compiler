@@ -147,6 +147,23 @@ def export_function_to_llvm(function_node, scope = None):
 
     scope.builder.ret(function_result)
 
+def is_parent(node1, node2):
+        #print ("NODE",node2)
+        for n in compiler.nodes.Node.nodes[node2].nodes:
+            #print ("printed",n)
+            if n == node1:
+                return True
+        return False
+
+def export_binary_to_llvm(binary_node, scope):
+
+   # edges_to = compiler.nodes.Edge.edges_to[binary_node.id]
+    print (binary_node.get_input_edges())
+    for node in binary_node.get_input_nodes():
+        print ("is parent " if is_parent(binary_node.id, node.id) else "not parent")
+
+    return None
+
 
 def export_branch_to_llvm(branch_node, scope):
     # ~ print (Node)
@@ -157,14 +174,12 @@ def export_branch_to_llvm(branch_node, scope):
 
 
 def export_condition_to_llvm(condition_node, scope):
-    # ~ print (condition_node)
-    # ~ nodes.
-    edges_to = compiler.nodes.Edge.edges_to[condition_node.id]
-    print ()
-    # ~ for node, edge in condition_node.get_result_nodes():
-        # ~ print (node)
-        # ~ print (edge)
-    return None
+
+
+    for node, edge in condition_node.get_result_nodes():
+        print (compiler.nodes.Node.nodes[node].emit_llvm(scope))
+
+    pass
 
 
 def export_if_to_llvm(if_node, scope):

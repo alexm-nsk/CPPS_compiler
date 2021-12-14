@@ -184,7 +184,14 @@ class Node:
     def get_result_nodes(self):
         return [( edge.from_, edge )
             for edge in Edge.edges_to[self.id] if Node.is_parent(edge.from_, self.id)]
-
+    
+    def get_input_nodes(self):
+        return [ Node.nodes[edge.from_]
+            for edge in Edge.edges_to[self.id]]
+            
+    def get_input_edges(self):        
+        return  [(edge.from_, edge.to) for edge in Edge.edges_to[self.id]]
+            
     @staticmethod
     def is_parent(node1, node2):
         for n in Node.nodes[node2].nodes:
