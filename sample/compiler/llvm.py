@@ -50,6 +50,15 @@ class LlvmScope:
         self.name          = name
         self.expected_type = expected_type
 
+    def get_var_index(self, var_name):
+        for i, var in enumerate(self.vars):
+            if var_name == var: return i
+        return None
+
+    def get_var_by_index(self, index):
+        # TODO make sure it's the actual one
+        return self.vars[index]
+
 
 def init_llvm(module_name = "microsisal"):
 
@@ -152,21 +161,38 @@ def is_parent(node1, node2):
 
         N2 = compiler.nodes.Node.nodes_[node2]
         if not "nodes" in N2.__dict__: return False
-        
+
         for n in N2.nodes:
             if n.id == node1:
                 return True
         return False
 
+def get_edge_between(a, b):
+    for e in compiler.nodes.Edge.edges_to[b.id]:
+        if e.from_ == a.id:
+            return e
+    return None
 
 def export_binary_to_llvm(binary_node, scope):
 
-   # edges_to = compiler.nodes.Edge.edges_to[binary_node.id]
+    edges_to = compiler.nodes.Edge.edges_to[binary_node.id]
+    print (edges_to)
+    # TODO (check if it has exactly two)
     a, b, = binary_node.get_input_nodes()
-    for node in [a, b]:
-        print (node.id, node.name, "parameter " if is_parent(binary_node.id, node.id) 
-                else "internal")
-
+    print (a)
+    print()
+    print (b)
+    # ~ print
+    for i,operand in enumerate([a, b]):
+        # find edge that points from this operand to the operation
+        index = get_edge_between(operand, binary_node) 
+        if is_parent(binary_node.id, operand.id): #parameter
+            pass
+            # ~ parameter
+            print ()
+        else:
+            pass
+            
     return None
 
 
@@ -179,7 +205,6 @@ def export_branch_to_llvm(branch_node, scope):
 
 
 def export_condition_to_llvm(condition_node, scope):
-
 
     for node, edge in condition_node.get_result_nodes():
         print (compiler.nodes.Node.nodes_[node].emit_llvm(scope))
