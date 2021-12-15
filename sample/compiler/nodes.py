@@ -108,17 +108,19 @@ def parse_json_fields(self, node):
     if ("name" in node ):         self.name          = node["name"]
     if ("location" in node ):     self.location      = node["location"]
     if ("id" in node ):           self.id            = node["id"]
-    if ("nodes" in node ):        self.nodes         = parse_nodes(node["nodes"])
-    if ("edges" in node ):        self.edges         = get_edges(node["edges"])
-    if ("inPorts" in node ):      self.in_ports      = get_ports(node["inPorts"] )
-    if ("outPorts" in node ):     self.out_ports     = get_ports(node["outPorts"])
-    if ("params" in node ):       self.params        = get_params(node["params"])
-    if ("condition" in node ):    self.condition     = parse_node (node["condition"])
-    if ("branches" in node ):     self.branches      = parse_nodes(node["branches"])
     if ("functionName" in node ): self.function_name = node["functionName"]
     if ("operator" in node ):     self.operator      = node["operator"]
     if ("callee" in node ):       self.callee        = node["callee"]
     if ("value" in node ):        self.value         = node["value"]
+    
+    if ("edges" in node ):        self.edges         = get_edges(node["edges"])
+    if ("inPorts" in node ):      self.in_ports      = get_ports(node["inPorts"] )
+    if ("outPorts" in node ):     self.out_ports     = get_ports(node["outPorts"])
+    if ("params" in node ):       self.params        = get_params(node["params"])
+    
+    if ("condition" in node ):    self.condition     = parse_node (node["condition"])
+    if ("branches" in node ):     self.branches      = parse_nodes(node["branches"])
+    if ("nodes" in node ):        self.nodes         = parse_nodes(node["nodes"])
 
 
 class Type:
@@ -172,10 +174,10 @@ class Port:
 
 class Node:
 
-    nodes = {}
+    nodes_ = {}
 
     def __init__(self, node):
-        Node.nodes[node["id"]] = self
+        Node.nodes_[node["id"]] = self
         parse_json_fields (self, node)
 
     def __repr__(self):
@@ -186,7 +188,7 @@ class Node:
             for edge in Edge.edges_to[self.id] if Node.is_parent(edge.from_, self.id)]
     
     def get_input_nodes(self):
-        return [ Node.nodes[edge.from_]
+        return [ Node.nodes_[edge.from_]
             for edge in Edge.edges_to[self.id]]
             
     def get_input_edges(self):        
@@ -194,7 +196,7 @@ class Node:
             
     @staticmethod
     def is_parent(node1, node2):
-        for n in Node.nodes[node2].nodes:
+        for n in Node.nodes_[node2].nodes:
             if n.id == node1:
                 return True
         return False
