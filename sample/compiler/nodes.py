@@ -133,6 +133,7 @@ class Type:
         return str(self.__dict__)
 
     def emit_llvm(self):
+        # TODO derive type from it's description
         return ir.IntType(32)
 
 
@@ -188,11 +189,14 @@ class Node:
             for edge in Edge.edges_to[self.id] if Node.is_parent(edge.from_, self.id)]
     
     def get_input_nodes(self):
-        return [ Node.nodes_[edge.from_]
+        return [ (Node.nodes_[edge.from_], edge)
             for edge in Edge.edges_to[self.id]]
             
-    def get_input_edges(self):        
+    def get_input_edges_simple(self):        
         return  [(edge.from_, edge.to) for edge in Edge.edges_to[self.id]]
+
+    def get_input_edges(self):        
+        return  Edge.edges_to[self.id]
             
     @staticmethod
     def is_parent(node1, node2):
@@ -205,7 +209,7 @@ class Node:
         class_name = self.__class__.__name__
         func_name = "export_" + class_name.lower() + "_to_llvm"
         if func_name in globals():
-            globals() [ func_name ](self, scope)
+            return globals() [ func_name ](self, scope)
         else:
             raise Exception (f'compiling {class_name} not implemented')
 

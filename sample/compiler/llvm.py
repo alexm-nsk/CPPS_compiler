@@ -57,7 +57,9 @@ class LlvmScope:
 
     def get_var_by_index(self, index):
         # TODO make sure it's the actual one
-        return self.vars[index]
+        for name, var in self.vars.items():
+            if var.index == index:
+                return var
 
 
 def init_llvm(module_name = "microsisal"):
@@ -140,6 +142,7 @@ def export_function_to_llvm(function_node, scope = None):
     for n,p in enumerate(params):
         function.args[n].name = p
         vars_[p] = function.args[n]
+        vars_[p].index = n
 
     block = function.append_basic_block(name = "entry")
 
@@ -173,43 +176,73 @@ def get_edge_between(a, b):
             return e
     return None
 
+
+'''
+    • IRBuilder.icmp_signed(cmpop, lhs, rhs, name='')
+    Signed integer compare lhs with rhs. The string cmpop can be one of <, <=, ==, !=, >= or >.
+
+    • IRBuilder.icmp_unsigned(cmpop, lhs, rhs, name='')
+    Unsigned integer compare lhs with rhs. The string cmpop can be one of <, <=, ==, !=, >= or >.
+
+    • IRBuilder.fcmp_ordered(cmpop, lhs, rhs, name='', flags=[])
+    Floating-point ordered compare lhs with rhs.
+    – The string cmpop can be one of <, <=, ==, !=, >=, >, ord or uno.
+    – The flags list can include any of nnan, ninf, nsz, arcp and fast, which implies all previous flags.
+
+    • IRBuilder.fcmp_unordered(cmpop, lhs, rhs, name='', flags=[])
+    Floating-point unordered compare lhs with rhs.
+    – The string cmpop, can be one of <, <=, ==, !=, >=, >, ord or uno.
+    – The flags list can include any of nnan, ninf, nsz, arcp and fast, which implies all previous flags
+'''
+
+
 def export_binary_to_llvm(binary_node, scope):
 
     edges_to = compiler.nodes.Edge.edges_to[binary_node.id]
-    print (edges_to)
     # TODO (check if it has exactly two)
-    a, b, = binary_node.get_input_nodes()
-    print (a)
-    print()
-    print (b)
-    # ~ print
-    for i,operand in enumerate([a, b]):
+    ops = []
+    for operand, edge in binary_node.get_input_nodes()[:2]:
         # find edge that points from this operand to the operation
-        index = get_edge_between(operand, binary_node) 
         if is_parent(binary_node.id, operand.id): #parameter
-            pass
-            # ~ parameter
-            print ()
+            index = get_edge_between(operand, binary_node).from_index
+            ops.append(scope.get_var_by_index(index))
         else:
-            pass
-            
-    return None
+            ops.append(operand.emit_llvm(scope))
+
+    lhs, rhs = ops
+
+    if binary_node.operator in ["<", "<=", "==", "!=", ">=", ">."]:
+        return scope.builder.icmp_signed(binary_node.operator, lhs, rhs)
+    elif binary_node.operator == "+":
+        return scope.builder.add(lhs, rhs)
+    elif binary_node.operator == "-":
+        return scope.builder.add(lhs, rhs)
+
+def export_literal_to_llvm(literal_node, scope):
+    # TODO get the type
+    llvm_type = ir.IntType(32)
+    return ir.Constant( llvm_type, int(literal_node.value))
 
 
 def export_branch_to_llvm(branch_node, scope):
-        # ~ print (Node)
-    #for node, edge in condition_node.get_result_nodes():
-     #   print (node)
-      #  print (edge)
-    return None
+
+    # ~ print ("nodes:", branch_node.get_input_nodes())
+    result_nodes = branch_node.get_result_nodes()
+    if result_nodes != []:
+        for node, edge in result_nodes:
+            # return first and only port value for now
+            return compiler.nodes.Node.nodes_[node].emit_llvm(scope)
+    else:
+        input_edges = branch_node.get_input_edges()
+        for edge in input_edges:
+            return scope.get_var_by_index(edge.from_index)
 
 
 def export_condition_to_llvm(condition_node, scope):
 
     for node, edge in condition_node.get_result_nodes():
-        print (compiler.nodes.Node.nodes_[node].emit_llvm(scope))
-
-    pass
+        # return first and only port value for now
+        return compiler.nodes.Node.nodes_[node].emit_llvm(scope)
 
 
 def export_if_to_llvm(if_node, scope):
@@ -220,50 +253,29 @@ def export_if_to_llvm(if_node, scope):
     def get_branch(name):
         return next((x for x in if_node.branches if x.name == name), None)
 
-    # ~ with scope.builder.if_else(condition_result) as (then, else_):
-        # ~ with then:
-            # ~ pass
-            # ~ #then_result = get_branch("Then").emit_llvm(scope)
-            #print (then_result)
-            # ~ scope.builder.store(then_result, if_ret_val)
-        # ~ with else_:
-            # ~ else_result = get_branch("Else").emit_llvm(scope)
-            # ~ scope.builder.store(else_result, if_ret_val)
+    with scope.builder.if_else(condition_result) as (then, else_):
+        with then:
+            pass
+            then_result = get_branch("Then").emit_llvm(scope)
+            scope.builder.store(then_result, if_ret_val)
+        with else_:
+            else_result = get_branch("Else").emit_llvm(scope)
 
     return scope.builder.load (if_ret_val, name="if_result")
 
 
-def export_algebraic_to_llvm(algebraic_node, scope):
+def export_functioncall_to_llvm(function_call_node, scope):
 
-    lhs   = algebraic_node.expression[0].emit_llvm(scope)
-    rhs   = algebraic_node.expression[2].emit_llvm(scope)
-    cmpop = algebraic_node.expression[1].operator
+    name = function_call_node.callee
+    # ~ args = [ arg.emit_llvm(scope) for arg in function_call_node.args ]
+    arg_nodes = function_call_node.get_input_nodes()
+    num_in_ports = len(function_call_node.in_ports)
 
-    if cmpop == "<":
-        return scope.builder.icmp_signed(cmpop, lhs, rhs, name='cmp_result')
-    elif cmpop == "+":
-        return scope.builder.add(lhs, rhs, name='sum')
-    elif cmpop == "-":
-        return scope.builder.sub(lhs, rhs, name='sub')
-    else:
-        raise Exception ("Unsupported operation:",
-                                algebraic_node.expression[1].location,
-                                algebraic_node.expression[1].operator)
-
-
-def export_identifier_to_llvm(identifier_node, scope):
-    return scope.vars[identifier_node.name]
-
-
-def export_literal_to_llvm(literal_node, scope):
-    return ir.Constant( literal_node.type.emit_llvm() , int(literal_node.value))
-
-
-def export_call_to_llvm(function_call_node, scope):
-
-    name = function_call_node.function_name.name
-    args = [ arg.emit_llvm(scope) for arg in function_call_node.args ]
-
+    args = [None for i in range(num_in_ports)]
+    
+    for (node, edge) in arg_nodes:
+        args[edge.to_index] = node.emit_llvm(scope)
+        
     # ~ Call function fn with arguments args, a sequence of values.
     # ~ cconv is the optional calling convention.
     # ~ tail, if True, is a hint for the optimizer to perform tail-call optimization.
