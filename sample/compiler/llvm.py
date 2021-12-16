@@ -217,6 +217,10 @@ def export_binary_to_llvm(binary_node, scope):
         return scope.builder.add(lhs, rhs)
     elif binary_node.operator == "-":
         return scope.builder.sub(lhs, rhs)
+    elif binary_node.operator == "*":
+        return scope.builder.mul(lhs, rhs)
+    elif binary_node.operator == "/":
+        return scope.builder.sdiv(lhs, rhs)
 
 def export_literal_to_llvm(literal_node, scope):
     # TODO get the type
@@ -255,7 +259,6 @@ def export_if_to_llvm(if_node, scope):
 
     with scope.builder.if_else(condition_result) as (then, else_):
         with then:
-            pass
             then_result = get_branch("Then").emit_llvm(scope)
             scope.builder.store(then_result, if_ret_val)
         with else_:

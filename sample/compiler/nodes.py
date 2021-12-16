@@ -102,14 +102,16 @@ def parse_nodes(nodes):
 
     return [ parse_node(node) for node in nodes ]
 
-
+def replace_operators(op):
+    return op.replace("&lt", "<").replace("&le", "<=").replace("&gt", ">").replace("&ge", ">=")
+    
 def parse_json_fields(self, node):
 
     if ("name" in node ):         self.name          = node["name"]
     if ("location" in node ):     self.location      = node["location"]
     if ("id" in node ):           self.id            = node["id"]
     if ("functionName" in node ): self.function_name = node["functionName"]
-    if ("operator" in node ):     self.operator      = node["operator"]
+    if ("operator" in node ):     self.operator      = replace_operators(node["operator"])
     if ("callee" in node ):       self.callee        = node["callee"]
     if ("value" in node ):        self.value         = node["value"]
     
