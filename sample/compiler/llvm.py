@@ -216,7 +216,7 @@ def export_binary_to_llvm(binary_node, scope):
     elif binary_node.operator == "+":
         return scope.builder.add(lhs, rhs)
     elif binary_node.operator == "-":
-        return scope.builder.add(lhs, rhs)
+        return scope.builder.sub(lhs, rhs)
 
 def export_literal_to_llvm(literal_node, scope):
     # TODO get the type
@@ -267,12 +267,13 @@ def export_if_to_llvm(if_node, scope):
 def export_functioncall_to_llvm(function_call_node, scope):
 
     name = function_call_node.callee
-    # ~ args = [ arg.emit_llvm(scope) for arg in function_call_node.args ]
+
     arg_nodes = function_call_node.get_input_nodes()
     num_in_ports = len(function_call_node.in_ports)
 
+
+    # put argument values into appropriate argument slots:
     args = [None for i in range(num_in_ports)]
-    
     for (node, edge) in arg_nodes:
         args[edge.to_index] = node.emit_llvm(scope)
         
