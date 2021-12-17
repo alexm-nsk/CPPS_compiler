@@ -211,20 +211,23 @@ def export_binary_to_llvm(binary_node, scope):
 
     lhs, rhs = ops
 
-    if binary_node.operator in ["<", "<=", "==", "!=", ">=", ">."]:
-        return scope.builder.icmp_signed(binary_node.operator, lhs, rhs)
-    elif binary_node.operator == "+":
+    op = binary_node.operator
+    
+    if op in ["<", "<=", "==", "!=", ">=", ">."]:
+        return scope.builder.icmp_signed(op, lhs, rhs)
+    elif op == "+":
         return scope.builder.add(lhs, rhs)
-    elif binary_node.operator == "-":
+    elif op == "-":
         return scope.builder.sub(lhs, rhs)
-    elif binary_node.operator == "*":
+    elif op == "*":
         return scope.builder.mul(lhs, rhs)
-    elif binary_node.operator == "/":
+    elif op == "/":
         return scope.builder.sdiv(lhs, rhs)
 
 def export_literal_to_llvm(literal_node, scope):
     # TODO get the type
-    llvm_type = ir.IntType(32)
+    # ~ print (literal_node.out_ports[0].type)
+    llvm_type = literal_node.out_ports[0].type.emit_llvm()
     return ir.Constant( llvm_type, int(literal_node.value))
 
 

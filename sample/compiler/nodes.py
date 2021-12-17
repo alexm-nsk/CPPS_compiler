@@ -31,10 +31,9 @@ BRANCH_NAMES = ["Else", "ElseIf", "Then"]
 
 
 def get_type(type_object):
-
     return Type(
                     location = type_object["location"],
-                    name     = type_object["name"]
+                    descr     = type_object["name"]
                 )
 
 
@@ -126,17 +125,20 @@ def parse_json_fields(self, node):
 
 
 class Type:
-
-    def __init__(self, location, name):
+    type_map = {
+        "integer" : ir.IntType(32)
+    }
+    def __init__(self, location, descr):
         self.location = location
-        self.name     = name
+        self.descr     = descr
+        #print ("type created")
 
     def __repr__(self):
         return str(self.__dict__)
 
     def emit_llvm(self):
         # TODO derive type from it's description
-        return ir.IntType(32)
+        return self.type_map[self.descr]
 
 
 class Edge:
