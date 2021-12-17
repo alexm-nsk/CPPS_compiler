@@ -200,8 +200,13 @@ def export_binary_to_llvm(binary_node, scope):
 
     edges_to = compiler.nodes.Edge.edges_to[binary_node.id]
     # TODO (check if it has exactly two)
+    input_nodes = binary_node.get_input_nodes()
+    
+    if len(input_nodes) != 2:
+        raise Exception("Binary node has wrong number of input nodes (must be 2), location: " + binary_node.location)
+        
     ops = []
-    for operand, edge in binary_node.get_input_nodes()[:2]:
+    for operand, edge in input_nodes[:2]:
         # find edge that points from this operand to the operation
         if is_parent(binary_node.id, operand.id): #parameter
             index = get_edge_between(operand, binary_node).from_index
@@ -224,16 +229,14 @@ def export_binary_to_llvm(binary_node, scope):
     elif op == "/":
         return scope.builder.sdiv(lhs, rhs)
 
+
 def export_literal_to_llvm(literal_node, scope):
-    # TODO get the type
-    # ~ print (literal_node.out_ports[0].type)
     llvm_type = literal_node.out_ports[0].type.emit_llvm()
     return ir.Constant( llvm_type, int(literal_node.value))
 
 
 def export_branch_to_llvm(branch_node, scope):
 
-    # ~ print ("nodes:", branch_node.get_input_nodes())
     result_nodes = branch_node.get_result_nodes()
     if result_nodes != []:
         for node, edge in result_nodes:
