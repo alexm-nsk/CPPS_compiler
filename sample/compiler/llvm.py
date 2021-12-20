@@ -150,14 +150,20 @@ def export_function_to_llvm(function_node, scope = None):
 
     scope = LlvmScope(builder, vars_, expected_type = function_node.out_ports[0].type.emit_llvm())
 
-    function_result = function_node.nodes[0].emit_llvm(scope)
-    # ~ return
+
+    result_node, edge = function_node.get_input_nodes()[0]
+
+    function_result = result_node.emit_llvm(scope)
+    
     # needed for printf:
     if function_node.function_name == "main":
+
         fmt_arg = add_bitcaster(builder, module)
         builder.call(printf, [fmt_arg, function_result])
 
     scope.builder.ret(function_result)
+
+    return function_result
 
 
 def is_parent(node1, node2):
@@ -169,6 +175,7 @@ def is_parent(node1, node2):
             if n.id == node1:
                 return True
         return False
+
 
 def get_edge_between(a, b):
     for e in compiler.nodes.Edge.edges_to[b.id]:
@@ -220,7 +227,7 @@ def export_binary_to_llvm(binary_node, scope):
 
     # get operand types:
     type_a, type_b = [port.type.descr for port in binary_node.in_ports]
-    
+
     if op in ["<", "<=", "==", "!=", ">=", ">."]:
         if type_a == "integer" and type_b == "integer":
             return scope.builder.icmp_signed(op, lhs, rhs)
@@ -276,6 +283,7 @@ def export_if_to_llvm(if_node, scope):
             scope.builder.store(then_result, if_ret_val)
         with else_:
             else_result = get_branch("Else").emit_llvm(scope)
+            scope.builder.store(else_result, if_ret_val)
 
     return scope.builder.load (if_ret_val, name="if_result")
 
@@ -286,7 +294,6 @@ def export_functioncall_to_llvm(function_call_node, scope):
 
     arg_nodes = function_call_node.get_input_nodes()
     num_in_ports = len(function_call_node.in_ports)
-
 
     # put argument values into appropriate argument slots:
     args = [None for i in range(num_in_ports)]
