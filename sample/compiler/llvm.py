@@ -199,16 +199,16 @@ def get_edge_between(a, b):
 def export_binary_to_llvm(binary_node, scope):
 
     edges_to = compiler.nodes.Edge.edges_to[binary_node.id]
-    # TODO (check if it has exactly two)
+
     input_nodes = binary_node.get_input_nodes()
-    
+
     if len(input_nodes) != 2:
-        raise Exception("Binary node has wrong number of input nodes (must be 2), location: " + binary_node.location)
-        
+        raise Exception("Binary node has wrong number of nodes pointing at it (must be 2), location: " + binary_node.location)
+
     ops = []
     for operand, edge in input_nodes[:2]:
         # find edge that points from this operand to the operation
-        if is_parent(binary_node.id, operand.id): #parameter
+        if is_parent(binary_node.id, operand.id):
             index = get_edge_between(operand, binary_node).from_index
             ops.append(scope.get_var_by_index(index))
         else:
@@ -217,9 +217,16 @@ def export_binary_to_llvm(binary_node, scope):
     lhs, rhs = ops
 
     op = binary_node.operator
+
+    # get operand types:
+    type_a, type_b = [port.type.descr for port in binary_node.in_ports]
     
     if op in ["<", "<=", "==", "!=", ">=", ">."]:
-        return scope.builder.icmp_signed(op, lhs, rhs)
+        if type_a == "integer" and type_b == "integer":
+            return scope.builder.icmp_signed(op, lhs, rhs)
+        else:
+            print(f'Warning: comparing different types: {type_a, type_b} at {binary_node.location}')
+            return scope.builder.fcmp_ordered(op, lhs, rhs)
     elif op == "+":
         return scope.builder.add(lhs, rhs)
     elif op == "-":
@@ -285,7 +292,7 @@ def export_functioncall_to_llvm(function_call_node, scope):
     args = [None for i in range(num_in_ports)]
     for (node, edge) in arg_nodes:
         args[edge.to_index] = node.emit_llvm(scope)
-        
+
     # ~ Call function fn with arguments args, a sequence of values.
     # ~ cconv is the optional calling convention.
     # ~ tail, if True, is a hint for the optimizer to perform tail-call optimization.
