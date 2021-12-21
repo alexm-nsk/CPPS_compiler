@@ -255,7 +255,7 @@ def export_branch_to_llvm(branch_node, scope):
     if result_nodes != []:
         for node, edge in result_nodes:
             # return first and only port value for now
-            return compiler.nodes.Node.nodes_[node].emit_llvm(scope)
+            return node.emit_llvm(scope)
     else:
         input_edges = branch_node.get_input_edges()
         for edge in input_edges:
@@ -266,7 +266,7 @@ def export_condition_to_llvm(condition_node, scope):
 
     for node, edge in condition_node.get_result_nodes():
         # return first and only port value for now
-        return compiler.nodes.Node.nodes_[node].emit_llvm(scope)
+        return node.emit_llvm(scope)
 
 
 def export_if_to_llvm(if_node, scope):

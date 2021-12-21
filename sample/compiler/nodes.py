@@ -189,7 +189,7 @@ class Node:
         return str(self.__dict__)
 
     def get_result_nodes(self):
-        return [( edge.from_, edge )
+        return [( Node.nodes_[edge.from_], edge )
             for edge in Edge.edges_to[self.id] if Node.is_parent(edge.from_, self.id)]
     
     def get_input_nodes(self):
