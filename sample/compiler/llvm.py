@@ -150,7 +150,6 @@ def export_function_to_llvm(function_node, scope = None):
 
     scope = LlvmScope(builder, vars_, expected_type = function_node.out_ports[0].type.emit_llvm())
 
-
     result_node, edge = function_node.get_input_nodes()[0]
 
     function_result = result_node.emit_llvm(scope)

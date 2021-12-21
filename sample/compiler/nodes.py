@@ -93,6 +93,21 @@ def parse_node(node):
     elif name == "Literal":
         return Literal(node)
 
+    elif name == "LoopExpression":
+        return LoopExpression(node)
+        
+    elif name == "Init":
+        return Init(node)
+
+    elif name == "PreCondition":
+        return PreCondition(node)
+
+    elif name == "Body":
+        return Body(node)
+        
+    elif name == "Returns":
+        return Returns(node)
+
     elif name in BRANCH_NAMES:
         return Branch(node)
 
@@ -122,6 +137,10 @@ def parse_json_fields(self, node):
     if ("condition" in node ):    self.condition     = parse_node (node["condition"])
     if ("branches" in node ):     self.branches      = parse_nodes(node["branches"])
     if ("nodes" in node ):        self.nodes         = parse_nodes(node["nodes"])
+
+    # Loop:
+    for name in ["init", "preCondition", "body", "reduction"]:
+        if (name in node ): self.__dict__[name]     = parse_node(node[name])
 
 
 class Type:
@@ -244,3 +263,25 @@ class FunctionCall(Node):
 
 class Literal(Node):
     pass
+
+    
+class LoopExpression(Node):
+    pass
+
+
+class Init(Node):
+    pass
+
+
+class PreCondition(Node):
+    pass
+
+
+class Body(Node):
+    pass
+
+
+class Returns(Node):
+    pass
+
+
