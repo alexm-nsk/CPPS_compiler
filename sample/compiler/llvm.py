@@ -88,10 +88,10 @@ class LlvmScope:
             if var_name == var: return i
         return None
 
-    def get_var_by_index(self, index):
+    def get_var_by_index(self, var_index):
         # TODO make sure it's the actual one
         for name, index in self.var_index.items():
-            if index == index:
+            if index == var_index:
                 return self.vars[name]
                 
         raise Exception (f"Variable with index {index} not found, location: {self.location}")
