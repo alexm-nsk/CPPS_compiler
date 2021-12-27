@@ -25,7 +25,7 @@
 
 from compiler.json_parser import *
 from compiler.llvm import *
-
+import re
 
 BRANCH_NAMES = ["Else", "ElseIf", "Then"]
 
@@ -140,7 +140,8 @@ def parse_json_fields(self, node):
 
     # Loop:
     for name in ["init", "preCondition", "body", "reduction"]:
-        if (name in node ): self.__dict__[name]     = parse_node(node[name])
+        conv_name = re.sub("([A-Z])", lambda m: "_" + m.group(0).lower(), name)
+        if (name in node ): self.__dict__[conv_name] = parse_node(node[name])
 
 
 class Type:

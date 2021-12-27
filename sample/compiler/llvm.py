@@ -254,6 +254,7 @@ def export_branch_to_llvm(branch_node, scope):
     if result_nodes != []:
         for node, edge in result_nodes:
             # return first and only port value for now
+            # TODO implement multiple outputs
             return node.emit_llvm(scope)
     else:
         input_edges = branch_node.get_input_edges()
@@ -273,6 +274,8 @@ def export_if_to_llvm(if_node, scope):
     condition_result = if_node.condition.emit_llvm(scope)
     if_ret_val = scope.builder.alloca(scope.expected_type, name = "if_result_pointer")
 
+    # TODO there could be multiple else_if branches
+    
     def get_branch(name):
         return next((x for x in if_node.branches if x.name == name), None)
 
@@ -306,6 +309,14 @@ def export_functioncall_to_llvm(function_call_node, scope):
 
     return scope.builder.call(llvm_functions[name], args, name='call_result', cconv=None, tail=False, fastmath=())
 
+
+def export_init_to_llvm(init_node, scope):
+    pass
+
+def export_loopexpression_to_llvm(loopexpression_node, scope):
+    print (loopexpression_node.pre_condition)
+    print (loopexpression_node.__dict__.keys())
+    
 
 if __name__ == "__main__":
     pass
