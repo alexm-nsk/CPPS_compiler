@@ -54,13 +54,15 @@ type_map = {
 
 class LlvmScope:
 
-    def __init__(self, builder, expected_type = None, name = ""):
+    def __init__(self, builder, expected_type = None, name = "", function = None):
+        
         self.builder       = builder
         self.name          = name
         self.expected_type = expected_type
         self.location      = "" # TODO assign this
         self.vars          = {}
-        self.var_index     = {} # stores varname to index pairs 
+        self.var_index     = {} # stores varname to index pairs
+        self.function      = function
         
     def add_var(self, name,  var_):
         self.vars[name] = var_
@@ -178,7 +180,7 @@ def export_function_to_llvm(function_node, scope = None):
     block = function.append_basic_block(name = "entry")
     builder = ir.IRBuilder(block)
 
-    scope = LlvmScope(builder, expected_type = function_node.out_ports[0].type.emit_llvm())
+    scope = LlvmScope(builder, expected_type = function_node.out_ports[0].type.emit_llvm(), function = function)
 
     for n,p in enumerate(params):
         function.args[n].name = p        
@@ -259,7 +261,6 @@ def export_binary_to_llvm(binary_node, scope):
             #print (get_edges_between(operand, binary_node)[1])
             index = get_edges_between(operand, binary_node)[n].from_index
             ops.append(scope.get_var_by_index(index))
-            print (index)
         else:
             ops.append(operand.emit_llvm(scope))
 
@@ -367,8 +368,7 @@ def export_init_to_llvm(init_node, scope):
         else:
             scope.builder.store(node.emit_llvm(scope), scope.vars[name])
     # doesn't need to return anything, only to initialize the loop
-    print (scope.vars)
-    print (scope.var_index)
+
 
 def export_body_to_llvm(body_node, scope):
     #print (body_node.nodes)
@@ -393,12 +393,16 @@ def export_returns_to_llvm (returns_node, scope):
 
 
 def export_loopexpression_to_llvm(loopexpression_node, scope):
-    # ~ scope = deepcopy(scope)
+    #scope = deepcopy(scope)
+    # ~ scope = LlvmScope(scope.builder, name = "loop", function = scope.function)
+    # TODO try making new scope based on scope argument instead of deepcopying it
+    scope.builder = ir.IRBuilder(scope.function.append_basic_block(name = "loop_init"))
 
     # TODO do we need a new builder?
-    # ~ loop_result = scope.builder.alloca(ir.IntType(SYSTEM_BIT_DEPTH))
+    loop_result = scope.builder.alloca(ir.IntType(SYSTEM_BIT_DEPTH), name = "loop_result")
     # ~ block = scope.builder.append_basic_block(name = "entry")
 
+    
     ret_var = loopexpression_node.init.emit_llvm(scope)
     loopexpression_node.pre_condition.emit_llvm(scope)
     loopexpression_node.body.emit_llvm(scope)
