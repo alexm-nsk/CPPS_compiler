@@ -54,21 +54,34 @@ type_map = {
 
 class LlvmScope:
 
-    def __init__(self, builder, vars_, expected_type = None, name = ""):
-        self.vars          = vars_
+    def __init__(self, builder, expected_type = None, name = ""):
         self.builder       = builder
         self.name          = name
         self.expected_type = expected_type
-
+        self.location      = "" # TODO assign this
+        self.vars          = {}
+        self.var_index     = {} # stores varname to index pairs 
+        
     def add_var(self, name,  var_):
         self.vars[name] = var_
+        self.var_index[name] = len(self.var_index)
 
     # accepts descriptions in form of:
     # {'type': {'location': 'not applicable', 'descr': 'integer'}, 'index': 0
 
     def add_vars(self, var_): #add a dict {"name" : internals}
         for name, value in var_.items():
-            self.vars[name] = self.builder.alloca(value['type'].emit_llvm(), name = name)
+            self.vars[name] = value
+            self.var_index[name] = len(self.var_index)            
+
+    def prepend_vars(self, var_):
+
+        for name in self.var_index:
+            self.var_index[name] += len(var_)
+
+        for n , (name, value) in enumerate(var_.items()):
+            self.vars[name] = value
+            self.var_index[name] = n        
 
     def get_var_index(self, var_name):
         for i, var in enumerate(self.vars):
@@ -77,9 +90,11 @@ class LlvmScope:
 
     def get_var_by_index(self, index):
         # TODO make sure it's the actual one
-        for name, var in self.vars.items():
-            if var.index == index:
-                return var
+        for name, index in self.var_index.items():
+            if index == index:
+                return self.vars[name]
+                
+        raise Exception (f"Variable with index {index} not found, location: {self.location}")
 
 
 def init_llvm(module_name = "microsisal"):
@@ -159,15 +174,15 @@ def export_function_to_llvm(function_node, scope = None):
     vars_ = {}
 
     # assign names to llvm function parameters (used when we recall those arguments in function's body):
-    for n,p in enumerate(params):
-        function.args[n].name = p
-        vars_[p] = function.args[n]
-        vars_[p].index = n
 
     block = function.append_basic_block(name = "entry")
     builder = ir.IRBuilder(block)
 
-    scope = LlvmScope(builder, vars_, expected_type = function_node.out_ports[0].type.emit_llvm())
+    scope = LlvmScope(builder, expected_type = function_node.out_ports[0].type.emit_llvm())
+
+    for n,p in enumerate(params):
+        function.args[n].name = p        
+        scope.add_vars({p : function.args[n]})
 
     result_node, edge = function_node.get_input_nodes()[0]
     function_result = result_node.emit_llvm(scope)
@@ -200,6 +215,15 @@ def get_edge_between(a, b):
     return None
 
 
+def get_edges_between(a, b):
+        
+    return [
+                e
+                for e in compiler.nodes.Edge.edges_to[b.id]
+                if e.from_ == a.id
+            ]
+
+
 '''
     • IRBuilder.icmp_signed(cmpop, lhs, rhs, name='')
     Signed integer compare lhs with rhs. The string cmpop can be one of <, <=, ==, !=, >= or >.
@@ -229,11 +253,13 @@ def export_binary_to_llvm(binary_node, scope):
         raise Exception("Binary node has wrong number of nodes pointing at it (must be 2), location: " + binary_node.location)
 
     ops = []
-    for operand, edge in input_nodes[:2]:
+    for n, (operand, edge) in enumerate(input_nodes[:2]):
         # find edge that points from this operand to the operation
         if is_parent(binary_node.id, operand.id):
-            index = get_edge_between(operand, binary_node).from_index
+            #print (get_edges_between(operand, binary_node)[1])
+            index = get_edges_between(operand, binary_node)[n].from_index
             ops.append(scope.get_var_by_index(index))
+            print (index)
         else:
             ops.append(operand.emit_llvm(scope))
 
@@ -330,23 +356,53 @@ def export_functioncall_to_llvm(function_call_node, scope):
 def export_init_to_llvm(init_node, scope):
 
     results = init_node.get_result_nodes()
-
-    for n , (var, descr) in enumerate(init_node.results.items()):
-        scope.add_vars({var: descr})
+    for n , (name, descr) in enumerate(init_node.results.items()):
+        new_var = scope.builder.alloca(descr['type'].emit_llvm(), name = name)
+        scope.prepend_vars({name: new_var})
         node, edge = results[n]
-        scope.builder.store(node.emit_llvm(scope), scope.vars[var])
+        if (node == init_node):
+            #scope.builder.store(node.emit_llvm(scope), scope.vars[var])
+            #TODO store scope's var in this var
+            pass
+        else:
+            scope.builder.store(node.emit_llvm(scope), scope.vars[name])
+    # doesn't need to return anything, only to initialize the loop
+    print (scope.vars)
+    print (scope.var_index)
 
-    # ~ scope.builder.store(scope.vars["N"], scope.vars["i"])
+def export_body_to_llvm(body_node, scope):
+    #print (body_node.nodes)
+    # ~ print (body_node.results)
+    pass
 
-    return scope.vars["i"]
+
+def export_precondition_to_llvm (pre_cond_node, scope):
+
+    result_nodes = pre_cond_node.get_result_nodes()
+
+    if (len (result_nodes) > 1):
+        raise Exception("only one loop condition is supported at the moment, location: " + pre_cond_node.location)
+
+    node, edge = result_nodes[0]
+
+    node.emit_llvm(scope)
+
+
+def export_returns_to_llvm (returns_node, scope):
+    pass
 
 
 def export_loopexpression_to_llvm(loopexpression_node, scope):
     # ~ scope = deepcopy(scope)
 
     # TODO do we need a new builder?
+    # ~ loop_result = scope.builder.alloca(ir.IntType(SYSTEM_BIT_DEPTH))
+    # ~ block = scope.builder.append_basic_block(name = "entry")
 
     ret_var = loopexpression_node.init.emit_llvm(scope)
+    loopexpression_node.pre_condition.emit_llvm(scope)
+    loopexpression_node.body.emit_llvm(scope)
+    loopexpression_node.reduction.emit_llvm(scope) # reduction contains and object of type "Returns"
 
     return ret_var
 

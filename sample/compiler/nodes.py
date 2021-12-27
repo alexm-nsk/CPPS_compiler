@@ -75,6 +75,8 @@ def get_params(params):
 def parse_node(node):
 
     name = node["name"]
+
+    #TODO use map to functions instead of ifs and elifs
     if name == "Lambda":
         return Function(node)
 
@@ -110,6 +112,10 @@ def parse_node(node):
 
     elif name in BRANCH_NAMES:
         return Branch(node)
+
+    elif name == "OldValue":
+        return OldValue(node)
+
 
 
 def parse_nodes(nodes):
@@ -294,4 +300,7 @@ class Body(Node):
 class Returns(Node):
     pass
 
+
+class OldValue(Node):
+    pass
 
