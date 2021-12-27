@@ -41,16 +41,16 @@ def reset_llvm():
     fmt_arg          = None
     module           = None
 
-# TODO get it from the system and put it into a sttings module
+
+# TODO get it from the system and put it into a settings module
 SYSTEM_BIT_DEPTH = 64
+
 
 # TODO check if it's necessary to create it.IntType(32) every time
 type_map = {
     "integer" : ir.IntType(SYSTEM_BIT_DEPTH)
 }
 
-def map_type(type_name):
-    return type_map[type_name]
 
 class LlvmScope:
 
@@ -65,10 +65,10 @@ class LlvmScope:
 
     # accepts descriptions in form of:
     # {'type': {'location': 'not applicable', 'descr': 'integer'}, 'index': 0
-    
+
     def add_vars(self, var_): #add a dict {"name" : internals}
         for name, value in var_.items():
-            self.vars[name] = value
+            self.vars[name] = self.builder.alloca(value['type'].emit_llvm(), name = name)
 
     def get_var_index(self, var_name):
         for i, var in enumerate(self.vars):
@@ -171,7 +171,7 @@ def export_function_to_llvm(function_node, scope = None):
 
     result_node, edge = function_node.get_input_nodes()[0]
     function_result = result_node.emit_llvm(scope)
-    
+
     # needed for printf:
     if function_node.function_name == "main":
         fmt_arg = add_bitcaster(builder, module)
@@ -292,7 +292,7 @@ def export_if_to_llvm(if_node, scope):
     if_ret_val = scope.builder.alloca(scope.expected_type, name = "if_result_pointer")
 
     # TODO there could be multiple else_if branches
-    
+
     def get_branch(name):
         return next((x for x in if_node.branches if x.name == name), None)
 
@@ -328,17 +328,28 @@ def export_functioncall_to_llvm(function_call_node, scope):
 
 
 def export_init_to_llvm(init_node, scope):
-    # ~ print (init_node.__dict__.keys())
-    # ~ print (init_node.params)
-    print (init_node.results)
+
+    results = init_node.get_result_nodes()
+
+    for n , (var, descr) in enumerate(init_node.results.items()):
+        scope.add_vars({var: descr})
+        node, edge = results[n]
+        scope.builder.store(node.emit_llvm(scope), scope.vars[var])
+
+    # ~ scope.builder.store(scope.vars["N"], scope.vars["i"])
+
+    return scope.vars["i"]
 
 
 def export_loopexpression_to_llvm(loopexpression_node, scope):
-    scope = deepcopy(scope)
-    print (scope.vars)
-    print (loopexpression_node.init.emit_llvm(scope))
-    # ~ print (loopexpression_node.__dict__.keys())
-    
+    # ~ scope = deepcopy(scope)
+
+    # TODO do we need a new builder?
+
+    ret_var = loopexpression_node.init.emit_llvm(scope)
+
+    return ret_var
+
 
 if __name__ == "__main__":
     pass
