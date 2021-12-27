@@ -95,7 +95,7 @@ def parse_node(node):
 
     elif name == "LoopExpression":
         return LoopExpression(node)
-        
+
     elif name == "Init":
         return Init(node)
 
@@ -104,7 +104,7 @@ def parse_node(node):
 
     elif name == "Body":
         return Body(node)
-        
+
     elif name == "Returns":
         return Returns(node)
 
@@ -116,9 +116,11 @@ def parse_nodes(nodes):
 
     return [ parse_node(node) for node in nodes ]
 
+
 def replace_operators(op):
     return op.replace("&lt", "<").replace("&le", "<=").replace("&gt", ">").replace("&ge", ">=")
-    
+
+
 def parse_json_fields(self, node):
 
     if ("name" in node ):         self.name          = node["name"]
@@ -128,25 +130,32 @@ def parse_json_fields(self, node):
     if ("operator" in node ):     self.operator      = replace_operators(node["operator"])
     if ("callee" in node ):       self.callee        = node["callee"]
     if ("value" in node ):        self.value         = node["value"]
-    
+
     if ("edges" in node ):        self.edges         = get_edges(node["edges"])
     if ("inPorts" in node ):      self.in_ports      = get_ports(node["inPorts"] )
     if ("outPorts" in node ):     self.out_ports     = get_ports(node["outPorts"])
     if ("params" in node ):       self.params        = get_params(node["params"])
-    
+
     if ("condition" in node ):    self.condition     = parse_node (node["condition"])
     if ("branches" in node ):     self.branches      = parse_nodes(node["branches"])
     if ("nodes" in node ):        self.nodes         = parse_nodes(node["nodes"])
 
+
     # Loop:
+    
+    if ("results" in node ):      self.results       = get_params(node["results"])
+
     for name in ["init", "preCondition", "body", "reduction"]:
+        # will replace names like "preCondition" with names like "pre_condition"
+        # to adhere to typical Python naming scheme:
         conv_name = re.sub("([A-Z])", lambda m: "_" + m.group(0).lower(), name)
+        #
         if (name in node ): self.__dict__[conv_name] = parse_node(node[name])
 
 
 class Type:
     type_map = {
-        "integer" : ir.IntType(32)
+        "integer" : ir.IntType(SYSTEM_BIT_DEPTH)
     }
     def __init__(self, location, descr):
         self.location = location
@@ -211,25 +220,25 @@ class Node:
     def get_result_nodes(self):
         return [( Node.nodes_[edge.from_], edge )
             for edge in Edge.edges_to[self.id] if Node.is_parent(edge.from_, self.id)]
-    
+
     def get_input_nodes(self):
         return [ (Node.nodes_[edge.from_], edge)
             for edge in Edge.edges_to[self.id]]
-            
-    def get_input_edges_simple(self):        
+
+    def get_input_edges_simple(self):
         return  [(edge.from_, edge.to) for edge in Edge.edges_to[self.id]]
 
-    def get_input_edges(self):        
+    def get_input_edges(self):
         return  Edge.edges_to[self.id]
-            
+
     @staticmethod
     def is_parent(node1, node2):
         for n in Node.nodes_[node2].nodes:
             if n.id == node1:
                 return True
         return False
-        
-    def emit_llvm(self, scope = None):                
+
+    def emit_llvm(self, scope = None):
         class_name = self.__class__.__name__
         func_name = "export_" + class_name.lower() + "_to_llvm"
         if func_name in globals():
@@ -265,7 +274,7 @@ class FunctionCall(Node):
 class Literal(Node):
     pass
 
-    
+
 class LoopExpression(Node):
     pass
 

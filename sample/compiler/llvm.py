@@ -41,6 +41,16 @@ def reset_llvm():
     fmt_arg          = None
     module           = None
 
+# TODO get it from the system and put it into a sttings module
+SYSTEM_BIT_DEPTH = 64
+
+# TODO check if it's necessary to create it.IntType(32) every time
+type_map = {
+    "integer" : ir.IntType(SYSTEM_BIT_DEPTH)
+}
+
+def map_type(type_name):
+    return type_map[type_name]
 
 class LlvmScope:
 
@@ -49,6 +59,16 @@ class LlvmScope:
         self.builder       = builder
         self.name          = name
         self.expected_type = expected_type
+
+    def add_var(self, name,  var_):
+        self.vars[name] = var_
+
+    # accepts descriptions in form of:
+    # {'type': {'location': 'not applicable', 'descr': 'integer'}, 'index': 0
+    
+    def add_vars(self, var_): #add a dict {"name" : internals}
+        for name, value in var_.items():
+            self.vars[name] = value
 
     def get_var_index(self, var_name):
         for i, var in enumerate(self.vars):
@@ -82,7 +102,7 @@ def init_llvm(module_name = "microsisal"):
     #initialize printf
 
     voidptr_ty     = ir.IntType(8).as_pointer()
-    printf_ty      = ir.FunctionType(ir.IntType(32), [voidptr_ty], var_arg = True)
+    printf_ty      = ir.FunctionType(ir.IntType(SYSTEM_BIT_DEPTH), [voidptr_ty], var_arg = True)
     printf         = ir.Function(module, printf_ty, name = "printf")
 
     llvm_initialized = True
@@ -145,18 +165,15 @@ def export_function_to_llvm(function_node, scope = None):
         vars_[p].index = n
 
     block = function.append_basic_block(name = "entry")
-
     builder = ir.IRBuilder(block)
 
     scope = LlvmScope(builder, vars_, expected_type = function_node.out_ports[0].type.emit_llvm())
 
     result_node, edge = function_node.get_input_nodes()[0]
-
     function_result = result_node.emit_llvm(scope)
     
     # needed for printf:
     if function_node.function_name == "main":
-
         fmt_arg = add_bitcaster(builder, module)
         builder.call(printf, [fmt_arg, function_result])
 
@@ -311,11 +328,16 @@ def export_functioncall_to_llvm(function_call_node, scope):
 
 
 def export_init_to_llvm(init_node, scope):
-    pass
+    # ~ print (init_node.__dict__.keys())
+    # ~ print (init_node.params)
+    print (init_node.results)
+
 
 def export_loopexpression_to_llvm(loopexpression_node, scope):
-    print (loopexpression_node.pre_condition)
-    print (loopexpression_node.__dict__.keys())
+    scope = deepcopy(scope)
+    print (scope.vars)
+    print (loopexpression_node.init.emit_llvm(scope))
+    # ~ print (loopexpression_node.__dict__.keys())
     
 
 if __name__ == "__main__":
