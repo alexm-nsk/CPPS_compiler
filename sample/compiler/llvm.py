@@ -55,7 +55,7 @@ type_map = {
 class LlvmScope:
 
     def __init__(self, builder, expected_type = None, name = "", function = None):
-        
+
         self.builder       = builder
         self.name          = name
         self.expected_type = expected_type
@@ -63,7 +63,7 @@ class LlvmScope:
         self.vars          = {}
         self.var_index     = {} # stores varname to index pairs
         self.function      = function
-        
+
     def add_var(self, name,  var_):
         self.vars[name] = var_
         self.var_index[name] = len(self.var_index)
@@ -74,7 +74,7 @@ class LlvmScope:
     def add_vars(self, var_): #add a dict {"name" : internals}
         for name, value in var_.items():
             self.vars[name] = value
-            self.var_index[name] = len(self.var_index)            
+            self.var_index[name] = len(self.var_index)
 
     def prepend_vars(self, var_):
 
@@ -83,7 +83,7 @@ class LlvmScope:
 
         for n , (name, value) in enumerate(var_.items()):
             self.vars[name] = value
-            self.var_index[name] = n        
+            self.var_index[name] = n
 
     def get_var_index(self, var_name):
         for i, var in enumerate(self.vars):
@@ -95,7 +95,7 @@ class LlvmScope:
         for name, index in self.var_index.items():
             if index == var_index:
                 return self.vars[name]
-                
+
         raise Exception (f"Variable with index {index} not found, location: {self.location}")
 
 
@@ -164,10 +164,10 @@ def export_function_to_llvm(function_node, scope = None):
         arg_types.append(type_["type"].emit_llvm())
         params.append(name)
 
-
     #just one value for now:
     # TODO (make multiresult)
-    function_type = ir.FunctionType( function_node.out_ports[0].type.emit_llvm(), (p for p in arg_types), False )
+    return_llvm_type = function_node.out_ports[0].type.emit_llvm()
+    function_type = ir.FunctionType( return_llvm_type, (p for p in arg_types), False )
 
     function = ir.Function(module, function_type, name=function_node.function_name)
     llvm_functions[function_node.function_name]  = function
@@ -180,13 +180,15 @@ def export_function_to_llvm(function_node, scope = None):
     block = function.append_basic_block(name = "entry")
     builder = ir.IRBuilder(block)
 
-    scope = LlvmScope(builder, expected_type = function_node.out_ports[0].type.emit_llvm(), function = function)
+    scope = LlvmScope(builder, expected_type = return_llvm_type, function = function)
 
     for n,p in enumerate(params):
-        function.args[n].name = p        
+        function.args[n].name = p
         scope.add_vars({p : function.args[n]})
 
     result_node, edge = function_node.get_input_nodes()[0]
+    
+    # TODO use scope.expected_type for further nodes
     function_result = result_node.emit_llvm(scope)
 
     # needed for printf:
@@ -221,7 +223,7 @@ def get_edge_between(a, b):
 
 
 def get_edges_between(a, b):
-        
+
     return [
                 e
                 for e in compiler.nodes.Edge.edges_to[b.id]
@@ -248,6 +250,15 @@ def get_edges_between(a, b):
 '''
 
 
+def dereference_value(value, scope):
+
+    if isinstance(value, ir.AllocaInstr):
+        return scope.builder.load(value, name = "deref__" + value.name)
+    elif isinstance(value, ir.PointerType):
+        return scope.builder.load(value.pointee, name = "deref__" + value.name)
+    return value
+
+
 def export_binary_to_llvm(binary_node, scope):
 
     edges_to = compiler.nodes.Edge.edges_to[binary_node.id]
@@ -258,22 +269,26 @@ def export_binary_to_llvm(binary_node, scope):
         raise Exception("Binary node has wrong number of nodes pointing at it (must be 2), location: " + binary_node.location)
 
     ops = []
+
+    def dereference_and_add(value):
+        # dereference the value if we have a pointer operand (Llvm can't compare pointer with non-pointer):
+        # TODO no need to dereference if both are pointers
+        if isinstance(value, ir.AllocaInstr):
+            value = scope.builder.load(value, name = "deref__" + value.name)
+        elif isinstance(value, ir.PointerType):
+            value = scope.builder.load(value.pointee, name = "deref__" + value.name)
+        ops.append(value)
+
     for n, (operand, edge) in enumerate(input_nodes[:2]):
         # find edge that points from this operand to the operation
         if is_parent(binary_node.id, operand.id):
-            #print (get_edges_between(operand, binary_node)[1])
             index = get_edges_between(operand, binary_node)[n].from_index
-            ops.append(scope.get_var_by_index(index))
+            dereference_and_add(scope.get_var_by_index(index))
         else:
-            ops.append(operand.emit_llvm(scope))
+            dereference_and_add(operand.emit_llvm(scope))
 
     lhs, rhs = ops
-    print (lhs)
-    if isinstance(lhs, ir.AllocaInstr):
-        lhs = scope.builder.load(lhs)
-    else:
-        print (lhs, "is not a pointer type", type(lhs))
-    
+
     op = binary_node.operator
 
     # get operand types:
@@ -401,16 +416,16 @@ def export_returns_to_llvm (returns_node, scope):
 
 
 def export_loopexpression_to_llvm(loopexpression_node, scope):
-  
-    loop_block = scope.builder.append_basic_block(name = "loop")
-    with scope.builder.goto_block(loop_block):
-        loop_result = scope.builder.alloca(ir.IntType(SYSTEM_BIT_DEPTH), name = "loop_result")
-        ret_var = loopexpression_node.init.emit_llvm(scope)
-        loopexpression_node.pre_condition.emit_llvm(scope)
-        loopexpression_node.body.emit_llvm(scope)
-        loopexpression_node.reduction.emit_llvm(scope) # reduction contains and object of type "Returns"
 
-    return loop_result
+    # ~ loop_block = scope.builder.append_basic_block(name = "loop")
+    # ~ with scope.builder.goto_block(loop_block):
+    loop_result = scope.builder.alloca(scope.expected_type, name = "loop_result")
+    ret_var = loopexpression_node.init.emit_llvm(scope)
+    loopexpression_node.pre_condition.emit_llvm(scope)
+    loopexpression_node.body.emit_llvm(scope)
+    loopexpression_node.reduction.emit_llvm(scope) # reduction contains and object of type "Returns"
+
+    return dereference_value(loop_result, scope)
 
 
 if __name__ == "__main__":
