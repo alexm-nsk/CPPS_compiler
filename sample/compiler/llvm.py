@@ -194,7 +194,10 @@ def export_function_to_llvm(function_node, scope = None):
         fmt_arg = add_bitcaster(builder, module)
         builder.call(printf, [fmt_arg, function_result])
 
-    scope.builder.ret(function_result)
+    exit_block = scope.builder.append_basic_block(name = "exit")
+    scope.builder.branch(exit_block)
+    with scope.builder.goto_block(exit_block):
+        scope.builder.ret(function_result)
 
     return function_result
 
@@ -265,7 +268,12 @@ def export_binary_to_llvm(binary_node, scope):
             ops.append(operand.emit_llvm(scope))
 
     lhs, rhs = ops
-
+    print (lhs)
+    if isinstance(lhs, ir.AllocaInstr):
+        lhs = scope.builder.load(lhs)
+    else:
+        print (lhs, "is not a pointer type", type(lhs))
+    
     op = binary_node.operator
 
     # get operand types:
@@ -393,22 +401,16 @@ def export_returns_to_llvm (returns_node, scope):
 
 
 def export_loopexpression_to_llvm(loopexpression_node, scope):
-    #scope = deepcopy(scope)
-    # ~ scope = LlvmScope(scope.builder, name = "loop", function = scope.function)
-    # TODO try making new scope based on scope argument instead of deepcopying it
-    scope.builder = ir.IRBuilder(scope.function.append_basic_block(name = "loop_init"))
+  
+    loop_block = scope.builder.append_basic_block(name = "loop")
+    with scope.builder.goto_block(loop_block):
+        loop_result = scope.builder.alloca(ir.IntType(SYSTEM_BIT_DEPTH), name = "loop_result")
+        ret_var = loopexpression_node.init.emit_llvm(scope)
+        loopexpression_node.pre_condition.emit_llvm(scope)
+        loopexpression_node.body.emit_llvm(scope)
+        loopexpression_node.reduction.emit_llvm(scope) # reduction contains and object of type "Returns"
 
-    # TODO do we need a new builder?
-    loop_result = scope.builder.alloca(ir.IntType(SYSTEM_BIT_DEPTH), name = "loop_result")
-    # ~ block = scope.builder.append_basic_block(name = "entry")
-
-    
-    ret_var = loopexpression_node.init.emit_llvm(scope)
-    loopexpression_node.pre_condition.emit_llvm(scope)
-    loopexpression_node.body.emit_llvm(scope)
-    loopexpression_node.reduction.emit_llvm(scope) # reduction contains and object of type "Returns"
-
-    return ret_var
+    return loop_result
 
 
 if __name__ == "__main__":
