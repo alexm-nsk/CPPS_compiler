@@ -187,7 +187,7 @@ def export_function_to_llvm(function_node, scope = None):
         scope.add_vars({p : function.args[n]})
 
     result_node, edge = function_node.get_input_nodes()[0]
-    
+
     # TODO use scope.expected_type for further nodes
     function_result = result_node.emit_llvm(scope)
 
@@ -407,7 +407,6 @@ def export_precondition_to_llvm (pre_cond_node, scope):
         raise Exception("only one loop condition is supported at the moment, location: " + pre_cond_node.location)
 
     node, edge = result_nodes[0]
-
     node.emit_llvm(scope)
 
 
@@ -415,17 +414,34 @@ def export_returns_to_llvm (returns_node, scope):
     pass
 
 
+# initialize
+# loop_start:
+#     if pre_condition == True
+#           execute_loop_body
+#           go_to loop_start
+#     else
+#           go_to loop_exit
+# loop_exit:
+# return value
+
 def export_loopexpression_to_llvm(loopexpression_node, scope):
 
-    # ~ loop_block = scope.builder.append_basic_block(name = "loop")
-    # ~ with scope.builder.goto_block(loop_block):
     loop_result = scope.builder.alloca(scope.expected_type, name = "loop_result")
-    ret_var = loopexpression_node.init.emit_llvm(scope)
-    loopexpression_node.pre_condition.emit_llvm(scope)
-    loopexpression_node.body.emit_llvm(scope)
-    loopexpression_node.reduction.emit_llvm(scope) # reduction contains and object of type "Returns"
 
-    return dereference_value(loop_result, scope)
+    ret_var = loopexpression_node.init.emit_llvm(scope)
+
+    # ~ loop_block = scope.builder.append_basic_block(name = "loop_start")
+    # ~ scope.builder.branch(loop_block)
+    
+    # ~ with scope.builder.goto_block(loop_block):
+    loopexpression_node.pre_condition.emit_llvm(scope)
+
+    # ~ loopexpression_node.body.emit_llvm(scope)
+
+    # ~ loopexpression_node.reduction.emit_llvm(scope)
+    # reduction contains and object of type "Returns"
+
+    return scope.builder.load(loop_result)
 
 
 if __name__ == "__main__":
