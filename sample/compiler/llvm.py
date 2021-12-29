@@ -388,7 +388,7 @@ def export_init_to_llvm(init_node, scope):
         if n == 0:
             ret_val = new_var
             # we return the first initialization instruction for proper structuring later
-            
+
         scope.prepend_vars({name: new_var})
         node, edge = results[n]
         if (node == init_node):
@@ -422,28 +422,6 @@ def export_returns_to_llvm (returns_node, scope):
     pass
 
 
-# initialize
-# loop_start:
-#     if pre_condition == True
-#           execute_loop_body
-#           go_to loop_start
-#     else
-#           go_to loop_exit
-# loop_exit:
-#     return value
-
-   # ~ continue_branch = None
-
-            # ~ with scope.builder.if_then(pre_cond) as then:
-                # ~ scope.builder.branch(loop_check)
-                # ~ continue_branch = scope.builder.block
-
-
- # ~ loop        = scope.function.append_basic_block(name = "for_loop")
-
-    # ~ with scope.builder.goto_block(loop):
- # ~ scope.builder.position_after(init)
-
 def export_loopexpression_to_llvm(loopexpression_node, scope):
 
     init     = loopexpression_node.init.emit_llvm(scope)
@@ -452,9 +430,9 @@ def export_loopexpression_to_llvm(loopexpression_node, scope):
     loop_result = scope.builder.alloca(scope.expected_type, name = "loop_result")
     scope.builder.branch(loop_check)
     with scope.builder.goto_block(loop_check):
-       
+
         pre_cond = loopexpression_node.pre_condition.emit_llvm(scope)
-    
+
         with scope.builder.if_else(pre_cond) as (then, else_):
             with then: # condition satisfied - keep looping
                 # TODO execute the loop's body here
@@ -467,10 +445,6 @@ def export_loopexpression_to_llvm(loopexpression_node, scope):
                 loopexpression_node.body.emit_llvm(scope)
 
         result = scope.builder.load(loop_result, name = "loop_result_deref")
-        
-        # ~ scope.builder.branch(loop_check)
-
-    # ~ loopexpression_node.reduction.emit_llvm(scope)
 
     return result
 
