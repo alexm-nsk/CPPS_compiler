@@ -413,19 +413,24 @@ def export_precondition_to_llvm (pre_cond_node, scope):
 
 
 def export_returns_to_llvm (returns_node, scope):
+    # must influence the body:
+    # if it's "value" we return the value
+    # if it's sum we must accumulate it each time after body is executed
     pass
+
 
 def export_oldvalue_to_llvm (oldvalue_node, scope):
     edge = oldvalue_node.get_input_edges()[0]
     index = edge.from_index
-    
+
     return scope.get_var_by_index(index)
+
 
 def export_body_to_llvm(body_node, scope):
 
     result_node, edge = body_node.get_result_nodes()[0]
     index = edge.to_index
-    
+
     final_value = result_node.emit_llvm(scope)
 
     scope.builder.store(final_value, scope.get_var_by_index(index))
@@ -434,7 +439,7 @@ def export_body_to_llvm(body_node, scope):
 def export_loopexpression_to_llvm(loopexpression_node, scope):
 
     init     = loopexpression_node.init.emit_llvm(scope)
-    
+
     loop_check  = scope.function.append_basic_block(name = "loop_check")
     loop_result = scope.builder.alloca(scope.expected_type, name = "loop_result")
     scope.builder.branch(loop_check)
@@ -444,10 +449,6 @@ def export_loopexpression_to_llvm(loopexpression_node, scope):
 
         with scope.builder.if_else(pre_cond) as (then, else_):
             with then: # condition satisfied - keep looping
-                # TODO execute the loop's body here
-                #old_value = scope.builder.load(init)
-                #inc = scope.builder.add(old_value, ir.Constant(ir.IntType(64), 1))
-                #scope.builder.store(inc, init)
                 loopexpression_node.body.emit_llvm(scope)
                 scope.builder.branch(loop_check)
             with else_: # exit
