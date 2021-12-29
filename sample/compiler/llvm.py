@@ -197,6 +197,7 @@ def export_function_to_llvm(function_node, scope = None):
         builder.call(printf, [fmt_arg, function_result])
 
     exit_block = scope.builder.append_basic_block(name = "exit")
+    scope.builder.position_after(function_result)
     scope.builder.branch(exit_block)
     with scope.builder.goto_block(exit_block):
         scope.builder.ret(function_result)
@@ -378,10 +379,15 @@ def export_functioncall_to_llvm(function_call_node, scope):
 
 
 def export_init_to_llvm(init_node, scope):
-
+    ret_val = None
     results = init_node.get_result_nodes()
     for n , (name, descr) in enumerate(init_node.results.items()):
         new_var = scope.builder.alloca(descr['type'].emit_llvm(), name = name)
+
+        if n == 0:
+            ret_val = new_var
+            # we return the first initialization instruction for proper structuring later
+            
         scope.prepend_vars({name: new_var})
         node, edge = results[n]
         if (node == init_node):
@@ -390,6 +396,7 @@ def export_init_to_llvm(init_node, scope):
             pass
         else:
             scope.builder.store(node.emit_llvm(scope), scope.vars[name])
+    return ret_val
     # doesn't need to return anything, only to initialize the loop
 
 
@@ -424,34 +431,44 @@ def export_returns_to_llvm (returns_node, scope):
 # loop_exit:
 #     return value
 
+   # ~ continue_branch = None
+
+            # ~ with scope.builder.if_then(pre_cond) as then:
+                # ~ scope.builder.branch(loop_check)
+                # ~ continue_branch = scope.builder.block
+
+
+ # ~ loop        = scope.function.append_basic_block(name = "for_loop")
+
+    # ~ with scope.builder.goto_block(loop):
+ # ~ scope.builder.position_after(init)
 
 def export_loopexpression_to_llvm(loopexpression_node, scope):
 
-    loop_result = scope.builder.alloca(scope.expected_type, name = "loop_result")
-    ret_var = loopexpression_node.init.emit_llvm(scope)
-    loop_block = scope.function.append_basic_block(name = "loop_start")
-    # ~ scope.builder.branch(loop_block)
+    init     = loopexpression_node.init.emit_llvm(scope)
 
-    with scope.builder.goto_block(loop_block):
+    loop_check  = scope.function.append_basic_block(name = "loop_check")
+    loop_result = scope.builder.alloca(scope.expected_type, name = "loop_result")
+    scope.builder.branch(loop_check)
+    with scope.builder.goto_block(loop_check):
+       
         pre_cond = loopexpression_node.pre_condition.emit_llvm(scope)
     
-    continue_branch = None
-    with scope.builder.if_else(pre_cond) as (then, else_):
-        with then: # condition satisfied - keep looping
-            # ~ continue_branch = then
-            scope.builder.branch(loop_block)
-        with else_: # exit
-            loopexpression_node.body.emit_llvm(scope)
+        with scope.builder.if_else(pre_cond) as (then, else_):
+            with then: # condition satisfied - keep looping
+                # TODO execute the loop's body here
+                continue_branch = scope.builder.block
+                scope.builder.branch(loop_check)
+            with else_: # exit
+                loopexpression_node.body.emit_llvm(scope)
 
-    # ~ with scope.builder.goto_block(loop_block):
-        # ~ scope.builder.branch(then)
-    
-    # ~ 
+        result = scope.builder.load(loop_result, name = "loop_result_deref")
+        
+        # ~ scope.builder.branch(loop_check)
 
     # ~ loopexpression_node.reduction.emit_llvm(scope)
-    # reduction contains and object of type "Returns"
 
-    return scope.builder.load(loop_result, name = "loop_result_deref")
+    return result
 
 
 if __name__ == "__main__":
