@@ -407,7 +407,7 @@ def export_precondition_to_llvm (pre_cond_node, scope):
         raise Exception("only one loop condition is supported at the moment, location: " + pre_cond_node.location)
 
     node, edge = result_nodes[0]
-    node.emit_llvm(scope)
+    return node.emit_llvm(scope)
 
 
 def export_returns_to_llvm (returns_node, scope):
@@ -422,26 +422,36 @@ def export_returns_to_llvm (returns_node, scope):
 #     else
 #           go_to loop_exit
 # loop_exit:
-# return value
+#     return value
+
 
 def export_loopexpression_to_llvm(loopexpression_node, scope):
 
     loop_result = scope.builder.alloca(scope.expected_type, name = "loop_result")
-
     ret_var = loopexpression_node.init.emit_llvm(scope)
-
-    # ~ loop_block = scope.builder.append_basic_block(name = "loop_start")
+    loop_block = scope.function.append_basic_block(name = "loop_start")
     # ~ scope.builder.branch(loop_block)
-    
-    # ~ with scope.builder.goto_block(loop_block):
-    loopexpression_node.pre_condition.emit_llvm(scope)
 
-    # ~ loopexpression_node.body.emit_llvm(scope)
+    with scope.builder.goto_block(loop_block):
+        pre_cond = loopexpression_node.pre_condition.emit_llvm(scope)
+    
+    continue_branch = None
+    with scope.builder.if_else(pre_cond) as (then, else_):
+        with then: # condition satisfied - keep looping
+            # ~ continue_branch = then
+            scope.builder.branch(loop_block)
+        with else_: # exit
+            loopexpression_node.body.emit_llvm(scope)
+
+    # ~ with scope.builder.goto_block(loop_block):
+        # ~ scope.builder.branch(then)
+    
+    # ~ 
 
     # ~ loopexpression_node.reduction.emit_llvm(scope)
     # reduction contains and object of type "Returns"
 
-    return scope.builder.load(loop_result)
+    return scope.builder.load(loop_result, name = "loop_result_deref")
 
 
 if __name__ == "__main__":
