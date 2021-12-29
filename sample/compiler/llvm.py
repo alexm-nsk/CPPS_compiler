@@ -191,15 +191,16 @@ def export_function_to_llvm(function_node, scope = None):
     # TODO use scope.expected_type for further nodes
     function_result = result_node.emit_llvm(scope)
 
-    # needed for printf:
-    if function_node.function_name == "main":
-        fmt_arg = add_bitcaster(builder, module)
-        builder.call(printf, [fmt_arg, function_result])
 
     exit_block = scope.builder.append_basic_block(name = "exit")
     scope.builder.position_after(function_result)
     scope.builder.branch(exit_block)
+    # needed for printf:
+
     with scope.builder.goto_block(exit_block):
+        if function_node.function_name == "main":
+            fmt_arg = add_bitcaster(builder, module)
+            builder.call(printf, [fmt_arg, function_result])
         scope.builder.ret(function_result)
 
     return function_result
@@ -457,9 +458,12 @@ def export_loopexpression_to_llvm(loopexpression_node, scope):
         with scope.builder.if_else(pre_cond) as (then, else_):
             with then: # condition satisfied - keep looping
                 # TODO execute the loop's body here
-                continue_branch = scope.builder.block
+                old_value = scope.builder.load(init)
+                inc = scope.builder.add(old_value, ir.Constant(ir.IntType(64), 1))
+                scope.builder.store(inc, init)
                 scope.builder.branch(loop_check)
             with else_: # exit
+                scope.builder.store(scope.builder.load(init), loop_result)
                 loopexpression_node.body.emit_llvm(scope)
 
         result = scope.builder.load(loop_result, name = "loop_result_deref")
