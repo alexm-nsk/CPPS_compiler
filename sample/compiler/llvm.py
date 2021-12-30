@@ -430,6 +430,7 @@ def export_returns_to_llvm (returns_node, scope):
     node, edge = returns_node.get_result_nodes()[0]
     return node.emit_llvm(scope)
 
+
 def export_oldvalue_to_llvm (oldvalue_node, scope):
 
     edge = oldvalue_node.get_input_edges()[0]
