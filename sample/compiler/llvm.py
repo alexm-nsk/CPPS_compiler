@@ -412,11 +412,23 @@ def export_precondition_to_llvm (pre_cond_node, scope):
     return node.emit_llvm(scope)
 
 
+def export_reduction_to_llvm (reduction_node, scope):
+    # TODO alternatively get nodes that targets the second port (index #1)
+    node, edge = reduction_node.get_parameter_nodes()[0]
+
+    if (reduction_node.operator == "value"):
+        index = edge.from_index
+        return scope.get_var_by_index(index)
+
+
 def export_returns_to_llvm (returns_node, scope):
     # must influence the body:
     # if it's "value" we return the value
     # if it's sum we must accumulate it each time after body is executed
-    pass
+
+    node, edge = returns_node.get_result_nodes()[0]
+
+    return node.emit_llvm(scope)
 
 
 def export_oldvalue_to_llvm (oldvalue_node, scope):
@@ -443,6 +455,7 @@ def export_loopexpression_to_llvm(loopexpression_node, scope):
     loop_check  = scope.function.append_basic_block(name = "loop_check")
     loop_result = scope.builder.alloca(scope.expected_type, name = "loop_result")
     scope.builder.branch(loop_check)
+
     with scope.builder.goto_block(loop_check):
 
         pre_cond = loopexpression_node.pre_condition.emit_llvm(scope)
@@ -452,8 +465,11 @@ def export_loopexpression_to_llvm(loopexpression_node, scope):
                 loopexpression_node.body.emit_llvm(scope)
                 scope.builder.branch(loop_check)
             with else_: # exit
-                scope.builder.store(scope.builder.load(init), loop_result)
-                loopexpression_node.reduction.emit_llvm(scope)
+#                scope.builder.store(scope.builder.load(init), loop_result)
+                scope.builder.store( 
+                                    dereference_value( loopexpression_node.reduction.emit_llvm(scope), scope ), 
+                                    loop_result
+                                    )
 
         result = scope.builder.load(loop_result, name = "loop_result_deref")
 

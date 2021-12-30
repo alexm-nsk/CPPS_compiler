@@ -75,8 +75,10 @@ def get_params(params):
 def parse_node(node):
 
     name = node["name"]
-
-    #TODO use map to functions instead of ifs and elifs
+    
+    return CLASS_MAP[name](node)
+    #TODO delete these after testing:
+    
     if name == "Lambda":
         return Function(node)
 
@@ -115,6 +117,9 @@ def parse_node(node):
 
     elif name == "OldValue":
         return OldValue(node)
+    
+    elif name == "Reduction":
+        return Reduction(node)
 
 
 
@@ -222,10 +227,17 @@ class Node:
 
     def __repr__(self):
         return str(self.__dict__)
-
+    
+    def has_nodes(self):
+        return "nodes" in self.__dict__
+        
     def get_result_nodes(self):
         return [( Node.nodes_[edge.from_], edge )
             for edge in Edge.edges_to[self.id] if Node.is_parent(edge.from_, self.id)]
+
+    def get_parameter_nodes(self):
+        return [( Node.nodes_[edge.from_], edge )
+            for edge in Edge.edges_to[self.id] if Node.nodes_[edge.from_].has_nodes() and Node.is_parent(self.id, edge.from_)]
 
     def get_input_nodes(self):
         return [ (Node.nodes_[edge.from_], edge)
@@ -245,6 +257,9 @@ class Node:
         return False
 
     def emit_llvm(self, scope = None):
+        if scope == None and type(self) != Function:
+            raise Exception(f"No scope provided for{self.name} when emitting llvm-code")
+            
         class_name = self.__class__.__name__
         func_name = "export_" + class_name.lower() + "_to_llvm"
         if func_name in globals():
@@ -304,3 +319,25 @@ class Returns(Node):
 class OldValue(Node):
     pass
 
+class Reduction(Node):
+    pass
+    
+    
+CLASS_MAP = {
+"Lambda" : Function,
+"If":If,
+"Else": Branch,
+"ElseIf": Branch,
+"Then": Branch,
+"Condition":Condition,
+"Binary":Binary,
+"FunctionCall":FunctionCall,
+"Literal":Literal,
+"LoopExpression":LoopExpression,
+"Init":Init,
+"PreCondition":PreCondition,
+"Body":Body,
+"Returns": Returns,
+"OldValue": OldValue,
+"Reduction": Reduction
+}
