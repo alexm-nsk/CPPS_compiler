@@ -75,10 +75,10 @@ def get_params(params):
 def parse_node(node):
 
     name = node["name"]
-    
+
     return CLASS_MAP[name](node)
     #TODO delete these after testing:
-    
+
     if name == "Lambda":
         return Function(node)
 
@@ -117,7 +117,7 @@ def parse_node(node):
 
     elif name == "OldValue":
         return OldValue(node)
-    
+
     elif name == "Reduction":
         return Reduction(node)
 
@@ -153,7 +153,7 @@ def parse_json_fields(self, node):
 
 
     # Loop:
-    
+
     if ("results" in node ):      self.results       = get_params(node["results"])
 
     for name in ["init", "preCondition", "body", "reduction"]:
@@ -227,10 +227,10 @@ class Node:
 
     def __repr__(self):
         return str(self.__dict__)
-    
+
     def has_nodes(self):
         return "nodes" in self.__dict__
-        
+
     def get_result_nodes(self):
         return [( Node.nodes_[edge.from_], edge )
             for edge in Edge.edges_to[self.id] if Node.is_parent(edge.from_, self.id)]
@@ -259,7 +259,7 @@ class Node:
     def emit_llvm(self, scope = None):
         if scope == None and type(self) != Function:
             raise Exception(f"No scope provided for{self.name} when emitting llvm-code")
-            
+
         class_name = self.__class__.__name__
         func_name = "export_" + class_name.lower() + "_to_llvm"
         if func_name in globals():
@@ -319,10 +319,15 @@ class Returns(Node):
 class OldValue(Node):
     pass
 
+
 class Reduction(Node):
     pass
-    
-    
+
+
+class ArrayAccess(Node):
+    pass
+
+
 CLASS_MAP = {
 "Lambda" : Function,
 "If":If,
@@ -339,5 +344,6 @@ CLASS_MAP = {
 "Body":Body,
 "Returns": Returns,
 "OldValue": OldValue,
-"Reduction": Reduction
+"Reduction": Reduction,
+"ArrayAccess": ArrayAccess,
 }

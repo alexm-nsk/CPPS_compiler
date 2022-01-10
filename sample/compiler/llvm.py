@@ -380,14 +380,10 @@ def export_functioncall_to_llvm(function_call_node, scope):
 
 
 def export_init_to_llvm(init_node, scope):
-    ret_val = None
+
     results = init_node.get_result_nodes()
     for n , (name, descr) in enumerate(init_node.results.items()):
         new_var = scope.builder.alloca(descr['type'].emit_llvm(), name = name)
-
-        if n == 0:
-            ret_val = new_var
-            # we return the first initialization instruction for proper structuring later
 
         scope.prepend_vars({name: new_var})
         node, edge = results[n]
@@ -397,7 +393,7 @@ def export_init_to_llvm(init_node, scope):
             pass
         else:
             scope.builder.store(node.emit_llvm(scope), scope.vars[name])
-    return ret_val
+
     # doesn't need to return anything, only to initialize the loop
 
 
@@ -440,6 +436,7 @@ def export_oldvalue_to_llvm (oldvalue_node, scope):
 
 def export_body_to_llvm(body_node, scope):
 
+    # TODO implement multiple statements
     result_node, edge = body_node.get_result_nodes()[0]
     index = edge.to_index
     final_value = result_node.emit_llvm(scope)
