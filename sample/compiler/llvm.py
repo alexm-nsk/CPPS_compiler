@@ -68,8 +68,6 @@ class LlvmScope:
         self.vars[name] = var_
         self.var_index[name] = len(self.var_index)
 
-    # accepts descriptions in form of:
-    # {'type': {'location': 'not applicable', 'descr': 'integer'}, 'index': 0
 
     def add_vars(self, var_): #add a dict {"name" : internals}
         for name, value in var_.items():
