@@ -320,6 +320,7 @@ def generate_conditions(ret_val, node, parent_node, slot, current_scope):
 
 
 def generate_branches(ret_val, node, parent_node, slot, current_scope):
+    print (node.else_nodes["nodes"])
 
     ret_val["branches"] = []
     branches_list = []
@@ -330,7 +331,6 @@ def generate_branches(ret_val, node, parent_node, slot, current_scope):
         branches_list.append(dict(name = "ElseIf", nodes = elseif["nodes"], id = elseif["id"]))
 
     branches_list.append(dict(name = "Else", nodes = node.else_nodes["nodes"], id = node.else_nodes["id"]))
-
     for branch in branches_list:
 
         id_   = branch["id"]
@@ -357,6 +357,7 @@ def generate_branches(ret_val, node, parent_node, slot, current_scope):
         json_nodes[id_] = new_branch
 
         for port, child_node in enumerate(branch["nodes"]):
+            print (child_node)
             nodes_and_edges = child_node.emit_json(id_, port, id_)
             nodes = nodes_and_edges["nodes"]
             edges = nodes_and_edges["edges"] + nodes_and_edges["final_edges"]
@@ -371,6 +372,7 @@ def generate_branches(ret_val, node, parent_node, slot, current_scope):
 
 def export_if_to_json(node, parent_node, slot, current_scope):
 
+    print (node)
     ret_val = {}
 
     ret_val["name"]     = "If"
@@ -385,7 +387,6 @@ def export_if_to_json(node, parent_node, slot, current_scope):
     json_nodes[ node.node_id ] = ret_val
 
     json_branches = []
-
     generate_conditions (ret_val, node, node.node_id, slot, current_scope)
     generate_branches   (ret_val, node, node.node_id, slot, current_scope)
 
