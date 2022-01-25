@@ -360,8 +360,8 @@ def generate_branches(ret_val, node, parent_node, slot, current_scope):
             nodes_and_edges = child_node.emit_json(id_, port, id_)
             nodes = nodes_and_edges["nodes"]
             edges = nodes_and_edges["edges"] + nodes_and_edges["final_edges"]
-            json_nodes[id_]["nodes"].extend(nodes)
-            json_nodes[id_]["edges"].extend(edges)
+            new_branch["nodes"].extend(nodes)
+            new_branch["edges"].extend(edges)
 
         ret_val["branches"].append(new_branch)
 
