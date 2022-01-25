@@ -137,6 +137,7 @@ def make_node(node):
         contents  = make_graph(node["id"]+"_graph", contents)
     else:
         contents = make_edges()
+        contents = make_graph(node["id"]+"_graph", contents)
 # ~ init
 # ~ preCondition
 # ~ body
