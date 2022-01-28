@@ -29,17 +29,7 @@ from compiler.llvm import *
 def parse_json(json_data):
     init_llvm()
     functions = [parse_node (function) for function in json_data["functions"]]
-    #print (Node.nodes["node4"].nodes)
-    #print (Node.nodes["node6"].nodes)
-    
-    
-    #for node in Node.nodes:
-     #   print (node)
-    #print (Edge.edges_to["node3"])
-    #print (Node.is_parent("node2", "node1"))
     print ( create_module(functions, "module") )
-    #print (functions[0].emit_llvm())
-    #print (get_result_nodes("node1"))
     return []
 
 
