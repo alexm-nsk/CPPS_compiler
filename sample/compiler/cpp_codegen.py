@@ -1,5 +1,3 @@
-
-#TODO facilitate indentation
 CPP_INDENT = " " * 4
 
 class Type:
