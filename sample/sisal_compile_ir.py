@@ -46,7 +46,7 @@ def main(args):
             module_name = re.sub("\..*", ".ll", module_name)
 
             ir_data = json.loads(file_contents)
-            parse_json(ir_data)
+            compile_to_cpp(ir_data)
 
         except Exception as e:
             if "--debug" in args:

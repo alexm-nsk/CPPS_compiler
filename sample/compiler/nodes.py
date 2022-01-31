@@ -25,6 +25,7 @@
 
 from compiler.json_parser import *
 from compiler.llvm import *
+from compiler.cpp import *
 import re
 
 BRANCH_NAMES = ["Else", "ElseIf", "Then"]
@@ -180,6 +181,8 @@ class Type:
         # TODO derive type from it's description
         return self.type_map[self.descr]
 
+    def __str__(self):
+        return self.descr
 
 class Edge:
 
@@ -231,14 +234,18 @@ class Node:
     def has_nodes(self):
         return "nodes" in self.__dict__
 
+    # returns a list of pairs of nodes containing the result of all internal calculations
+    # and edges that carry that final value:
     def get_result_nodes(self):
         return [( Node.nodes_[edge.from_], edge )
             for edge in Edge.edges_to[self.id] if Node.is_parent(edge.from_, self.id)]
 
+    # TODO check if this is needed
     def get_parameter_nodes(self):
         return [( Node.nodes_[edge.from_], edge )
             for edge in Edge.edges_to[self.id] if Node.nodes_[edge.from_].has_nodes() and Node.is_parent(self.id, edge.from_)]
 
+    # get all the pairs of nodes that output values to this node and corresponding edges
     def get_input_nodes(self):
         return [ (Node.nodes_[edge.from_], edge)
             for edge in Edge.edges_to[self.id]]
@@ -264,6 +271,17 @@ class Node:
         func_name = "export_" + class_name.lower() + "_to_llvm"
         if func_name in globals():
             return globals() [ func_name ](self, scope)
+        else:
+            raise Exception (f'compiling {class_name} not implemented')
+
+    def emit_cpp(self, cpp_scope = None):
+        if cpp_scope == None and type(self) != Function:
+            raise Exception(f"No scope provided for{self.name} when emitting llvm-code")
+
+        class_name = self.__class__.__name__
+        func_name = "export_" + class_name.lower() + "_to_cpp"
+        if func_name in globals():
+            return globals() [ func_name ](self, cpp_scope)
         else:
             raise Exception (f'compiling {class_name} not implemented')
 
@@ -329,21 +347,21 @@ class ArrayAccess(Node):
 
 
 CLASS_MAP = {
-"Lambda" : Function,
-"If":If,
-"Else": Branch,
-"ElseIf": Branch,
-"Then": Branch,
-"Condition":Condition,
-"Binary":Binary,
-"FunctionCall":FunctionCall,
-"Literal":Literal,
-"LoopExpression":LoopExpression,
-"Init":Init,
-"PreCondition":PreCondition,
-"Body":Body,
-"Returns": Returns,
-"OldValue": OldValue,
-"Reduction": Reduction,
-"ArrayAccess": ArrayAccess,
+    "Lambda" : Function,
+    "If":If,
+    "Else": Branch,
+    "ElseIf": Branch,
+    "Then": Branch,
+    "Condition":Condition,
+    "Binary":Binary,
+    "FunctionCall":FunctionCall,
+    "Literal":Literal,
+    "LoopExpression":LoopExpression,
+    "Init":Init,
+    "PreCondition":PreCondition,
+    "Body":Body,
+    "Returns": Returns,
+    "OldValue": OldValue,
+    "Reduction": Reduction,
+    "ArrayAccess": ArrayAccess,
 }

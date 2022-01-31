@@ -138,7 +138,7 @@ def add_bitcaster(builder, module):
     return fmt_arg
 
 
-def create_module(functions, module_name):
+def create_llvm_module(functions, module_name):
     global module
     module = init_llvm(module_name)
 

@@ -1,5 +1,10 @@
 CPP_INDENT = " " * 4
 
+class CppScope:
+    def __init__(self, builder = None):
+        self.builder = builder
+        pass
+
 class Type:
 
     def __init__(self):
@@ -22,6 +27,12 @@ class StringType(Type):
 
     def __str__(self):
         return self.value
+
+
+class VoidType(Type):
+    
+    def __str__(self):
+        return "void"
 
 
 class Argument:
@@ -105,13 +116,12 @@ class Call(Expression):
 
 class If(Expression):
 
-    def __init__(self, cond, indent,  name = None):
+    def __init__(self, cond, indent_level, name = None):
         super().__init__(name)
         self.cond  = cond
-        self.then  = Block(indent+1)
-        self.else_ = Block(indent+1)
-        self.indent = indent
-
+        self.then  = Block(1)
+        self.else_ = Block(1)
+        self.indent_level = indent_level
 
     def get_then(self):
         return self.then
@@ -120,7 +130,7 @@ class If(Expression):
         return self.else_
 
     def __str__(self):
-        ind = self.indent * CPP_INDENT
+        ind = self.indent_level * CPP_INDENT
         return f"if({self.cond})\n" + ind +  "{" + ind +  str(self.then) +"\n"+ ind +"}\n"+ ind +"else\n" + ind + "{" + str(self.else_) +"\n"+ ind + "}"
 
 
@@ -146,6 +156,7 @@ class Binary(Expression):
 
     #def __str__(self):
         #return f"{str(self.left)} {self.operator} {str(self.right)}"
+
 
 class WhileLoop(Expression):
 
@@ -197,10 +208,10 @@ class Function:
 
 class Block:
 
-    def __init__(self, indent_level = 1, name = None):
+    def __init__(self, indent_offset = 1, name = None):
         self.inits = []
         self.statements = []
-        self.indent_level = indent_level
+        self.indent_level = indent_offset
         self.name = name
 
     def add_expression(self, exp, name = None):
@@ -232,7 +243,6 @@ class Block:
 
     def add_bin(self, bin_):
         self.statements.append(bin_)
-
 
 
 class Builder:
@@ -267,11 +277,11 @@ class Builder:
         self.block.add_init(bin_)
         return bin_
 
-    def add_constant(self, value):
+    def constant(self, value):
         c = Constant(value)
         return c
 
-    def add_while(self, init, precond, body):
+    def while_(self, init, precond, body):
 
         return None
 
