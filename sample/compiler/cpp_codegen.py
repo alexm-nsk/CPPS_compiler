@@ -1,8 +1,9 @@
 CPP_INDENT = " " * 4
 
 class CppScope:
-    def __init__(self, builder = None):
+    def __init__(self, vars_, builder = None):
         self.builder = builder
+        self.vars = vars_
         pass
 
 class Type:
@@ -38,6 +39,7 @@ class VoidType(Type):
 class Argument:
 
     def __init__(self, name, type_, index):
+        print ("arg added")
         self.name = name
         self.type = type_
         self.index = index
@@ -168,6 +170,14 @@ class WhileLoop(Expression):
         self.body_block = Block(name = "loop")
 
 
+class VarReference(Expression):
+
+    def __init__(self, var_name):
+        self.var_name = var_name
+
+    def __str__(self):
+        return self.var_name
+
 class Function:
 
     def __init__(self, name, return_type, arguments: "list of (name, type) - tuples", main = False):
@@ -188,8 +198,14 @@ class Function:
     def get_entry_block(self):
         return self.entry_block
 
-    def get_argument(self, name):
+    def get_argument_by_name(self, name):
         return list(filter(lambda x: x.name == name, self.arguments))[0]
+
+    def get_argument_by_index(self, index):
+        return self.arguments[index]
+
+    def get_arguments(self):
+        return self.arguments
 
     def __str__(self):
         text = ""
@@ -244,6 +260,9 @@ class Block:
     def add_bin(self, bin_):
         self.statements.append(bin_)
 
+    def add_var_reference(self, vr):
+        self.statements.append(vr)
+
 
 class Builder:
 
@@ -272,7 +291,7 @@ class Builder:
         self.block.add_if(if_)
         return if_
 
-    def bin(self, left, right, op):
+    def binary(self, left, right, op):
         bin_ = Binary(left, right, op)
         self.block.add_init(bin_)
         return bin_
@@ -284,6 +303,11 @@ class Builder:
     def while_(self, init, precond, body):
 
         return None
+
+    def var_ref(self, name):
+        vr = VarReference(name)
+        self.block.add_var_reference(vr)
+        return vr
 
 
 class Module:

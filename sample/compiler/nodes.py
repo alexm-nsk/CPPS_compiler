@@ -256,6 +256,15 @@ class Node:
     def get_input_edges(self):
         return  Edge.edges_to[self.id]
 
+    def is_node_parent(self, node_id):
+        if not "nodes" in Node.nodes_[node_id].__dict__:
+            return False
+
+        for n in Node.nodes_[node_id].nodes:
+            if n.id == self.id:
+                return True
+        return False
+
     @staticmethod
     def is_parent(node1, node2):
         for n in Node.nodes_[node2].nodes:
