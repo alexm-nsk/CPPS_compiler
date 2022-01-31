@@ -69,23 +69,18 @@ def export_literal_to_cpp(node, scope):
     return scope.builder.constant(node.value)
 
 
-def get_var_from_scope(edge, scope):
-    index = edge.from_index
-    return scope.vars[index]
-
-
 def export_binary_to_cpp(node, scope):
 
     (left, l_edge), (right, r_edge) = node.get_input_nodes()
     operator = node.operator
 
     if node.is_node_parent(l_edge.from_):
-        lho = get_var_from_scope(l_edge, scope)
+        lho = scope.vars[l_edge.from_index]
     else:
         lho = left.emit_cpp(scope)
 
     if node.is_node_parent(r_edge.from_):
-        rho = get_var_from_scope(r_edge, scope)
+        rho = scope.vars[r_edge.from_index]
     else:
         rho = right.emit_cpp(scope)
 
@@ -98,7 +93,41 @@ def export_condition_to_cpp(node, scope):
     return result.emit_cpp(scope)
 
 
+def export_branch_to_cpp(node, scope):
+    results = node.get_result_nodes()
+    if results != []:
+        (result, edge), = node.get_result_nodes()
+
+        return result.emit_cpp(scope)
+    else:
+        edges = node.get_input_edges()
+        
+        for edge in edges:
+            return scope.vars[edge.from_index]
+
+
+def export_call_to_cpp(node, scope):
+    args = node.get_result_nodes()
+
+    for (node, edge) in args:
+        print ()
+
+    return result.emit_cpp(scope)
+
+
 def export_if_to_cpp(node, scope):
     cond = node.condition.emit_cpp(scope)
-    scope.builder.if_(cond)
-    pass
+
+    get_branch = lambda name: list(filter(lambda x: x.name == name, node.branches))[0]
+    
+    if_ = scope.builder.if_(cond)
+    result = scope.builder.define(IntegerType(32), name = "if_result")
+    then = if_.get_then_builder()
+    then_scope = CppScope(scope.vars, then)
+    then_result = get_branch("Then").emit_cpp(then_scope)
+    then_scope.builder.assignment(result, then_result)
+
+    # TODO put assignment here
+    else_ = if_.get_else_builder()
+
+    else_scope = CppScope(scope.vars, else_)

@@ -1,9 +1,13 @@
+# TODO make sure names dont overlap when you give names to new identifiers
+# TODO make default values for types
 CPP_INDENT = " " * 4
+
+from copy import copy
 
 class CppScope:
     def __init__(self, vars_, builder = None):
         self.builder = builder
-        self.vars = vars_
+        self.vars = copy(vars_)
         pass
 
 class Type:
@@ -16,7 +20,10 @@ class IntegerType(Type):
 
     def __init__(self, bit_depth = 64):
         self.bit_depth = bit_depth
-
+        
+    def default(self):
+        return 0
+        
     def __str__(self):
         return "int"
 
@@ -58,7 +65,13 @@ class Statement:
 
 
 class Assignment(Statement):
-    pass
+
+    def __init__(self, var, value):
+        self.var = var
+        self.value = value
+
+    def __str__(self):
+        return str(self.var) + " = " + str(self.value)
 
 
 class Return(Statement):
@@ -93,7 +106,8 @@ class Variable(Expression):
     def __init__(self, type_, value = None, name = None):
         super().__init__(name)
         self.type = type_
-        self.init_code = str(value)
+        self.value = value
+        self.init_code = str(value) if value else None
 
 
 class Constant(Expression):
@@ -121,8 +135,8 @@ class If(Expression):
     def __init__(self, cond, indent_level, name = None):
         super().__init__(name)
         self.cond  = cond
-        self.then  = Block(1)
-        self.else_ = Block(1)
+        self.then  = Block(indent_level + 1)
+        self.else_ = Block(indent_level + 1)
         self.indent_level = indent_level
 
     def get_then(self):
@@ -131,6 +145,12 @@ class If(Expression):
     def get_else(self):
         return self.else_
 
+    def get_then_builder(self):
+        return Builder(self.then)
+
+    def get_else_builder(self):
+        return Builder(self.else_)
+        
     def __str__(self):
         ind = self.indent_level * CPP_INDENT
         return f"if({self.cond})\n" + ind +  "{" + ind +  str(self.then) +"\n"+ ind +"}\n"+ ind +"else\n" + ind + "{" + str(self.else_) +"\n"+ ind + "}"
@@ -177,6 +197,7 @@ class VarReference(Expression):
 
     def __str__(self):
         return self.var_name
+
 
 class Function:
 
@@ -243,8 +264,8 @@ class Block:
         label = "\n" if self.name == None else CPP_INDENT * self.indent_level + f"// {self.name}:"  + "\n"
         inits = "".join(  CPP_INDENT * self.indent_level +
                             str(s.type) + " "  +
-                            str(s.name) + " = " +
-                            str(s.init_code) +
+                            str(s.name) +
+                            ((" = " + str(s.init_code)) if s.init_code else "") +
                             ";\n"
                             for s in self.inits)
         body = "".join( CPP_INDENT * self.indent_level +
@@ -263,6 +284,9 @@ class Block:
     def add_var_reference(self, vr):
         self.statements.append(vr)
 
+    def add_assignment(self, assignment):
+        self.statements.append(assignment)
+        
 
 class Builder:
 
@@ -309,6 +333,10 @@ class Builder:
         self.block.add_var_reference(vr)
         return vr
 
+    def assignment(self, var, value):
+        assignment = Assignment(var, value)
+        self.block.add_assignment(assignment)
+        return assignment
 
 class Module:
 
