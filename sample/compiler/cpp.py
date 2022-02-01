@@ -115,8 +115,13 @@ def export_functioncall_to_cpp(node, scope):
     args = [None for a in range(num_args)]
     
     for (arg_node, edge) in input_nodes:
+
         index = edge.to_index
-        args[index] = arg_node.emit_cpp(scope)
+        
+        if arg_node.is_node_parent(edge.from_):            
+            args[index] = scope.vars[edge.from_index]
+        else:
+            args[index] = arg_node.emit_cpp(scope)
 
     result = scope.builder.call(functions[node.callee], args)
     
