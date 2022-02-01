@@ -217,15 +217,6 @@ class WhileLoop(Expression):
         self.body_block = Block(name = "loop")
 
 
-class VarReference(Expression):
-
-    def __init__(self, var_name):
-        self.var_name = var_name
-
-    def __str__(self):
-        return self.var_name
-
-
 class Function:
 
     def __init__(self, name, return_type, arguments: "list of (name, type) - tuples", main = False):
@@ -308,9 +299,6 @@ class Block:
     def add_bin(self, bin_):
         self.statements.append(bin_)
 
-    def add_var_reference(self, vr):
-        self.statements.append(vr)
-
     def add_assignment(self, assignment):
         self.statements.append(assignment)
         
@@ -355,15 +343,11 @@ class Builder:
 
         return None
 
-    def var_ref(self, name):
-        vr = VarReference(name)
-        self.block.add_var_reference(vr)
-        return vr
-
     def assignment(self, var, value):
         assignment = Assignment(var, value)
         self.block.add_assignment(assignment)
         return assignment
+
 
 class Module:
 
