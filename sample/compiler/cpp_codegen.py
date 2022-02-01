@@ -180,7 +180,8 @@ class If(Expression):
         
     def __str__(self):
         ind = self.indent_level * CPP_INDENT
-        return f"if({self.cond})\n" + ind +  "{" + ind +  str(self.then) +"\n"+ ind +"}\n"+ ind +"else\n" + ind + "{" + str(self.else_) +"\n"+ ind + "}"
+        # "" used to contain \n:
+        return f"if({self.cond})\n" + ind +  "{" + ind +  str(self.then) +""+ ind +"}\n"+ ind +"else\n" + ind + "{" + str(self.else_) +""+ ind + "}"
 
 
 class CppCode(Expression):
