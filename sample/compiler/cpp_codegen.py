@@ -270,7 +270,7 @@ class Block:
                             for s in self.inits)
         body = "".join( CPP_INDENT * self.indent_level +
                             str(s) + (";" if type(s) != If else "\n") for s in self.statements)
-        return label + inits + body
+        return label + inits + body + "\n"
 
     def add_ret(self, object_):
         self.statements.append(Return(object_))
