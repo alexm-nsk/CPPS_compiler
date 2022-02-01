@@ -22,6 +22,8 @@
 #
 #
 
+# C++ code generation module, inspired by llvmlite
+
 # TODO make sure names dont overlap when you give names to new identifiers
 # TODO make default values for types
 
