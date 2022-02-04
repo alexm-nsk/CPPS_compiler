@@ -24,8 +24,20 @@
 
 
 from compiler.json_parser import *
-from compiler.llvm import *
-from compiler.cpp import *
+
+COMPILER = "C++"
+
+if "COMPILER" in globals():
+    
+    if   COMPILER == "LLVM":
+        from compiler.llvm import *
+        
+    elif COMPILER == "C++":
+        from compiler.cpp import *
+        
+else:
+    raise Exception ("Compiler not specified!")
+    
 import re
 
 BRANCH_NAMES = ["Else", "ElseIf", "Then"]
@@ -166,9 +178,7 @@ def parse_json_fields(self, node):
 
 
 class Type:
-    type_map = {
-        "integer" : ir.IntType(SYSTEM_BIT_DEPTH)
-    }
+
     def __init__(self, location, descr):
         self.location = location
         self.descr     = descr
@@ -178,11 +188,15 @@ class Type:
         return str(self.__dict__)
 
     def emit_llvm(self):
+        type_map = {
+            "integer" : ir.IntType(SYSTEM_BIT_DEPTH)
+        }
         # TODO derive type from it's description
-        return self.type_map[self.descr]
+        return type_map[self.descr]
 
     def __str__(self):
         return self.descr
+
 
 class Edge:
 

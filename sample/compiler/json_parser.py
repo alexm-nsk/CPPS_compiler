@@ -23,8 +23,8 @@
 #
 
 from compiler.nodes import *
-from compiler.llvm import *
-from compiler.cpp import *
+# ~ from compiler.llvm import *
+# ~ from compiler.cpp import *
 
 def compile_to_llvm(json_data):
     init_llvm()
@@ -33,7 +33,6 @@ def compile_to_llvm(json_data):
 
 
 def compile_to_cpp(json_data):
-    #init_llvm()
     functions = [parse_node (function) for function in json_data["functions"]]
     print ( create_cpp_module(functions, "module") )
 
