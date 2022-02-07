@@ -206,9 +206,6 @@ class Binary(Expression):
         self.type = IntegerType(32)
         self.init_code = f"{str(self.left)} {self.operator} {str(self.right)}"
 
-    #def __str__(self):
-        #return f"{str(self.left)} {self.operator} {str(self.right)}"
-
 
 class WhileLoop(Expression):
 
