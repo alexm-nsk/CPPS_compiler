@@ -63,7 +63,7 @@ def export_function_to_cpp(node, scope):
 
     for child_node, edge in node.get_result_nodes()[:1]: # do only one for now
         scope.builder.ret( node.nodes[0].emit_cpp(scope) )
-
+   
     return this_function
 
 
@@ -162,17 +162,15 @@ def export_precondition_to_cpp(node, scope):
 #   {
 #       bool cond = i <= N;
 #       if (! cond ) break;
-#       i = i + 1;    
+#       i = i + 1;
 #   }
 
 #   result = i;
 
 
 def export_loopexpression_to_cpp(node, scope):
-    #print (node.init)
 
     # initialize variables from init-node and put them in new scope (at the beginning of the list)
-    # TODO extract variable type from outport type
 
     # the variables we introduce in this loop:
     new_vars = []
@@ -183,13 +181,17 @@ def export_loopexpression_to_cpp(node, scope):
         var_name = list(  node.body.params.items()  )[index][0]
         # initialize it:
         new_variable = scope.builder.define(type_, value = 0, name = var_name)
-        # TODO could cause wrong order:
         new_vars.append(new_variable)
 
-    # ~ while_ = WhileLoop(
-    # make a new scope based on the provided one:
-    while_scope = CppScope(scope.vars, scope.builder)
-    for v in reversed(new_vars):
-        while_scope.add_var_to_front(v)
 
-    print (node.pre_condition.emit_cpp(while_scope))
+    while_scope_vars = scope.get_vars_copy()
+    # make a new scope based on the provided one:
+    # put newly defined variables into scope's vars
+    for v in reversed(new_vars):
+        while_scope_vars.insert(0, v)
+    
+    while_ = scope.builder.while_()
+    pre_cond_builder = while_.get_pre_cond_builder()
+    pre_cond_scope = CppScope(while_scope_vars, pre_cond_builder)
+    
+    node.pre_condition.emit_cpp(pre_cond_scope)

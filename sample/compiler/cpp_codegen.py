@@ -27,6 +27,8 @@
 # TODO make sure names dont overlap when you give names to new identifiers
 # TODO make default values for types
 
+# TODO make sure builders are alwais initialized once
+
 CPP_INDENT = " " * 4
 
 from copy import copy
@@ -36,13 +38,15 @@ class CppScope:
     def __init__(self, vars_, builder = None):
         self.builder = builder
         self.vars = copy(vars_)
-        pass
 
     def add_var_to_front(self, var):
         self.vars.insert(0, var)
 
     def add_var_to_back(self, var):
         self.vars.append(var)
+        
+    def get_vars_copy(self):
+        return copy(self.vars)
 
 class Type:
 
@@ -207,16 +211,11 @@ class If(Expression):
 
 class WhileLoop(Expression):
 
-    def __init__(self, name = None):
+    def __init__(self, indent_level = 0, name = None):
         super().__init__(name)
-        
-        # ~ self.init = init
-        # ~ self.precond = precond
-        # ~ self.body = body
-        
-        self.pre_cond = Block(name = "pre_cond")
-        self.body = Block(name = "loop")
-        self.return_ = Block(name = "return_")
+        self.indent_level = indent_level
+        self.pre_cond = Block(indent_level + 1, name = "pre_cond")
+        self.body = Block(indent_level + 1, name = "loop")
     
     def get_pre_cond_builder(self):
         return Builder(self.pre_cond)
@@ -228,7 +227,9 @@ class WhileLoop(Expression):
         return Builder(self.return_)
     
     def __str__(self):
-        return "while loop"
+        ind = self.indent_level * CPP_INDENT
+        return "while(1)\n" + ind + "{\n" + str(self.pre_cond) + ind + "}\n"
+
 
 class CppCode(Expression):
 
@@ -339,7 +340,7 @@ class Block:
     def add_assignment(self, assignment):
         self.statements.append(assignment)
 
-    def add_while_loop(self, wk):
+    def add_while_loop(self, wl):
         self.statements.append(wl)
 
 
@@ -379,10 +380,10 @@ class Builder:
         c = Constant(value)
         return c
 
-    def while_(self, init, precond, body):
-        while_loop = WhileLoop(init, precond, body)
+    def while_(self):
+        while_loop = WhileLoop(indent_level = self.block.indent_level)
         self.block.add_while_loop(while_loop)
-        return None
+        return while_loop
 
     def assignment(self, var, value):
         assignment = Assignment(var, value)
