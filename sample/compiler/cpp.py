@@ -171,14 +171,14 @@ def export_precondition_to_cpp(node, scope):
 
 def export_oldvalue_to_cpp(node, scope):
     edge = node.get_input_edges()[0]
-        
+
     return scope.vars[edge.from_index]
 
 
 def export_body_to_cpp(node, scope):
     # calculate values on outports
     # and add assignment to corresponding (to each port) variables
-    
+
     # else_scope.
     for result_node, result_edge in node.get_result_nodes():
         index = result_edge.to_index
@@ -187,23 +187,26 @@ def export_body_to_cpp(node, scope):
 
 
 def export_reduction_to_cpp(node, scope):
-    pass
+    index = node.get_input_edges()[0].from_index
+    return scope.builder.assignment(scope.vars[-1], scope.vars[index])
 
 
+#scope.builder.assignment(result, while_scope_vars[0])
 def export_returns_to_cpp(node, scope):
-    
-    pass
+    for result_node, result_edge in node.get_result_nodes():
+
+        return result_node.emit_cpp(scope)
 
 
 def export_loopexpression_to_cpp(node, scope):
-    
+
     # TODO get type from outport:
     result = scope.builder.define(IntegerType(32), name = "while_result")
     # initialize variables from init-node and put them in new scope (at the beginning of the list)
     # the variables we introduce in this loop:
-    
-    new_vars = []
 
+    new_vars = []
+    
     # put newly defined variables into new vars (we will add them to scops)
     for index, port in enumerate(node.init.out_ports):
         type_ = port.type.emit_cpp()
@@ -212,11 +215,16 @@ def export_loopexpression_to_cpp(node, scope):
         # initialize it:
         new_variable = scope.builder.define(type_, value = 0, name = var_name)
         new_vars.append(new_variable)
-
+        
+    #new_vars = list(reversed(new_vars))
+    new_vars = new_vars + scope.vars
+    #new_vars.append(result)
+    print (new_vars)
+    
     # make a new scope based on the provided one
-    for v in reversed(new_vars):
-        while_scope_vars = scope.get_vars_copy()
-        while_scope_vars.insert(0, v)
+    while_scope_vars = new_vars + scope.get_vars_copy() + [result]
+    #for v in new_vars:
+        #while_scope_vars.insert(0, v)
 
     while_ = scope.builder.while_()
 
@@ -229,8 +237,9 @@ def export_loopexpression_to_cpp(node, scope):
     body_builder = while_.get_body_builder()
     body_scope = CppScope(while_scope_vars, body_builder)
     node.body.emit_cpp(body_scope)
-    
-    scope.builder.assignment(result, while_scope_vars[0])
+
+    node.reduction.emit_cpp(body_scope)
+
     return result
 
 
