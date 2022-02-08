@@ -43,6 +43,7 @@ def create_cpp_module(functions, name):
 
     return module
 
+# TODO call print in main
 
 def export_function_to_cpp(node, scope):
 
@@ -157,18 +158,6 @@ def export_precondition_to_cpp(node, scope):
     result_node.emit_cpp(scope)
 
 
-#   int result = 0
-
-#   while (1)
-#   {
-#       bool cond = i <= N;
-#       if (! cond ) break;
-#       i = i + 1;
-#   }
-
-#   result = i;
-
-
 def export_oldvalue_to_cpp(node, scope):
     edge = node.get_input_edges()[0]
 
@@ -188,13 +177,15 @@ def export_body_to_cpp(node, scope):
 
 def export_reduction_to_cpp(node, scope):
     index = node.get_input_edges()[0].from_index
-    return scope.builder.assignment(scope.vars[-1], scope.vars[index])
+    if node.operator == "value":
+        return scope.builder.assignment(scope.vars[-1], scope.vars[index])
+    elif node.operator == "sum":
+        pass
 
 
 #scope.builder.assignment(result, while_scope_vars[0])
 def export_returns_to_cpp(node, scope):
     for result_node, result_edge in node.get_result_nodes():
-
         return result_node.emit_cpp(scope)
 
 
@@ -216,15 +207,10 @@ def export_loopexpression_to_cpp(node, scope):
         new_variable = scope.builder.define(type_, value = 0, name = var_name)
         new_vars.append(new_variable)
         
-    #new_vars = list(reversed(new_vars))
     new_vars = new_vars + scope.vars
-    #new_vars.append(result)
-    print (new_vars)
     
     # make a new scope based on the provided one
     while_scope_vars = new_vars + scope.get_vars_copy() + [result]
-    #for v in new_vars:
-        #while_scope_vars.insert(0, v)
 
     while_ = scope.builder.while_()
 
@@ -241,21 +227,3 @@ def export_loopexpression_to_cpp(node, scope):
     node.reduction.emit_cpp(body_scope)
 
     return result
-
-
-# ~ //module
-# ~ #include <stdio.h>
-
-# ~ int main(int N)
-# ~ {
-    # ~ // entry:
-    # ~ int while_result;
-    # ~ int i = 0;
-    # ~ while( i <= N )
-    # ~ {
-        # ~ int i = i + 1;
-        # ~         result = i; - if "value" , result += id3; if "sum" initialize result with 0 if summing
-    # ~ }
-    # ~ while_result = i;
-    # ~ return while_result;
-# ~ }

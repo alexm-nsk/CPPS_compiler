@@ -29,6 +29,8 @@
 
 # TODO make sure builders are alwais initialized once
 
+# TODO separate scope result variable?
+
 CPP_INDENT = " " * 4
 
 from copy import copy
@@ -290,7 +292,7 @@ class Function:
     def __str__(self):
         text = ""
         footer = ""
-
+            
         if self.is_main:
             arg_text = "int argc, char **argv"
             footer = "\n" + CPP_INDENT + "return 0;\n"
