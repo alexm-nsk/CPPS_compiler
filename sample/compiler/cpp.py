@@ -63,7 +63,7 @@ def export_function_to_cpp(node, scope):
 
     for child_node, edge in node.get_result_nodes()[:1]: # do only one for now
         scope.builder.ret( node.nodes[0].emit_cpp(scope) )
-   
+
     return this_function
 
 
@@ -168,6 +168,23 @@ def export_precondition_to_cpp(node, scope):
 #   result = i;
 
 
+def export_oldvalue_to_cpp(node, scope):
+    edge = node.get_input_edges()[0]
+    
+    return scope.vars[edge.from_index]
+
+
+def export_body_to_cpp(node, scope):
+    # calculate values on outports
+    # and add assignment to corresponding (to each port) variables
+    
+    # else_scope.
+    for result_node, result_edge in node.get_result_nodes():
+        index = result_edge.to_index
+        value = result_node.emit_cpp(scope)
+        scope.builder.assignment(scope.vars[index], value)
+
+
 def export_loopexpression_to_cpp(node, scope):
 
     # initialize variables from init-node and put them in new scope (at the beginning of the list)
@@ -189,9 +206,15 @@ def export_loopexpression_to_cpp(node, scope):
     # put newly defined variables into scope's vars
     for v in reversed(new_vars):
         while_scope_vars.insert(0, v)
-    
+
     while_ = scope.builder.while_()
+
+    # process pre-condition:
     pre_cond_builder = while_.get_pre_cond_builder()
     pre_cond_scope = CppScope(while_scope_vars, pre_cond_builder)
-    
     node.pre_condition.emit_cpp(pre_cond_scope)
+
+    #process the body:
+    pre_body_builder = while_.get_body_builder()
+    pre_body_scope = CppScope(while_scope_vars, pre_body_builder)
+    node.body.emit_cpp(pre_body_scope)

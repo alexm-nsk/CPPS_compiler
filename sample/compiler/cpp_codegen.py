@@ -214,8 +214,8 @@ class WhileLoop(Expression):
     def __init__(self, indent_level = 0, name = None):
         super().__init__(name)
         self.indent_level = indent_level
-        self.pre_cond = Block(indent_level + 1, name = "pre_cond")
-        self.body = Block(indent_level + 1, name = "loop")
+        self.pre_cond = Block(indent_level + 1)
+        self.body = Block(indent_level + 1)
     
     def get_pre_cond_builder(self):
         return Builder(self.pre_cond)
@@ -228,7 +228,10 @@ class WhileLoop(Expression):
     
     def __str__(self):
         ind = self.indent_level * CPP_INDENT
-        return "while(1)\n" + ind + "{\n" + str(self.pre_cond) + ind + "}\n"
+        cond_code = self.pre_cond.inits[0].init_code
+        return "while( " + cond_code + " )\n" + ind + "{\n" + \
+                    str(self.body) + ind + \
+                    "}"
 
 
 class CppCode(Expression):
@@ -317,7 +320,7 @@ class Block:
 
     def __str__(self):
         # ~ value_init = "= " +
-        label = "\n" if self.name == None else CPP_INDENT * self.indent_level + f"// {self.name}:"  + "\n"
+        label = "" if self.name == None else CPP_INDENT * self.indent_level + f"// {self.name}:"  + "\n"
         inits = "".join(  CPP_INDENT * self.indent_level +
                             str(s.type) + " "  +
                             str(s.name) +
@@ -325,7 +328,7 @@ class Block:
                             ";\n"
                             for s in self.inits)
         body = "".join( CPP_INDENT * self.indent_level +
-                            str(s) + (";" if type(s) != If else "\n") for s in self.statements)
+                            str(s) + (";" if type(s) not in [If, WhileLoop] else "\n") for s in self.statements)
         return label + inits + body + "\n"
 
     def add_ret(self, object_):
