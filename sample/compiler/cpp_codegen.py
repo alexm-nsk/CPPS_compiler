@@ -159,7 +159,7 @@ class Variable(Expression):
         super().__init__(name)
         self.type = type_
         self.value = value
-        self.init_code = str(value)
+        self.init_code = str(value) if value not in [None, ""] else ""
 
 
 class Constant(Expression):
@@ -319,16 +319,19 @@ class Block:
         self.inits.append(identifier)
 
     def __str__(self):
-        # ~ value_init = "= " +
+        
         label = "" if self.name == None else CPP_INDENT * self.indent_level + f"// {self.name}:"  + "\n"
+        
         inits = "".join(  CPP_INDENT * self.indent_level +
                             str(s.type) + " "  +
                             str(s.name) +
-                            ((" = " + str(s.init_code)) if s.init_code != "" else "") +
+                            ((" = " + str(s.init_code)) if s.init_code not in ["", None] else "") +
                             ";\n"
                             for s in self.inits)
-        body = "".join( CPP_INDENT * self.indent_level +
-                            str(s) + (";" if type(s) not in [If, WhileLoop] else "\n") for s in self.statements)
+        
+        body = "\n".join( CPP_INDENT * self.indent_level +
+                            str(s) + (";" if type(s) not in [If, WhileLoop] else "") for s in self.statements)
+        
         return label + inits + body + "\n"
 
     def add_ret(self, object_):

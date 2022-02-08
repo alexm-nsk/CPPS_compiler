@@ -134,6 +134,7 @@ def export_if_to_cpp(node, scope):
     get_branch = lambda name: list(filter(lambda x: x.name == name, node.branches))[0]
 
     if_ = scope.builder.if_(cond)
+    # TODO get type from outport:
     result = scope.builder.define(IntegerType(32), name = "if_result")
 
     then = if_.get_then_builder()
@@ -170,7 +171,7 @@ def export_precondition_to_cpp(node, scope):
 
 def export_oldvalue_to_cpp(node, scope):
     edge = node.get_input_edges()[0]
-    
+        
     return scope.vars[edge.from_index]
 
 
@@ -185,13 +186,25 @@ def export_body_to_cpp(node, scope):
         scope.builder.assignment(scope.vars[index], value)
 
 
+def export_reduction_to_cpp(node, scope):
+    pass
+
+
+def export_returns_to_cpp(node, scope):
+    
+    pass
+
+
 def export_loopexpression_to_cpp(node, scope):
-
+    
+    # TODO get type from outport:
+    result = scope.builder.define(IntegerType(32), name = "while_result")
     # initialize variables from init-node and put them in new scope (at the beginning of the list)
-
     # the variables we introduce in this loop:
+    
     new_vars = []
 
+    # put newly defined variables into new vars (we will add them to scops)
     for index, port in enumerate(node.init.out_ports):
         type_ = port.type.emit_cpp()
         # get variable's name from body's parameters:
@@ -200,11 +213,9 @@ def export_loopexpression_to_cpp(node, scope):
         new_variable = scope.builder.define(type_, value = 0, name = var_name)
         new_vars.append(new_variable)
 
-
-    while_scope_vars = scope.get_vars_copy()
-    # make a new scope based on the provided one:
-    # put newly defined variables into scope's vars
+    # make a new scope based on the provided one
     for v in reversed(new_vars):
+        while_scope_vars = scope.get_vars_copy()
         while_scope_vars.insert(0, v)
 
     while_ = scope.builder.while_()
@@ -214,7 +225,14 @@ def export_loopexpression_to_cpp(node, scope):
     pre_cond_scope = CppScope(while_scope_vars, pre_cond_builder)
     node.pre_condition.emit_cpp(pre_cond_scope)
 
-    #process the body:
-    pre_body_builder = while_.get_body_builder()
-    pre_body_scope = CppScope(while_scope_vars, pre_body_builder)
-    node.body.emit_cpp(pre_body_scope)
+    # process the body:
+    body_builder = while_.get_body_builder()
+    body_scope = CppScope(while_scope_vars, body_builder)
+    node.body.emit_cpp(body_scope)
+    
+    # process return:
+    # ~ returns_builder = while_.get_returns_builder()
+    # ~ pre_body_scope = CppScope(while_scope_vars, pre_body_builder)
+    # ~ node.body.emit_cpp(pre_body_scope)
+    scope.builder.assignment(result, while_scope_vars[0])
+    return result
