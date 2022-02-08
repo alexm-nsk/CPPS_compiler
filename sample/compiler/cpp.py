@@ -230,9 +230,23 @@ def export_loopexpression_to_cpp(node, scope):
     body_scope = CppScope(while_scope_vars, body_builder)
     node.body.emit_cpp(body_scope)
     
-    # process return:
-    # ~ returns_builder = while_.get_returns_builder()
-    # ~ pre_body_scope = CppScope(while_scope_vars, pre_body_builder)
-    # ~ node.body.emit_cpp(pre_body_scope)
     scope.builder.assignment(result, while_scope_vars[0])
     return result
+
+
+# ~ //module
+# ~ #include <stdio.h>
+
+# ~ int main(int N)
+# ~ {
+    # ~ // entry:
+    # ~ int while_result;
+    # ~ int i = 0;
+    # ~ while( i <= N )
+    # ~ {
+        # ~ int i = i + 1;
+        # ~         result = i; - if "value" , result += id3; if "sum" initialize result with 0 if summing
+    # ~ }
+    # ~ while_result = i;
+    # ~ return while_result;
+# ~ }
