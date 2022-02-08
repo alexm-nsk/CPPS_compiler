@@ -168,7 +168,6 @@ def export_body_to_cpp(node, scope):
     # calculate values on outports
     # and add assignment to corresponding (to each port) variables
 
-    # else_scope.
     for result_node, result_edge in node.get_result_nodes():
         index = result_edge.to_index
         value = result_node.emit_cpp(scope)
@@ -178,26 +177,31 @@ def export_body_to_cpp(node, scope):
 def export_reduction_to_cpp(node, scope):
     index = node.get_input_edges()[0].from_index
     if node.operator == "value":
+        return scope.builder.assignment(scope.vars[-1], 
+                scope.builder.binary(  scope.vars[-1] , scope.builder.binary(scope.vars[index], scope.builder.constant(1), "+"), "+")
+            )
+
         return scope.builder.assignment(scope.vars[-1], scope.vars[index])
     elif node.operator == "sum":
-        pass
+        return scope.builder.assignment(scope.vars[-1], 
+                scope.builder.binary( scope.vars[index] , scope.builder.constant(1))
+            )
 
 
-#scope.builder.assignment(result, while_scope_vars[0])
 def export_returns_to_cpp(node, scope):
     for result_node, result_edge in node.get_result_nodes():
         return result_node.emit_cpp(scope)
 
 
 def export_loopexpression_to_cpp(node, scope):
-
+    # TODO make two blocks for body and reduction and put them back to back inside while block
     # TODO get type from outport:
     result = scope.builder.define(IntegerType(32), name = "while_result")
     # initialize variables from init-node and put them in new scope (at the beginning of the list)
     # the variables we introduce in this loop:
 
     new_vars = []
-    
+
     # put newly defined variables into new vars (we will add them to scops)
     for index, port in enumerate(node.init.out_ports):
         type_ = port.type.emit_cpp()
@@ -206,9 +210,9 @@ def export_loopexpression_to_cpp(node, scope):
         # initialize it:
         new_variable = scope.builder.define(type_, value = 0, name = var_name)
         new_vars.append(new_variable)
-        
+
     new_vars = new_vars + scope.vars
-    
+
     # make a new scope based on the provided one
     while_scope_vars = new_vars + scope.get_vars_copy() + [result]
 
