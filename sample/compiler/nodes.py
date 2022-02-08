@@ -28,16 +28,16 @@ from compiler.json_parser import *
 COMPILER = "C++"
 
 if "COMPILER" in globals():
-    
+
     if   COMPILER == "LLVM":
         from compiler.llvm import *
-        
+
     elif COMPILER == "C++":
         from compiler.cpp import *
-        
+
 else:
     raise Exception ("Compiler not specified!")
-    
+
 import re
 
 BRANCH_NAMES = ["Else", "ElseIf", "Then"]
@@ -194,6 +194,13 @@ class Type:
         # TODO derive type from it's description
         return type_map[self.descr]
 
+    def emit_cpp(self):
+        type_map = {
+            "integer" : IntegerType(32)
+        }
+        # TODO derive type from it's description
+        return type_map[self.descr]
+
     def __str__(self):
         return self.descr
 
@@ -337,13 +344,15 @@ class Literal(Node):
     pass
 
 
+# --------------------------------------
+# Loops:
+
 class LoopExpression(Node):
     pass
 
 
 class Init(Node):
     pass
-
 
 class PreCondition(Node):
     pass
@@ -363,6 +372,9 @@ class OldValue(Node):
 
 class Reduction(Node):
     pass
+
+
+# --------------------------------------
 
 
 class ArrayAccess(Node):

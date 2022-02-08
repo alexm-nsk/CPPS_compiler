@@ -57,7 +57,7 @@ def export_function_to_cpp(node, scope):
     this_function = Function(node.function_name, ret_type, args, node.name == "main")
 
     functions[node.function_name] = this_function
-    
+
     builder = Builder(this_function.get_entry_block())
     scope = CppScope(this_function.get_arguments(), builder)
 
@@ -113,18 +113,18 @@ def export_functioncall_to_cpp(node, scope):
     input_nodes = node.get_input_nodes()
     num_args = len(input_nodes)
     args = [None for a in range(num_args)]
-    
+
     for (arg_node, edge) in input_nodes:
 
         index = edge.to_index
-        
-        if arg_node.is_node_parent(edge.from_):            
+
+        if arg_node.is_node_parent(edge.from_):
             args[index] = scope.vars[edge.from_index]
         else:
             args[index] = arg_node.emit_cpp(scope)
 
     result = scope.builder.call(functions[node.callee], args)
-    
+
     return result
 
 
@@ -147,3 +147,49 @@ def export_if_to_cpp(node, scope):
     else_scope.builder.assignment(result, else_result)
 
     return result
+
+
+def export_precondition_to_cpp(node, scope):
+    # the node that puts out the condition value:
+    result_node, result_edge = node.get_result_nodes() [0]
+    # ~ print( node.params )
+    result_node.emit_cpp(scope)
+
+
+#   int result = 0
+
+#   while (1)
+#   {
+#       bool cond = i <= N;
+#       if (! cond ) break;
+#       i = i + 1;    
+#   }
+
+#   result = i;
+
+
+def export_loopexpression_to_cpp(node, scope):
+    #print (node.init)
+
+    # initialize variables from init-node and put them in new scope (at the beginning of the list)
+    # TODO extract variable type from outport type
+
+    # the variables we introduce in this loop:
+    new_vars = []
+
+    for index, port in enumerate(node.init.out_ports):
+        type_ = port.type.emit_cpp()
+        # get variable's name from body's parameters:
+        var_name = list(  node.body.params.items()  )[index][0]
+        # initialize it:
+        new_variable = scope.builder.define(type_, value = 0, name = var_name)
+        # TODO could cause wrong order:
+        new_vars.append(new_variable)
+
+    # ~ while_ = WhileLoop(
+    # make a new scope based on the provided one:
+    while_scope = CppScope(scope.vars, scope.builder)
+    for v in reversed(new_vars):
+        while_scope.add_var_to_front(v)
+
+    print (node.pre_condition.emit_cpp(while_scope))

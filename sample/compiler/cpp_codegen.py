@@ -32,10 +32,17 @@ CPP_INDENT = " " * 4
 from copy import copy
 
 class CppScope:
+
     def __init__(self, vars_, builder = None):
         self.builder = builder
         self.vars = copy(vars_)
         pass
+
+    def add_var_to_front(self, var):
+        self.vars.insert(0, var)
+
+    def add_var_to_back(self, var):
+        self.vars.append(var)
 
 class Type:
 
@@ -47,12 +54,24 @@ class IntegerType(Type):
 
     def __init__(self, bit_depth = 64):
         self.bit_depth = bit_depth
-        
+
     def default(self):
         return 0
-        
+
     def __str__(self):
         return "int"
+
+
+class BooleanType(Type):
+
+    def __init__(self):
+        pass
+
+    def default(self):
+        return 0
+
+    def __str__(self):
+        return "bool"
 
 
 class StringType(Type):
@@ -65,7 +84,7 @@ class StringType(Type):
 
 
 class VoidType(Type):
-    
+
     def __str__(self):
         return "void"
 
@@ -136,7 +155,7 @@ class Variable(Expression):
         super().__init__(name)
         self.type = type_
         self.value = value
-        self.init_code = str(value) if value else None
+        self.init_code = str(value)
 
 
 class Constant(Expression):
@@ -179,12 +198,37 @@ class If(Expression):
 
     def get_else_builder(self):
         return Builder(self.else_)
-        
+
     def __str__(self):
         ind = self.indent_level * CPP_INDENT
         # "" used to contain \n:
         return f"if({self.cond})\n" + ind +  "{" + ind +  str(self.then) +""+ ind +"}\n"+ ind +"else\n" + ind + "{" + str(self.else_) +""+ ind + "}"
 
+
+class WhileLoop(Expression):
+
+    def __init__(self, name = None):
+        super().__init__(name)
+        
+        # ~ self.init = init
+        # ~ self.precond = precond
+        # ~ self.body = body
+        
+        self.pre_cond = Block(name = "pre_cond")
+        self.body = Block(name = "loop")
+        self.return_ = Block(name = "return_")
+    
+    def get_pre_cond_builder(self):
+        return Builder(self.pre_cond)
+    
+    def get_body_builder(self):
+        return Builder(self.body)
+    
+    def get_return_builder(self):
+        return Builder(self.return_)
+    
+    def __str__(self):
+        return "while loop"
 
 class CppCode(Expression):
 
@@ -203,18 +247,11 @@ class Binary(Expression):
         self.left     = left
         self.right    = right
         self.operator = operator
-        self.type = IntegerType(32)
+        if self.operator in ["<=", "<", ">", "==", ">="]:
+            self.type = BooleanType()
+        else:
+            self.type = IntegerType(32)
         self.init_code = f"{str(self.left)} {self.operator} {str(self.right)}"
-
-
-class WhileLoop(Expression):
-
-    def __init__(self, init, precond, body, name = None):
-        super().__init__(name)
-        self.init = init
-        self.precond = precond
-        self.body = body
-        self.body_block = Block(name = "loop")
 
 
 class Function:
@@ -283,7 +320,7 @@ class Block:
         inits = "".join(  CPP_INDENT * self.indent_level +
                             str(s.type) + " "  +
                             str(s.name) +
-                            ((" = " + str(s.init_code)) if s.init_code else "") +
+                            ((" = " + str(s.init_code)) if s.init_code != "" else "") +
                             ";\n"
                             for s in self.inits)
         body = "".join( CPP_INDENT * self.indent_level +
@@ -301,7 +338,10 @@ class Block:
 
     def add_assignment(self, assignment):
         self.statements.append(assignment)
-        
+
+    def add_while_loop(self, wk):
+        self.statements.append(wl)
+
 
 class Builder:
 
@@ -340,7 +380,8 @@ class Builder:
         return c
 
     def while_(self, init, precond, body):
-
+        while_loop = WhileLoop(init, precond, body)
+        self.block.add_while_loop(while_loop)
         return None
 
     def assignment(self, var, value):
