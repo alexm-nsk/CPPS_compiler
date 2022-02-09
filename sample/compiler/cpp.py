@@ -29,7 +29,19 @@ type_map = {
     "integer" : IntegerType(32)
 }
 
+
 functions = {}
+
+
+def resolve(edge, scope):
+    from_node = edge.get_from_node()
+    to_node   = edge.get_to_node()
+
+    if to_node.is_node_parent(edge.from_):
+        return scope.vars[edge.from_index]
+    else:
+        return from_node.emit_cpp(scope)
+
 
 def sisal_to_cpp_type(type_):
     return type_map[str(type_)]
@@ -43,7 +55,9 @@ def create_cpp_module(functions, name):
 
     return module
 
+
 # TODO call print in main
+
 
 def export_function_to_cpp(node, scope):
 
@@ -70,12 +84,10 @@ def export_function_to_cpp(node, scope):
         for child_node, edge in node.get_result_nodes()[:1]: # do only one for now
             scope.builder.printf( child_node.emit_cpp(scope) )
 
-
     return this_function
 
 
 def export_literal_to_cpp(node, scope):
-
     return scope.builder.constant(node.value)
 
 
@@ -84,15 +96,8 @@ def export_binary_to_cpp(node, scope):
     (left, l_edge), (right, r_edge) = node.get_input_nodes()
     operator = node.operator
 
-    if node.is_node_parent(l_edge.from_):
-        lho = scope.vars[l_edge.from_index]
-    else:
-        lho = left.emit_cpp(scope)
-
-    if node.is_node_parent(r_edge.from_):
-        rho = scope.vars[r_edge.from_index]
-    else:
-        rho = right.emit_cpp(scope)
+    lho = resolve(l_edge, scope)
+    rho = resolve(r_edge, scope)
 
     return scope.builder.binary(lho, rho, operator)
 
@@ -122,16 +127,10 @@ def export_functioncall_to_cpp(node, scope):
     args = [None for a in range(num_args)]
 
     for (arg_node, edge) in input_nodes:
-
         index = edge.to_index
-
-        if arg_node.is_node_parent(edge.from_):
-            args[index] = scope.vars[edge.from_index]
-        else:
-            args[index] = arg_node.emit_cpp(scope)
+        args[index] = resolve(edge, scope)
 
     result = scope.builder.call(functions[node.callee], args)
-
     return result
 
 
@@ -178,30 +177,12 @@ def export_body_to_cpp(node, scope):
         value = result_node.emit_cpp(scope)
         scope.builder.assignment(scope.vars[index], value)
 
-    # ~ if node.is_node_parent(l_edge.from_):
-        # ~ lho = scope.vars[l_edge.from_index]
-    # ~ else:
-        # ~ lho = left.emit_cpp(scope)
-
-    # ~ if node.is_node_parent(r_edge.from_):
-        # ~ rho = scope.vars[r_edge.from_index]
-    # ~ else:
-        # ~ rho = right.emit_cpp(scope)
-
-def resolve(edge, scope):
-    from_node = edge.get_from_node()
-    to_node   = edge.get_to_node()
-
-    if to_node.is_node_parent(edge.from_):
-        print ("scope!")
-        return scope.vars[edge.from_index]
-    else:
-        return from_node.emit_cpp(scope)
 
 def export_reduction_to_cpp(node, scope):
+
     index = node.get_input_edges()[0].from_index
     # ~ value = scope.vars[index]
-    value = resolve(node.get_input_edges()[0],scope)
+    value = resolve(node.get_input_edges()[1],scope)
 
     if node.operator == "value":
         return scope.builder.assignment(scope.vars[-1], value)
@@ -213,6 +194,7 @@ def export_reduction_to_cpp(node, scope):
 
 
 def export_returns_to_cpp(node, scope):
+
     for result_node, result_edge in node.get_result_nodes():
         return result_node.emit_cpp(scope)
 

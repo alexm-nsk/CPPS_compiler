@@ -30,6 +30,7 @@
 # TODO separate scope result variable?
 
 CPP_INDENT = " " * 4
+REDUCTION_FIRST = True
 
 from copy import copy
 
@@ -230,7 +231,13 @@ class WhileLoop(Expression):
     def __str__(self):
         ind = self.indent_level * CPP_INDENT
         cond_code = self.pre_cond.inits[0].init_code
-        return "while( " + cond_code + " )\n" + ind + "{\n" + \
+        if REDUCTION_FIRST:
+            return "while( " + cond_code + " )\n" + ind + "{\n" + \
+                    str(self.reduction) + \
+                    str(self.body) + ind + \
+                    "}"
+        else:
+            return "while( " + cond_code + " )\n" + ind + "{\n" + \
                     str(self.body) + \
                     str(self.reduction) + ind + \
                     "}"
