@@ -226,6 +226,12 @@ class Edge:
         Edge.edges_from[from_].append(self)
         Edge.edges_to  [to   ].append(self)
 
+    def get_from_node(self):
+        return Node.nodes_[self.from_]
+
+    def get_to_node(self):
+        return Node.nodes_[self.to]
+
     def __repr__(self):
         return str(self.__dict__)
 
@@ -254,6 +260,9 @@ class Node:
 
     def has_nodes(self):
         return "nodes" in self.__dict__
+
+    def get_node_by_id(id_):
+        return Node.nodes_[id_]
 
     # returns a list of pairs of nodes containing the result of all internal calculations
     # and edges that carry that final value:

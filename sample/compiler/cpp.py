@@ -69,7 +69,7 @@ def export_function_to_cpp(node, scope):
     else:
         for child_node, edge in node.get_result_nodes()[:1]: # do only one for now
             scope.builder.printf( child_node.emit_cpp(scope) )
-        
+
 
     return this_function
 
@@ -178,15 +178,36 @@ def export_body_to_cpp(node, scope):
         value = result_node.emit_cpp(scope)
         scope.builder.assignment(scope.vars[index], value)
 
+    # ~ if node.is_node_parent(l_edge.from_):
+        # ~ lho = scope.vars[l_edge.from_index]
+    # ~ else:
+        # ~ lho = left.emit_cpp(scope)
+
+    # ~ if node.is_node_parent(r_edge.from_):
+        # ~ rho = scope.vars[r_edge.from_index]
+    # ~ else:
+        # ~ rho = right.emit_cpp(scope)
+
+def resolve(edge, scope):
+    from_node = edge.get_from_node()
+    to_node   = edge.get_to_node()
+
+    if to_node.is_node_parent(edge.from_):
+        print ("scope!")
+        return scope.vars[edge.from_index]
+    else:
+        return from_node.emit_cpp(scope)
 
 def export_reduction_to_cpp(node, scope):
     index = node.get_input_edges()[0].from_index
-    value = scope.vars[index]
+    # ~ value = scope.vars[index]
+    value = resolve(node.get_input_edges()[0],scope)
+    
     if node.operator == "value":
         return scope.builder.assignment(scope.vars[-1], value)
 
     elif node.operator == "sum":
-        return scope.builder.assignment(scope.vars[-1], 
+        return scope.builder.assignment(scope.vars[-1],
                 scope.builder.binary(  scope.vars[-1] , value , "+")
             )
 
