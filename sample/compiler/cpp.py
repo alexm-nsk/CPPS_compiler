@@ -53,17 +53,23 @@ def export_function_to_cpp(node, scope):
         arg = (a, sisal_to_cpp_type(node.in_ports[n].type))
         args.append(arg)
 
-    ret_type = sisal_to_cpp_type(node.out_ports[0].type)
+    is_main = (node.function_name == "main")
 
-    this_function = Function(node.function_name, ret_type, args, node.name == "main")
+    ret_type = sisal_to_cpp_type(node.out_ports[0].type)
+    this_function = Function(node.function_name, ret_type, args, main = is_main)
 
     functions[node.function_name] = this_function
 
     builder = Builder(this_function.get_entry_block())
     scope = CppScope(this_function.get_arguments(), builder)
 
-    for child_node, edge in node.get_result_nodes()[:1]: # do only one for now
-        scope.builder.ret( node.nodes[0].emit_cpp(scope) )
+    if not is_main:
+        for child_node, edge in node.get_result_nodes()[:1]: # do only one for now
+            scope.builder.ret( child_node.emit_cpp(scope) )
+    else:
+        for child_node, edge in node.get_result_nodes()[:1]: # do only one for now
+            scope.builder.printf( child_node.emit_cpp(scope) )
+        
 
     return this_function
 
@@ -160,7 +166,6 @@ def export_precondition_to_cpp(node, scope):
 
 def export_oldvalue_to_cpp(node, scope):
     edge = node.get_input_edges()[0]
-
     return scope.vars[edge.from_index]
 
 
@@ -176,15 +181,13 @@ def export_body_to_cpp(node, scope):
 
 def export_reduction_to_cpp(node, scope):
     index = node.get_input_edges()[0].from_index
+    value = scope.vars[index]
     if node.operator == "value":
-        return scope.builder.assignment(scope.vars[-1], 
-                scope.builder.binary(  scope.vars[-1] , scope.vars[index]  , "+")
-            )
+        return scope.builder.assignment(scope.vars[-1], value)
 
-        return scope.builder.assignment(scope.vars[-1], scope.vars[index])
     elif node.operator == "sum":
         return scope.builder.assignment(scope.vars[-1], 
-                scope.builder.binary( scope.vars[index] , scope.builder.constant(1))
+                scope.builder.binary(  scope.vars[-1] , value , "+")
             )
 
 
@@ -196,7 +199,7 @@ def export_returns_to_cpp(node, scope):
 def export_loopexpression_to_cpp(node, scope):
     # TODO make two blocks for body and reduction and put them back to back inside while block
     # TODO get type from outport:
-    result = scope.builder.define(IntegerType(32), name = "while_result")
+    result = scope.builder.define(IntegerType(32), name = "while_result",  value = 0)
     # initialize variables from init-node and put them in new scope (at the beginning of the list)
     # the variables we introduce in this loop:
 
@@ -215,7 +218,6 @@ def export_loopexpression_to_cpp(node, scope):
 
     # make a new scope based on the provided one
     while_scope_vars = new_vars + scope.get_vars_copy() + [result]
-
     while_ = scope.builder.while_()
 
     # process pre-condition:
@@ -228,6 +230,7 @@ def export_loopexpression_to_cpp(node, scope):
     body_scope = CppScope(while_scope_vars, body_builder)
     node.body.emit_cpp(body_scope)
 
+    # process the reduction:
     reduction_builder = while_.get_reduction_builder()
     # TODO double the variables here
     reduction_scope = CppScope(while_scope_vars, reduction_builder)

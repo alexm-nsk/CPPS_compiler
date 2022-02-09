@@ -26,9 +26,7 @@
 
 # TODO make sure names dont overlap when you give names to new identifiers
 # TODO make default values for types
-
 # TODO make sure builders are alwais initialized once
-
 # TODO separate scope result variable?
 
 CPP_INDENT = " " * 4
@@ -216,9 +214,9 @@ class WhileLoop(Expression):
     def __init__(self, indent_level = 0, name = None):
         super().__init__(name)
         self.indent_level = indent_level
-        self.pre_cond = Block(indent_level + 1)
-        self.body = Block(indent_level + 1)
-        self.reduction = Block(indent_level + 1)
+        self.pre_cond = Block(indent_level + 1, name = "precondition")
+        self.body = Block(indent_level + 1, name = "body")
+        self.reduction = Block(indent_level + 1, name = "reduction")
     
     def get_pre_cond_builder(self):
         return Builder(self.pre_cond)
@@ -265,12 +263,12 @@ class Binary(Expression):
 class Function:
 
     def __init__(self, name, return_type, arguments: "list of (name, type) - tuples", main = False):
-        self.name = name
+        self.name        = name
         self.return_type = return_type
-        self.arguments = []
-        self.statements = []
+        self.arguments   = []
+        self.statements  = []
         self.entry_block = Block(name = "entry")
-        self.is_main = main
+        self.is_main     = main
 
         if not main:
             for index, (name, type_) in enumerate(arguments):
@@ -297,7 +295,7 @@ class Function:
             
         if self.is_main:
             arg_text = "int argc, char **argv"
-            footer = "\n" + CPP_INDENT + "return 0;\n"
+            footer = CPP_INDENT + "return 0;\n"
         else:
             arg_text = ", ".join([str (a.type) +" "+ str(a) for a in self.arguments])
 
