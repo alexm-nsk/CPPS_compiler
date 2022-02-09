@@ -208,7 +208,7 @@ class If(Expression):
     def __str__(self):
         ind = self.indent_level * CPP_INDENT
         # "" used to contain \n:
-        return f"if({self.cond})\n" + ind +  "{" + ind +  str(self.then) +""+ ind +"}\n"+ ind +"else\n" + ind + "{" + str(self.else_) +""+ ind + "}"
+        return f"if({self.cond})\n" + ind +  "{\n" + str(self.then) +""+ ind +"}\n"+ ind +"else\n" + ind + "{\n" + str(self.else_) +""+ ind + "}"
 
 
 class WhileLoop(Expression):
@@ -218,6 +218,7 @@ class WhileLoop(Expression):
         self.indent_level = indent_level
         self.pre_cond = Block(indent_level + 1)
         self.body = Block(indent_level + 1)
+        self.reduction = Block(indent_level + 1)
     
     def get_pre_cond_builder(self):
         return Builder(self.pre_cond)
@@ -225,14 +226,15 @@ class WhileLoop(Expression):
     def get_body_builder(self):
         return Builder(self.body)
     
-    def get_return_builder(self):
-        return Builder(self.return_)
+    def get_reduction_builder(self):
+        return Builder(self.reduction)
     
     def __str__(self):
         ind = self.indent_level * CPP_INDENT
         cond_code = self.pre_cond.inits[0].init_code
         return "while( " + cond_code + " )\n" + ind + "{\n" + \
-                    str(self.body) + ind + \
+                    str(self.body) + \
+                    str(self.reduction) + ind + \
                     "}"
 
 

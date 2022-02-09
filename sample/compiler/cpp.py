@@ -178,7 +178,7 @@ def export_reduction_to_cpp(node, scope):
     index = node.get_input_edges()[0].from_index
     if node.operator == "value":
         return scope.builder.assignment(scope.vars[-1], 
-                scope.builder.binary(  scope.vars[-1] , scope.builder.binary(scope.vars[index], scope.builder.constant(1), "+"), "+")
+                scope.builder.binary(  scope.vars[-1] , scope.vars[index]  , "+")
             )
 
         return scope.builder.assignment(scope.vars[-1], scope.vars[index])
@@ -228,6 +228,9 @@ def export_loopexpression_to_cpp(node, scope):
     body_scope = CppScope(while_scope_vars, body_builder)
     node.body.emit_cpp(body_scope)
 
-    node.reduction.emit_cpp(body_scope)
+    reduction_builder = while_.get_reduction_builder()
+    # TODO double the variables here
+    reduction_scope = CppScope(while_scope_vars, reduction_builder)
+    node.reduction.emit_cpp(reduction_scope)
 
     return result
