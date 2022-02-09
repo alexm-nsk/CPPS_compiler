@@ -202,7 +202,7 @@ def export_reduction_to_cpp(node, scope):
     index = node.get_input_edges()[0].from_index
     # ~ value = scope.vars[index]
     value = resolve(node.get_input_edges()[0],scope)
-    
+
     if node.operator == "value":
         return scope.builder.assignment(scope.vars[-1], value)
 
