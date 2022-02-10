@@ -79,10 +79,10 @@ def export_function_to_cpp(node, scope):
 
     this_function = Function(node.function_name, ret_type, args)#, main = is_main)
     functions[node.function_name] = this_function
-    
+
     # define code builder object for C++-main here so we can use it in the return value
     # whether or not this is main (see return in this function)
-    cpp_main = None 
+    cpp_main = None
 
     if is_main:
         cpp_main = Function("main", None, [], main = is_main)
@@ -143,7 +143,8 @@ def export_functioncall_to_cpp(node, scope):
         index = edge.to_index
         args[index] = resolve(edge, scope)
             # Here we replace callee with sisal main if we call main (because main is now a C++ "int main(etc...")
-    result = scope.builder.call(functions["sisal_main" if node.callee == "main" else "main"], args)
+
+    result = scope.builder.call(functions["sisal_main" if node.callee == "main" else node.callee], args)
     return result
 
 
@@ -154,7 +155,9 @@ def export_if_to_cpp(node, scope):
 
     if_ = scope.builder.if_(cond)
     # TODO get type from outport:
-    result = scope.builder.define(IntegerType(32), name = "if_result")
+    type_ = node.out_ports[0].type.emit_cpp()
+    
+    result = scope.builder.define(type_, name = "if_result")
 
     then = if_.get_then_builder()
     then_scope = CppScope(scope.vars, then)
