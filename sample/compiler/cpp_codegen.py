@@ -338,7 +338,7 @@ class Function:
             text += CPP_INDENT + "}\n" + CPP_INDENT + "catch(int)\n" + CPP_INDENT + "{\n" + CPP_INDENT*2 + "return 1;\n" + CPP_INDENT +"}\n"
         else:
             text += f"{self.entry_block}\n"
-        
+
         text += footer + "}"
 
         return text
@@ -453,7 +453,5 @@ class Module:
     def __str__(self):
         text = "//" +  self.name + "\n"
         text += "#include <stdio.h>\n\n"
-        # ~ for name, f in self.functions.items():
-            # ~ text += str(f) + "\n\n"
         text += "\n\n".join([str(f) for name, f in self.functions.items()])
         return text.strip()
