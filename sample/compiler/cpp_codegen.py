@@ -324,7 +324,23 @@ class Function:
             arg_text = ", ".join([str (a.type) +" "+ str(a) for a in self.arguments])
 
         text += f"{self.return_type} {self.name}({arg_text})\n"
-        text += "{\n" + f"{self.entry_block}"  + footer + "}"
+
+        text += "{\n"
+
+        def indent_cpp(code):
+            code = code.strip()
+            return CPP_INDENT + code.replace('\n', '\n' + CPP_INDENT)
+
+        if self.is_main:
+            text += CPP_INDENT + "try\n" + CPP_INDENT +"{\n"
+            entry_block = str(self.entry_block)
+            text += f"{CPP_INDENT + indent_cpp(entry_block)}\n"
+            text += CPP_INDENT + "}\n" + CPP_INDENT + "catch(int)\n" + CPP_INDENT + "{\n" + CPP_INDENT*2 + "return 1;\n" + CPP_INDENT +"}\n"
+        else:
+            text += f"{self.entry_block}\n"
+        
+        text += footer + "}"
+
         return text
 
 
@@ -437,6 +453,7 @@ class Module:
     def __str__(self):
         text = "//" +  self.name + "\n"
         text += "#include <stdio.h>\n\n"
-        for name, f in self.functions.items():
-            text += str(f) + "\n\n"
-        return text
+        # ~ for name, f in self.functions.items():
+            # ~ text += str(f) + "\n\n"
+        text += "\n\n".join([str(f) for name, f in self.functions.items()])
+        return text.strip()
