@@ -45,9 +45,10 @@ class CppScope:
 
     def add_var_to_back(self, var):
         self.vars.append(var)
-        
+
     def get_vars_copy(self):
         return copy(self.vars)
+
 
 class Type:
 
@@ -65,6 +66,21 @@ class IntegerType(Type):
 
     def __str__(self):
         return "int"
+
+
+class RealType(Type):
+
+    def __init__(self, bit_depth = 64):
+        self.bit_depth = bit_depth
+
+    def default(self):
+        return 0
+
+    def __str__(self):
+        if self.bit_depth == 32:
+            return "float"
+        if self.bit_depth == 64:
+            return "double"
 
 
 class BooleanType(Type):
@@ -218,16 +234,16 @@ class WhileLoop(Expression):
         self.pre_cond = Block(indent_level + 1, name = "precondition")
         self.body = Block(indent_level + 1, name = "body")
         self.reduction = Block(indent_level + 1, name = "reduction")
-    
+
     def get_pre_cond_builder(self):
         return Builder(self.pre_cond)
-    
+
     def get_body_builder(self):
         return Builder(self.body)
-    
+
     def get_reduction_builder(self):
         return Builder(self.reduction)
-    
+
     def __str__(self):
         ind = self.indent_level * CPP_INDENT
         cond_code = self.pre_cond.inits[0].init_code
@@ -282,6 +298,7 @@ class Function:
                 argument = Variable (name = name,type_ =  type_)
                 self.arguments.append(argument)
         else:
+            self.return_type = IntegerType(32)
             self.arguments = []
 
     def get_entry_block(self):
@@ -299,7 +316,7 @@ class Function:
     def __str__(self):
         text = ""
         footer = ""
-            
+
         if self.is_main:
             arg_text = "int argc, char **argv"
             footer = CPP_INDENT + "return 0;\n"
@@ -328,19 +345,19 @@ class Block:
         self.inits.append(identifier)
 
     def __str__(self):
-        
+
         label = "" if self.name == None else CPP_INDENT * self.indent_level + f"// {self.name}:"  + "\n"
-        
+
         inits = "".join(  CPP_INDENT * self.indent_level +
                             str(s.type) + " "  +
                             str(s.name) +
                             ((" = " + str(s.init_code)) if s.init_code not in ["", None] else "") +
                             ";\n"
                             for s in self.inits)
-        
+
         body = "\n".join( CPP_INDENT * self.indent_level +
                             str(s) + (";" if type(s) not in [If, WhileLoop] else "") for s in self.statements)
-        
+
         return label + inits + body + "\n"
 
     def add_ret(self, object_):

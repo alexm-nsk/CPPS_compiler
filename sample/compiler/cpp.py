@@ -51,12 +51,14 @@ def create_cpp_module(functions, name):
     module = Module(name)
 
     for f in functions:
-        module.add_function (f.emit_cpp())
+        for cpp_function in f.emit_cpp():
+            module.add_function (cpp_function)
 
     return module
 
 
-# TODO call print in main
+def make_cpp_main_function():
+    pass
 
 
 def export_function_to_cpp(node, scope):
@@ -67,24 +69,35 @@ def export_function_to_cpp(node, scope):
         arg = (a, sisal_to_cpp_type(node.in_ports[n].type))
         args.append(arg)
 
+    ret_type = sisal_to_cpp_type(node.out_ports[0].type)
+
     is_main = (node.function_name == "main")
 
-    ret_type = sisal_to_cpp_type(node.out_ports[0].type)
-    this_function = Function(node.function_name, ret_type, args, main = is_main)
+    # rename "main"-function to "sisal_main" and create a C++ - main:
+    if is_main:
+        node.function_name = "sisal_main"
 
+    this_function = Function(node.function_name, ret_type, args)#, main = is_main)
     functions[node.function_name] = this_function
+    
+    # define code builder object for C++-main here so we can use it in the return value
+    # whether or not this is main (see return in this function)
+    cpp_main = None 
+
+    if is_main:
+        cpp_main = Function("main", None, [], main = is_main)
+        main_builder = Builder(cpp_main.get_entry_block())
+        sisal_main_result = main_builder.call(this_function, [main_builder.constant(10)])
+        main_builder.printf( sisal_main_result )
+        functions["main"] = cpp_main
 
     builder = Builder(this_function.get_entry_block())
     scope = CppScope(this_function.get_arguments(), builder)
 
-    if not is_main:
-        for child_node, edge in node.get_result_nodes()[:1]: # do only one for now
-            scope.builder.ret( child_node.emit_cpp(scope) )
-    else:
-        for child_node, edge in node.get_result_nodes()[:1]: # do only one for now
-            scope.builder.printf( child_node.emit_cpp(scope) )
+    for child_node, edge in node.get_result_nodes()[:1]: # do only one for now
+        scope.builder.ret( child_node.emit_cpp(scope) )
 
-    return this_function
+    return [this_function] + ([cpp_main] if cpp_main else [])
 
 
 def export_literal_to_cpp(node, scope):
@@ -129,8 +142,8 @@ def export_functioncall_to_cpp(node, scope):
     for (arg_node, edge) in input_nodes:
         index = edge.to_index
         args[index] = resolve(edge, scope)
-
-    result = scope.builder.call(functions[node.callee], args)
+            # Here we replace callee with sisal main if we call main (because main is now a C++ "int main(etc...")
+    result = scope.builder.call(functions["sisal_main" if node.callee == "main" else "main"], args)
     return result
 
 
@@ -202,7 +215,8 @@ def export_returns_to_cpp(node, scope):
 def export_loopexpression_to_cpp(node, scope):
     # TODO make two blocks for body and reduction and put them back to back inside while block
     # TODO get type from outport:
-    result = scope.builder.define(IntegerType(32), name = "while_result",  value = 0)
+    # TODO make use of "results" in the nodes
+    result = scope.builder.define(node.out_ports[0].type.emit_cpp(), name = "while_result",  value = 0)
     # initialize variables from init-node and put them in new scope (at the beginning of the list)
     # the variables we introduce in this loop:
 

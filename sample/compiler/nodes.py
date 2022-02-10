@@ -167,7 +167,7 @@ def parse_json_fields(self, node):
 
     # Loop:
 
-    if ("results" in node ):      self.results       = get_params(node["results"])
+    if ("results" in node ): self.results = get_params(node["results"])
 
     for name in ["init", "preCondition", "body", "reduction"]:
         # will replace names like "preCondition" with names like "pre_condition"
@@ -181,8 +181,7 @@ class Type:
 
     def __init__(self, location, descr):
         self.location = location
-        self.descr     = descr
-        #print ("type created")
+        self.descr    = descr
 
     def __repr__(self):
         return str(self.__dict__)
@@ -196,9 +195,13 @@ class Type:
 
     def emit_cpp(self):
         type_map = {
-            "integer" : IntegerType(32)
+            "integer" : IntegerType(32),
+            "real" : RealType(32),
         }
         # TODO derive type from it's description
+        if not self.descr in type_map:
+            raise Exception(f"type {self.descr} is unsupported!")
+
         return type_map[self.descr]
 
     def __str__(self):
