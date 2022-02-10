@@ -337,7 +337,7 @@ class Function:
             text += f"{CPP_INDENT + indent_cpp(entry_block)}\n"
             text += CPP_INDENT + "}\n" + CPP_INDENT + "catch(int)\n" + CPP_INDENT + "{\n" + CPP_INDENT*2 + "return 1;\n" + CPP_INDENT +"}\n"
         else:
-            text += f"{self.entry_block}\n"
+            text += f"{self.entry_block}"
 
         text += footer + "}"
 
