@@ -173,10 +173,12 @@ class ArrayAccess(Expression):
         super().__init__(name)
         self.array_object = array_object
         self.index_object = index_object
-        self.init_code = "code!"
+        # must be an array:
+        self.type = array_object.type.element_type
+        self.init_code = f"{self.array_object}[{self.index_object}]"
     
-    def __str__(self):
-        return f"{self.array_object}[{self.index_object}]"
+    # ~ def __str__(self):
+        # ~ return f"{self.array_object}[{self.index_object}]"
 
 
 class Variable(Expression):
@@ -456,7 +458,8 @@ class Builder:
 
     def array_access(self, array_object, index_index):
         aa = ArrayAccess(array_object, index_index)
-        self.block.add_array_access(aa)
+        self.block.add_init(aa)
+        #self.block.add_array_access(aa)
         return aa
         
         
