@@ -215,8 +215,6 @@ def export_returns_to_cpp(node, scope):
 
 
 def export_loopexpression_to_cpp(node, scope):
-    # TODO make two blocks for body and reduction and put them back to back inside while block
-    # TODO get type from outport:
     # TODO make use of "results" in the nodes
     result = scope.builder.define(node.out_ports[0].type.emit_cpp(), name = "while_result",  value = 0)
     # initialize variables from init-node and put them in new scope (at the beginning of the list)
@@ -252,7 +250,12 @@ def export_loopexpression_to_cpp(node, scope):
     # process the reduction:
     reduction_builder = while_.get_reduction_builder()
     # TODO double the variables here
-    reduction_scope = CppScope(while_scope_vars, reduction_builder)
+    reduction_scope_vars = []
+    for v in new_vars:
+        for a in range(2):
+            reduction_scope_vars.append(v)
+    
+    reduction_scope = CppScope(reduction_scope_vars + scope.vars + [result], reduction_builder)
     node.reduction.emit_cpp(reduction_scope)
 
     return result
