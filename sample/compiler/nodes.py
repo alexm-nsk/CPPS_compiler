@@ -44,10 +44,7 @@ BRANCH_NAMES = ["Else", "ElseIf", "Then"]
 
 
 def get_type(type_object):
-    return Type(
-                    location = type_object["location"],
-                    descr     = type_object["name"]
-                )
+    return Type(type_object)
 
 
 def get_ports(ports):
@@ -179,9 +176,12 @@ def parse_json_fields(self, node):
 
 class Type:
 
-    def __init__(self, location, descr):
-        self.location = location
-        self.descr    = descr
+    def __init__(self, type_object):
+        self.location = type_object["location"]
+        if "name" in type_object:
+            self.descr = type_object["name"]
+        else: #presumably it has "element" otherwise
+            self.descr = Type(type_object["element"])
 
     def __repr__(self):
         return str(self.__dict__)
@@ -194,15 +194,20 @@ class Type:
         return type_map[self.descr]
 
     def emit_cpp(self):
-        type_map = {
-            "integer" : IntegerType(32),
-            "real" : RealType(32),
-        }
-        # TODO derive type from it's description
-        if not self.descr in type_map:
-            raise Exception(f"type {self.descr} is unsupported!")
+        
+        if type(self.descr) == Type:
+            return ArrayType(self.descr.emit_cpp())
+        else:
+            type_map = {
+                "integer" : IntegerType(32),
+                "real" : RealType(32),
+            }
 
-        return type_map[self.descr]
+            # TODO derive type from it's description
+            if not self.descr in type_map:
+                raise Exception(f"type {self.descr} is unsupported!")
+
+            return type_map[self.descr]
 
     def __str__(self):
         return self.descr
@@ -325,7 +330,7 @@ class Node:
         if func_name in globals():
             return globals() [ func_name ](self, cpp_scope)
         else:
-            raise Exception (f'compiling {class_name} not implemented')
+            raise Exception (f'compiling {class_name} to C++ not implemented (at {self.location})')
 
 
 class Condition(Node):

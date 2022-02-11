@@ -66,10 +66,10 @@ def export_function_to_cpp(node, scope):
     # turn function input arguments into c++ arguments
     args = []
     for n, a in enumerate(node.params):
-        arg = (a, sisal_to_cpp_type(node.in_ports[n].type))
+        arg = (a, node.in_ports[n].type.emit_cpp())
         args.append(arg)
 
-    ret_type = sisal_to_cpp_type(node.out_ports[0].type)
+    ret_type = node.out_ports[0].type.emit_cpp()
 
     is_main = (node.function_name == "main")
 
@@ -142,7 +142,8 @@ def export_functioncall_to_cpp(node, scope):
     for (arg_node, edge) in input_nodes:
         index = edge.to_index
         args[index] = resolve(edge, scope)
-            # Here we replace callee with sisal main if we call main (because main is now a C++ "int main(etc...")
+
+    # Here we replace callee with sisal main if we call main (because main is now a C++ "int main(etc...")
 
     result = scope.builder.call(functions["sisal_main" if node.callee == "main" else node.callee], args)
     return result
@@ -154,9 +155,9 @@ def export_if_to_cpp(node, scope):
     get_branch = lambda name: list(filter(lambda x: x.name == name, node.branches))[0]
 
     if_ = scope.builder.if_(cond)
-    # TODO get type from outport:
+
     type_ = node.out_ports[0].type.emit_cpp()
-    
+
     result = scope.builder.define(type_, name = "if_result")
 
     then = if_.get_then_builder()
@@ -175,7 +176,6 @@ def export_if_to_cpp(node, scope):
 def export_precondition_to_cpp(node, scope):
     # the node that puts out the condition value:
     result_node, result_edge = node.get_result_nodes() [0]
-    # ~ print( node.params )
     result_node.emit_cpp(scope)
 
 
@@ -257,3 +257,10 @@ def export_loopexpression_to_cpp(node, scope):
     node.reduction.emit_cpp(reduction_scope)
 
     return result
+
+
+def export_arrayaccess_to_cpp(node, scope):
+    (array_src, array_edge), (index_src, index_edge) = node.get_input_nodes()
+    # ~ print (resolve(array_edge, scope))
+    # ~ print (resolve(index_edge, scope))
+    return scope.builder.array_access(resolve(array_edge, scope), resolve(index_edge, scope))

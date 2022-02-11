@@ -56,6 +56,15 @@ class Type:
         pass
 
 
+class ArrayType(Type):
+
+    def __init__(self, element_type):
+        self.element_type = element_type
+
+    def __str__(self):
+        return f"{self.element_type}[]"
+        
+
 class IntegerType(Type):
 
     def __init__(self, bit_depth = 64):
@@ -110,18 +119,6 @@ class VoidType(Type):
         return "void"
 
 
-class Argument:
-
-    def __init__(self, name, type_, index):
-        print ("arg added")
-        self.name = name
-        self.type = type_
-        self.index = index
-
-    def __str__(self):
-        return f"{self.type} {self.name}"
-
-
 class Statement:
 
     def __init__(self):
@@ -168,6 +165,18 @@ class Expression():
 
     def __str__(self):
         return self.name
+
+
+class ArrayAccess(Expression):
+    
+    def __init__(self, array_object, index_object, name = None):
+        super().__init__(name)
+        self.array_object = array_object
+        self.index_object = index_object
+        self.init_code = "code!"
+    
+    def __str__(self):
+        return f"{self.array_object}[{self.index_object}]"
 
 
 class Variable(Expression):
@@ -332,10 +341,15 @@ class Function:
             return CPP_INDENT + code.replace('\n', '\n' + CPP_INDENT)
 
         if self.is_main:
+            # add a simple try-catch
             text += CPP_INDENT + "try\n" + CPP_INDENT +"{\n"
             entry_block = str(self.entry_block)
             text += f"{CPP_INDENT + indent_cpp(entry_block)}\n"
-            text += CPP_INDENT + "}\n" + CPP_INDENT + "catch(int)\n" + CPP_INDENT + "{\n" + CPP_INDENT*2 + "return 1;\n" + CPP_INDENT +"}\n"
+            text += CPP_INDENT + "}\n" +\
+                            CPP_INDENT + "catch(int)\n" + CPP_INDENT +\
+                            "{\n" + CPP_INDENT*2 +\
+                            "return 1;\n" + CPP_INDENT +\
+                            "}\n"
         else:
             text += f"{self.entry_block}"
 
@@ -391,6 +405,8 @@ class Block:
     def add_while_loop(self, wl):
         self.statements.append(wl)
 
+    def add_array_access(self, aa):
+        self.statements.append(aa)
 
 class Builder:
 
@@ -438,7 +454,12 @@ class Builder:
         self.block.add_assignment(assignment)
         return assignment
 
-
+    def array_access(self, array_object, index_index):
+        aa = ArrayAccess(array_object, index_index)
+        self.block.add_array_access(aa)
+        return aa
+        
+        
 class Module:
 
     def __init__(self, name):
