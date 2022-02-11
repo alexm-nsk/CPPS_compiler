@@ -144,7 +144,6 @@ def export_functioncall_to_cpp(node, scope):
         args[index] = resolve(edge, scope)
 
     # Here we replace callee with sisal main if we call main (because main is now a C++ "int main(etc...")
-
     result = scope.builder.call(functions["sisal_main" if node.callee == "main" else node.callee], args)
     return result
 

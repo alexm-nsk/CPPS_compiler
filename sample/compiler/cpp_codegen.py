@@ -62,7 +62,7 @@ class ArrayType(Type):
         self.element_type = element_type
 
     def __str__(self):
-        return f"{self.element_type}[]"
+        return f"vector<{self.element_type}>"
         
 
 class IntegerType(Type):
@@ -476,6 +476,8 @@ class Module:
 
     def __str__(self):
         text = "//" +  self.name + "\n"
-        text += "#include <stdio.h>\n\n"
+        text += "#include <stdio.h>\n"
+        text += "#include <vector>\n"
+        text += "using namespace std;\n\n"
         text += "\n\n".join([str(f) for name, f in self.functions.items()])
         return text.strip()
