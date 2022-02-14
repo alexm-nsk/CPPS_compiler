@@ -66,7 +66,7 @@ class ArrayType(Type):
 
     def __str__(self):
         return f"vector<{self.element_type}>"
-        
+
 
 class IntegerType(Type):
 
@@ -171,7 +171,7 @@ class Expression():
 
 
 class ArrayAccess(Expression):
-    
+
     def __init__(self, array_object, index_object, name = None):
         super().__init__(name)
         self.array_object = array_object
@@ -179,7 +179,7 @@ class ArrayAccess(Expression):
         # must be an array:
         self.type = array_object.type.element_type
         self.init_code = f"{self.array_object}[{self.index_object}]"
-    
+
     # ~ def __str__(self):
         # ~ return f"{self.array_object}[{self.index_object}]"
 
@@ -208,9 +208,16 @@ class Call(Expression):
     def __init__(self, function, args : "a list of c++ identifiers", name = None):
         super().__init__(name)
         self.function = function
-        self.args = args
+
         self.type = function.return_type
-        self.init_code = self.function.name + "(" + ",".join((str(s) for s in self.args)) + ")"
+
+        # TODO probably not the best way to do this:
+        if function.name == "sisal_main":
+            args = [v.name for v in function.arguments]
+            self.init_code = self.function.name + "(" + ",".join((str(s) for s in args)) + ")"
+        else:
+            self.args = args
+            self.init_code = self.function.name + "(" + ",".join((str(s) for s in self.args)) + ")"
 
 
 class If(Expression):
@@ -237,7 +244,9 @@ class If(Expression):
     def __str__(self):
         ind = self.indent_level * CPP_INDENT
         # "" used to contain \n:
-        return f"if({self.cond})\n" + ind +  "{\n" + str(self.then) +""+ ind +"}\n"+ ind +"else\n" + ind + "{\n" + str(self.else_) +""+ ind + "}"
+        return f"if({self.cond})\n" + ind +  "{\n" + str(self.then) +\
+                "" + ind +"}\n"+ ind +"else\n" + ind + "{\n" +\
+                str(self.else_) +""+ ind + "}"
 
 
 class WhileLoop(Expression):
@@ -297,7 +306,33 @@ class Binary(Expression):
         self.init_code = f"{str(self.left)} {self.operator} {str(self.right)}"
 
 
+def arg_loader():
+    pass
+
+
+json_pipe_loader = '''\
+// this code loads JSON input data from file
+// or pipe (depending on code generator configuration)
+Json::Value root;
+std::cin >> root;'''
+
+def init_arg_loader(args):
+    arg_init_code = ""
+    for a in args:
+        arg_init_code += f"{a.type} {a} = root[\"{a}\"].asInt();\n"
+
+    final = json_pipe_loader + "\n" + arg_init_code
+    return final
+
+
+def indent_cpp(code, steps = 1):
+    code = code.strip()
+    return CPP_INDENT * steps + code.replace('\n', '\n' + CPP_INDENT * steps)
+
+
 class Function:
+
+    functions = {}
 
     def __init__(self, name, return_type, arguments: "list of (name, type) - tuples", main = False):
         self.name        = name
@@ -306,6 +341,7 @@ class Function:
         self.statements  = []
         self.entry_block = Block(name = "entry")
         self.is_main     = main
+        Function.functions[name] = self
 
         if not main:
             for index, (name, type_) in enumerate(arguments):
@@ -341,13 +377,14 @@ class Function:
 
         text += "{\n"
 
-        def indent_cpp(code):
-            code = code.strip()
-            return CPP_INDENT + code.replace('\n', '\n' + CPP_INDENT)
-
         if self.is_main:
             # add a simple try-catch
             text += CPP_INDENT + "try\n" + CPP_INDENT +"{\n"
+
+            #add code that loads arguments
+            args =  Function.functions["sisal_main"].arguments
+            text += indent_cpp(init_arg_loader(args), 2) + "\n"
+
             entry_block = str(self.entry_block)
             text += f"{CPP_INDENT + indent_cpp(entry_block)}\n"
             text += CPP_INDENT + "}\n" +\
@@ -465,8 +502,8 @@ class Builder:
         self.block.add_init(aa)
         #self.block.add_array_access(aa)
         return aa
-        
-        
+
+
 class Module:
 
     def __init__(self, name):
@@ -482,6 +519,7 @@ class Module:
         text = "//" +  self.name + "\n"
         text += "#include <stdio.h>\n"
         text += "#include <vector>\n"
+        text += "#include <json/json.h>// uses jsoncpp library\n"
         text += "using namespace std;\n\n"
         text += "\n\n".join([str(f) for name, f in self.functions.items()])
         return text.strip()
