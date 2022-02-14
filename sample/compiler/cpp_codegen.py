@@ -29,8 +29,11 @@
 # TODO make sure builders are alwais initialized once
 # TODO separate scope result variable?
 
-CPP_INDENT = " " * 4
+CPP_INDENT      = " " * 4
 REDUCTION_FIRST = True
+OPTIMIZE_CPP    = True
+
+from compiler.cpp_opt import *
 
 from copy import copy
 
@@ -356,7 +359,8 @@ class Function:
             text += f"{self.entry_block}"
 
         text += footer + "}"
-
+        if OPTIMIZE_CPP:
+            return post_opt(text)
         return text
 
 
