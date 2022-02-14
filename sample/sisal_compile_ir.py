@@ -46,7 +46,10 @@ def main(args):
             module_name = re.sub("\..*", ".ll", module_name)
 
             ir_data = json.loads(file_contents)
-            compile_to_cpp(ir_data)
+            
+            module_name = re.search("([a-zA-Z_0-9.]*)\.json",input_file_name).group(1)
+            
+            compile_to_cpp(ir_data, module_name)
 
         except Exception as e:
             if "--debug" in args:
