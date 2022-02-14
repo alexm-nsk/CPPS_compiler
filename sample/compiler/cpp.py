@@ -148,6 +148,7 @@ def export_functioncall_to_cpp(node, scope):
         args[index] = resolve(edge, scope)
 
     # Here we replace callee with sisal main if we call main (because main is now a C++ "int main(etc...")
+
     result = scope.builder.call(functions["sisal_main" if node.callee == "main" else node.callee], args)
     return result
 
@@ -258,7 +259,7 @@ def export_loopexpression_to_cpp(node, scope):
     for v in new_vars:
         for a in range(2):
             reduction_scope_vars.append(v)
-    
+
     reduction_scope = CppScope(reduction_scope_vars + scope.vars + [result], reduction_builder)
     node.reduction.emit_cpp(reduction_scope)
 

@@ -28,9 +28,10 @@
 # TODO make sure builders are always initialized once
 # TODO separate scope result variable?
 
-CPP_INDENT      = " " * 4
-REDUCTION_FIRST = True
-OPTIMIZE_CPP    = False
+CPP_INDENT         = " " * 4
+REDUCTION_FIRST    = True
+OPTIMIZE_CPP       = False
+MAIN_FUNCTION_NAME = "sisal_main"
 
 from compiler.cpp_opt import *
 
@@ -392,16 +393,16 @@ class Function:
             text += CPP_INDENT + "try\n" + CPP_INDENT +"{\n"
 
             #add code that loads arguments
-            args =  Function.functions["sisal_main"].arguments
+            args =  Function.functions[MAIN_FUNCTION_NAME].arguments
             text += indent_cpp(init_arg_loader(args), 2) + "\n"
 
             entry_block = str(self.entry_block)
             text += f"{CPP_INDENT + indent_cpp(entry_block)}\n"
             text += CPP_INDENT + "}\n" +\
-                            CPP_INDENT + "catch(int)\n" + CPP_INDENT +\
-                            "{\n" + CPP_INDENT*2 +\
-                            "return 1;\n" + CPP_INDENT +\
-                            "}\n"
+                    CPP_INDENT + "catch(int)\n" + CPP_INDENT +\
+                    "{\n" + CPP_INDENT*2 +\
+                        "return 1;\n" + CPP_INDENT +\
+                    "}\n"
         else:
             text += f"{self.entry_block}"
 
@@ -461,6 +462,7 @@ class Block:
     def add_array_access(self, aa):
         self.statements.append(aa)
 
+
 class Builder:
 
     def __init__(self, block):
@@ -510,7 +512,6 @@ class Builder:
     def array_access(self, array_object, index_index):
         aa = ArrayAccess(array_object, index_index)
         self.block.add_init(aa)
-        #self.block.add_array_access(aa)
         return aa
 
 
