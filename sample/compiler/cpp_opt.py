@@ -8,10 +8,10 @@ init_expr       = lambda t, n: f"\n\s*({t})\s+({n})\s*=\s*(.*?);"
 assignment_expr = lambda n: f"({n})\s*=\s*(.*?);"
 return_expr     = f"\n\s*return ({id_re});"
 
+
 def opt_single_uses(code):
 
-    if code.startswith("int main"):
-        return code
+    if code.startswith("int main"): return code
 
     assignments = re.finditer(init_expr(id_re, id_re), code, re.DOTALL)
 

@@ -24,14 +24,13 @@
 
 # C++ code generation module, inspired by llvmlite
 
-# TODO make sure names dont overlap when you give names to new identifiers
 # TODO make default values for types
-# TODO make sure builders are alwais initialized once
+# TODO make sure builders are always initialized once
 # TODO separate scope result variable?
 
 CPP_INDENT      = " " * 4
 REDUCTION_FIRST = True
-OPTIMIZE_CPP    = True
+OPTIMIZE_CPP    = False
 
 from compiler.cpp_opt import *
 
@@ -152,8 +151,13 @@ class Return(Statement):
 
 class Expression():
 
+    # for id1, id2, id3... identifiers
     num_identifiers = 0
 
+    # for repated named identifiers like if_result, if_result1... (we store number for each name),
+    # see __init__ for details
+    names = {}
+    
     def get_new_name(self):
         if (type(self)==Constant):
             return "const"
@@ -164,7 +168,12 @@ class Expression():
         if not name:
             self.name = self.get_new_name()
         else:
-            self.name = name
+            if name in Expression.names:
+                Expression.names[name] += 1
+                self.name = name + Expression.names[name]
+            else:                
+                Expression.names[name] = 1
+                self.name = name
 
     def __str__(self):
         return self.name
