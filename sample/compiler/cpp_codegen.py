@@ -168,12 +168,13 @@ class Expression():
         if not name:
             self.name = self.get_new_name()
         else:
-            if name in Expression.names:
-                Expression.names[name] += 1
-                self.name = name + Expression.names[name]
-            else:                
-                Expression.names[name] = 1
-                self.name = name
+            # ~ if name in Expression.names:
+                # ~ Expression.names[name] += 1
+                # ~ self.name = name + str(Expression.names[name])
+            # ~ else:                
+                # ~ Expression.names[name] = 1
+                # ~ self.name = name
+            self.name = name
 
     def __str__(self):
         return self.name
