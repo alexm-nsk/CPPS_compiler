@@ -10,6 +10,9 @@ return_expr     = f"\n\s*return ({id_re});"
 
 def opt_single_uses(code):
 
+    if code.startswith("int main"):
+        return code
+
     assignments = re.finditer(init_expr(id_re, id_re), code, re.DOTALL)
 
     inits_to_remove = []
@@ -34,6 +37,7 @@ def opt_single_uses(code):
 
 
 def opt_retvals(code):
+
     # should be just one "return":
 
     return_ = list(re.finditer(return_expr, code))
@@ -56,7 +60,7 @@ def opt_retvals(code):
     return code
 
 
-def post_opt(code, pass_ = 1):
+def post_opt(code, pass_ = 0):
 
     code = opt_single_uses(code)
 

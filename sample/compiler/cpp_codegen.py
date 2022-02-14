@@ -519,6 +519,8 @@ class Module:
         text = "//" +  self.name + "\n"
         text += "#include <stdio.h>\n"
         text += "#include <vector>\n"
+        text += "#include <iostream>\n"
+        text += "#include <fstream>\n"
         text += "#include <json/json.h>// uses jsoncpp library\n"
         text += "using namespace std;\n\n"
         text += "\n\n".join([str(f) for name, f in self.functions.items()])
