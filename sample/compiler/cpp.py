@@ -51,6 +51,8 @@ def create_cpp_module(functions, name):
     module = Module(name)
 
     for f in functions:
+        # cpp_function is a function object from C++ code generator
+        # it can be converted to a string C++ src. code using the standardized "str" method
         for cpp_function in f.emit_cpp():
             module.add_function (cpp_function)
 
