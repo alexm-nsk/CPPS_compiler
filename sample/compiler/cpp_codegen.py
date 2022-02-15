@@ -30,7 +30,7 @@
 
 CPP_INDENT         = " " * 4
 REDUCTION_FIRST    = True
-OPTIMIZE_CPP       = False
+OPTIMIZE_CPP       = True
 MAIN_FUNCTION_NAME = "sisal_main"
 
 from compiler.cpp_opt import *
@@ -327,10 +327,20 @@ json_pipe_loader = '''\
 Json::Value root;
 std::cin >> root;'''
 
+def unpack_variable(a):
+    if type(a.type) == ArrayType:
+        init_code =  f"{a.type} {a};\n"
+        init_code += f"for ( unsigned int index = 0; index < root[\"{a}\"].size(); ++index )\n"
+        init_code += CPP_INDENT + f"{a}.push_back(root[\"{a}\"][index].asInt());\n"
+        
+        return init_code
+    elif type(a.type) == IntegerType:
+        return f"{a.type} {a} = root[\"{a}\"].asInt();\n"
+
 def init_arg_loader(args):
     arg_init_code = ""
     for a in args:
-        arg_init_code += f"{a.type} {a} = root[\"{a}\"].asInt();\n"
+        arg_init_code += unpack_variable(a)
 
     final = json_pipe_loader + "\n" + arg_init_code
     return final
@@ -388,6 +398,8 @@ class Function:
 
         text += "{\n"
 
+        # TODO move the whole thing out to cpp.py and do it using explicit C++ inserts
+        # this should make name collision prevention code also work
         if self.is_main:
             # add a simple try-catch
             text += CPP_INDENT + "try\n" + CPP_INDENT +"{\n"

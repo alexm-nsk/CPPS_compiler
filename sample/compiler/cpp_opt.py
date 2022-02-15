@@ -60,7 +60,7 @@ def opt_retvals(code):
     return code
 
 
-def post_opt(code, pass_ = 0):
+def post_opt(code, pass_ = 1):
 
     code = opt_single_uses(code)
 
