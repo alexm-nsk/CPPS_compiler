@@ -30,7 +30,7 @@
 
 CPP_INDENT         = " " * 4
 REDUCTION_FIRST    = True
-OPTIMIZE_CPP       = True
+OPTIMIZE_CPP       = False
 MAIN_FUNCTION_NAME = "sisal_main"
 
 from compiler.cpp_opt import *
@@ -77,7 +77,10 @@ class IntegerType(Type):
         return 0
 
     def __str__(self):
-        return "int"
+        if self.bit_depth == 32:
+            return "int"
+        if self.bit_depth == 64:
+            return "long long int"
 
 
 class RealType(Type):
@@ -158,7 +161,7 @@ class Expression():
     # for repated named identifiers like if_result, if_result1... (we store number for each name),
     # see __init__ for details
     names = {}
-    
+
     def get_new_name(self):
         if (type(self)==Constant):
             return "const"
@@ -172,7 +175,7 @@ class Expression():
             # ~ if name in Expression.names:
                 # ~ Expression.names[name] += 1
                 # ~ self.name = name + str(Expression.names[name])
-            # ~ else:                
+            # ~ else:
                 # ~ Expression.names[name] = 1
                 # ~ self.name = name
             self.name = name
@@ -223,7 +226,7 @@ class Call(Expression):
         self.type = function.return_type
 
         # TODO probably not the best way to do this:
-        if function.name == "sisal_main":
+        if function.name == MAIN_FUNCTION_NAME:
             args = [v.name for v in function.arguments]
             self.init_code = self.function.name + "(" + ",".join((str(s) for s in args)) + ")"
         else:
@@ -332,7 +335,7 @@ def unpack_variable(a):
         init_code =  f"{a.type} {a};\n"
         init_code += f"for ( unsigned int index = 0; index < root[\"{a}\"].size(); ++index )\n"
         init_code += CPP_INDENT + f"{a}.push_back(root[\"{a}\"][index].asInt());\n"
-        
+
         return init_code
     elif type(a.type) == IntegerType:
         return f"{a.type} {a} = root[\"{a}\"].asInt();\n"
