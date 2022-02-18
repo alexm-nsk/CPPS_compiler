@@ -55,8 +55,13 @@ class CppScope:
 
 class Type:
 
+    indices = ["i", "j", "k", "l", "m", "n", "o", "p", "r", "s"]
+
     def __init__(self):
         pass
+
+    def print_code(self):
+        return "this is a base class for type"
 
 
 class ArrayType(Type):
@@ -66,6 +71,24 @@ class ArrayType(Type):
 
     def __str__(self):
         return f"vector<{self.element_type}>"
+
+
+    # ~ def get_index(indices):
+        # ~ if indices == []:
+            # ~ return self.indices
+
+    # indices is ArrayType.indices with some items removed (so we don't have name collisions)
+    def print_code(self, name, indices = Type.indices):
+        new_indices = copy(indices)
+        if len(indices) > 0:
+            index = new_indices[0]
+            del new_indices[0]
+        else:
+            index = "i" + "1" #?
+# TODO: check if it's an array and remove new_indices if it isn't\
+        return f"for(unsigned int {index} = 0; {index} < {name}[{index}]; ++{index})" + "{\n" + \
+               "\n" + self.element_type.print_code(name, new_indices) +\
+               "}"
 
 
 class IntegerType(Type):
@@ -82,6 +105,9 @@ class IntegerType(Type):
         if self.bit_depth == 64:
             return "long long int"
 
+    def print_code(self, name = "", new_indices = None):
+        return f"printf(%d, {name});"
+
 
 class RealType(Type):
 
@@ -96,6 +122,9 @@ class RealType(Type):
             return "float"
         if self.bit_depth == 64:
             return "double"
+
+    def print_code(self, name = "", new_indices = None):
+        return f"printf(%f, {name});"
 
 
 class BooleanType(Type):
@@ -320,15 +349,12 @@ class Binary(Expression):
         self.init_code = f"{str(self.left)} {self.operator} {str(self.right)}"
 
 
-def arg_loader():
-    pass
-
-
 json_pipe_loader = '''\
 // this code loads JSON input data from file
 // or pipe (depending on code generator configuration)
 Json::Value root;
 std::cin >> root;'''
+
 
 def unpack_variable(a):
     if type(a.type) == ArrayType:
@@ -337,8 +363,10 @@ def unpack_variable(a):
         init_code += CPP_INDENT + f"{a}.push_back(root[\"{a}\"][index].asInt());\n"
 
         return init_code
+
     elif type(a.type) == IntegerType:
         return f"{a.type} {a} = root[\"{a}\"].asInt();\n"
+
 
 def init_arg_loader(args):
     arg_init_code = ""

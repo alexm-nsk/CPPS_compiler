@@ -37,7 +37,7 @@ def resolve(edge, scope):
     from_node = edge.get_from_node()
     to_node   = edge.get_to_node()
 
-    if to_node.is_node_parent(edge.from_):
+    if to_node.is_node_parent(edge.from_) or from_node == to_node:
         return scope.vars[edge.from_index]
     else:
         return from_node.emit_cpp(scope)
@@ -98,8 +98,12 @@ def export_function_to_cpp(node, scope):
     builder = Builder(this_function.get_entry_block())
     scope = CppScope(this_function.get_arguments(), builder)
 
-    for child_node, edge in node.get_result_nodes()[:1]: # do only one for now
-        scope.builder.ret( child_node.emit_cpp(scope) )
+    # ~ for child_node, edge in node.get_result_nodes()[:1]: # do only one for now
+        # ~ scope.builder.ret( child_node.emit_cpp(scope) )
+
+    for edge in node.get_input_edges()[:1]: # do only one for now
+        # ~ print (edge)
+        scope.builder.ret( resolve(edge, scope) )
 
     return [this_function] + ([cpp_main] if cpp_main else [])
 
