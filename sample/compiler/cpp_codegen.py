@@ -86,9 +86,9 @@ class ArrayType(Type):
         else:
             index = "i" + "1" #?
 # TODO: check if it's an array and remove new_indices if it isn't\
-        return f"for(unsigned int {index} = 0; {index} < {name}[{index}]; ++{index})" + "{\n" + \
-               "\n" + self.element_type.print_code(name, new_indices) +\
-               "}"
+        return f"for(unsigned int {index} = 0; {index} < {name}[{index}].size(); ++{index})\n" + "{\n" + CPP_INDENT +  \
+                self.element_type.print_code(name, new_indices) +\
+               "\n}"
 
 
 class IntegerType(Type):
@@ -157,6 +157,7 @@ class VoidType(Type):
 class Statement:
 
     def __init__(self):
+        self.no_semicolon = False
         return 0
 
     def __str__(self):
@@ -166,6 +167,7 @@ class Statement:
 class Assignment(Statement):
 
     def __init__(self, var, value):
+        super().__init__()
         self.var = var
         self.value = value
 
@@ -176,6 +178,7 @@ class Assignment(Statement):
 class Return(Statement):
 
     def __init__(self, object_):
+        super().__init__()
         self.object = object_
 
     def __str__(self):
@@ -198,6 +201,9 @@ class Expression():
         return "id" + str(Expression.num_identifiers)
 
     def __init__(self, name):
+
+        self.no_semicolon = False
+
         if not name:
             self.name = self.get_new_name()
         else:
@@ -267,6 +273,7 @@ class If(Expression):
 
     def __init__(self, cond, indent_level, name = None):
         super().__init__(name)
+        self.no_semicolon = True
         self.cond  = cond
         self.then  = Block(indent_level + 1)
         self.else_ = Block(indent_level + 1)
@@ -296,6 +303,7 @@ class WhileLoop(Expression):
 
     def __init__(self, indent_level = 0, name = None):
         super().__init__(name)
+        self.no_semicolon = True
         self.indent_level = indent_level
         self.pre_cond = Block(indent_level + 1, name = "precondition")
         self.body = Block(indent_level + 1, name = "body")
@@ -329,6 +337,7 @@ class CppCode(Expression):
 
     def __init__(self, code, name = None):
         super().__init__(name)
+        self.no_semicolon = True
         self.code = code
 
     def __str__(self):
@@ -479,11 +488,14 @@ class Block:
                             str(s.type) + " "  +
                             str(s.name) +
                             ((" = " + str(s.init_code)) if s.init_code not in ["", None] else "") +
-                            ";\n"
+                            ("" if s.no_semicolon else ";") + "\n"
                             for s in self.inits)
 
+        # ~ body = "\n".join( CPP_INDENT * self.indent_level +
+                            # ~ str(s) + (";" if type(s) not in [If, WhileLoop] else "") for s in self.statements)
+
         body = "\n".join( CPP_INDENT * self.indent_level +
-                            str(s) + (";" if type(s) not in [If, WhileLoop] else "") for s in self.statements)
+                            str(s) + ("" if s.no_semicolon else ";") for s in self.statements)
 
         return label + inits + body + "\n"
 
@@ -556,6 +568,10 @@ class Builder:
         aa = ArrayAccess(array_object, index_index)
         self.block.add_init(aa)
         return aa
+
+    def cpp_code(self, code):
+        for c in code.split("\n"):
+            self.block.add_expression(CppCode(c))
 
 
 class Module:

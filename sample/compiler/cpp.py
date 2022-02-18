@@ -92,7 +92,10 @@ def export_function_to_cpp(node, scope):
         cpp_main = Function("main", None, [], main = is_main)
         main_builder = Builder(cpp_main.get_entry_block())
         sisal_main_result = main_builder.call(this_function, [main_builder.constant(10)])
-        main_builder.printf( sisal_main_result )
+        # ~ main_builder.printf( sisal_main_result )
+        code = sisal_main_result.type.print_code(sisal_main_result,[])
+        main_builder.cpp_code( code )
+        # ~ print (sisal_main_result.type.print_code(sisal_main_result,[]))
         functions["main"] = cpp_main
 
     builder = Builder(this_function.get_entry_block())
@@ -102,7 +105,6 @@ def export_function_to_cpp(node, scope):
         # ~ scope.builder.ret( child_node.emit_cpp(scope) )
 
     for edge in node.get_input_edges()[:1]: # do only one for now
-        # ~ print (edge)
         scope.builder.ret( resolve(edge, scope) )
 
     return [this_function] + ([cpp_main] if cpp_main else [])
