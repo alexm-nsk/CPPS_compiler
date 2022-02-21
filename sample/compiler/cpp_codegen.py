@@ -27,6 +27,7 @@
 # TODO make default values for types
 # TODO make sure builders are always initialized once
 # TODO separate scope result variable?
+# TODO move get_idntifier name to scope
 
 CPP_INDENT         = " " * 4
 REDUCTION_FIRST    = True
@@ -85,9 +86,13 @@ class ArrayType(Type):
             del new_indices[0]
         else:
             index = "i" + "1" #?
-# TODO: check if it's an array and remove new_indices if it isn't\
-        return f"for(unsigned int {index} = 0; {index} < {name}[{index}].size(); ++{index})\n" + "{\n" + CPP_INDENT +  \
-                self.element_type.print_code(name, new_indices) +\
+        # TODO: check if it's an array and remove new_indices if it isn't\
+        # ~ name = Expression.get_new_name()
+        return f"for(unsigned int {index} = 0; {index} < {name}.size(); ++{index})\n" + "{\n" + CPP_INDENT + \
+               self.element_type.print_code(str(name) + f"[{index}]", new_indices) + \
+               "\n" + CPP_INDENT + \
+               f"if({index} < {name}.size() - 1)\n" + \
+               CPP_INDENT * 2 + "printf(\", \");" + \
                "\n}"
 
 
@@ -106,7 +111,7 @@ class IntegerType(Type):
             return "long long int"
 
     def print_code(self, name = "", new_indices = None):
-        return f"printf(%d, {name});"
+        return f"printf(\"%d\", {name});"
 
 
 class RealType(Type):
