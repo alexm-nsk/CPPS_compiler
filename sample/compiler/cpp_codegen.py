@@ -56,8 +56,6 @@ class CppScope:
 
 class Type:
 
-    indices = ["i", "j", "k", "l", "m", "n", "o", "p", "r", "s"]
-
     def __init__(self):
         pass
 
@@ -73,27 +71,15 @@ class ArrayType(Type):
     def __str__(self):
         return f"vector<{self.element_type}>"
 
-
-    # ~ def get_index(indices):
-        # ~ if indices == []:
-            # ~ return self.indices
-
     # indices is ArrayType.indices with some items removed (so we don't have name collisions)
-    def print_code(self, name, indices = Type.indices):
-        new_indices = copy(indices)
-        if len(indices) > 0:
-            index = new_indices[0]
-            del new_indices[0]
-        else:
-            index = "i" + "1" #?
-        # TODO: check if it's an array and remove new_indices if it isn't\
-        # ~ name = Expression.get_new_name()
-        return f"for(unsigned int {index} = 0; {index} < {name}.size(); ++{index})\n" + "{\n" + CPP_INDENT + \
-               self.element_type.print_code(str(name) + f"[{index}]", new_indices) + \
-               "\n" + CPP_INDENT + \
-               f"if({index} < {name}.size() - 1)\n" + \
-               CPP_INDENT * 2 + "printf(\", \");" + \
-               "\n}"
+    def print_code(self, name):
+
+        return f"result[\"{name}\"] = iterable_to_json({name});"
+        
+        # ~ return f"for(unsigned int {index} = 0; {index} < {name}.size(); ++{index})\n" + \
+               # ~ "{\n" + CPP_INDENT + \
+                   # ~ self.element_type.print_code(str(name) + f"[{index}]") + \
+               # ~ "\n}"
 
 
 class IntegerType(Type):
@@ -110,8 +96,9 @@ class IntegerType(Type):
         if self.bit_depth == 64:
             return "long long int"
 
-    def print_code(self, name = "", new_indices = None):
-        return f"printf(\"%d\", {name});"
+    def print_code(self, name = ""):
+        return f"result[\"{name}\"] = {name};"
+        # ~ return f"printf(\"%d\", {name});"
 
 
 class RealType(Type):
@@ -369,13 +356,16 @@ json_pipe_loader = '''\
 Json::Value root;
 std::cin >> root;'''
 
+json_result_printer = '''\
+std::cout << result << "\\n";
+std::cout << std::endl;'''
 
 def unpack_variable(a):
+
     if type(a.type) == ArrayType:
         init_code =  f"{a.type} {a};\n"
         init_code += f"for ( unsigned int index = 0; index < root[\"{a}\"].size(); ++index )\n"
         init_code += CPP_INDENT + f"{a}.push_back(root[\"{a}\"][index].asInt());\n"
-
         return init_code
 
     elif type(a.type) == IntegerType:
@@ -383,6 +373,7 @@ def unpack_variable(a):
 
 
 def init_arg_loader(args):
+
     arg_init_code = ""
     for a in args:
         arg_init_code += unpack_variable(a)
@@ -391,7 +382,13 @@ def init_arg_loader(args):
     return final
 
 
+def init_result_printer():
+    result_printer_code = "Json::Value result;"
+    return result_printer_code
+
+
 def indent_cpp(code, steps = 1):
+
     code = code.strip()
     return CPP_INDENT * steps + code.replace('\n', '\n' + CPP_INDENT * steps)
 
@@ -452,9 +449,11 @@ class Function:
             #add code that loads arguments
             args =  Function.functions[MAIN_FUNCTION_NAME].arguments
             text += indent_cpp(init_arg_loader(args), 2) + "\n"
+            text += indent_cpp(init_result_printer(), 2) + "\n"
 
             entry_block = str(self.entry_block)
             text += f"{CPP_INDENT + indent_cpp(entry_block)}\n"
+            text += indent_cpp(json_result_printer, 2) + "\n"
             text += CPP_INDENT + "}\n" +\
                     CPP_INDENT + "catch(int)\n" + CPP_INDENT +\
                     "{\n" + CPP_INDENT*2 +\
