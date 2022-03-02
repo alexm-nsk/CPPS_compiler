@@ -91,7 +91,7 @@ def export_function_to_cpp(node, scope):
         # TODO put json loader here
         cpp_main = Function("main", None, [], main = is_main)
         main_builder = Builder(cpp_main.get_entry_block())
-        sisal_main_result = main_builder.call(this_function, [main_builder.constant(10)])
+        sisal_main_result = main_builder.call(this_function, [main_builder.constant(10)], name = "sisal_main_results")
         code = sisal_main_result.type.print_code(sisal_main_result)
         main_builder.cpp_code( code )
         functions["main"] = cpp_main

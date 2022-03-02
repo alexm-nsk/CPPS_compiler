@@ -577,6 +577,14 @@ class Builder:
         for c in code.split("\n"):
             self.block.add_expression(CppCode(c))
 
+iterable_to_json = '''\
+Json::Value iterable_to_json(Iterable const& cont) {
+    Json::Value v;
+    for (auto&& element: cont) {
+        v.append(element);
+     }
+    return v;
+}\n\n'''
 
 class Module:
 
@@ -597,5 +605,6 @@ class Module:
         text += "#include <fstream>\n"
         text += "#include <json/json.h>// uses jsoncpp library\n"
         text += "using namespace std;\n\n"
+        text += iterable_to_json
         text += "\n\n".join([str(f) for name, f in self.functions.items()])
         return text.strip()
