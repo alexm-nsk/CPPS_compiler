@@ -577,7 +577,17 @@ class Builder:
         for c in code.split("\n"):
             self.block.add_expression(CppCode(c))
 
-iterable_to_json = '''\
+header = '''\
+#include <stdio.h>
+#include <vector>
+#include <iostream>
+#include <fstream>
+#include <json/json.h>// uses jsoncpp library
+
+using namespace std;
+
+template <typename Iterable>
+
 Json::Value iterable_to_json(Iterable const& cont) {
     Json::Value v;
     for (auto&& element: cont) {
@@ -598,13 +608,7 @@ class Module:
         function.containing_module = self
 
     def __str__(self):
-        text = "//" +  self.name + "\n"
-        text += "#include <stdio.h>\n"
-        text += "#include <vector>\n"
-        text += "#include <iostream>\n"
-        text += "#include <fstream>\n"
-        text += "#include <json/json.h>// uses jsoncpp library\n"
-        text += "using namespace std;\n\n"
-        text += iterable_to_json
+        text = "//" +  self.name + "\n"        
+        text += header
         text += "\n\n".join([str(f) for name, f in self.functions.items()])
         return text.strip()

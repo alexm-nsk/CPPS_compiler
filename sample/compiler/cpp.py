@@ -202,7 +202,7 @@ def export_body_to_cpp(node, scope):
 def export_reduction_to_cpp(node, scope):
 
     index = node.get_input_edges()[0].from_index
-    # ~ value = scope.vars[index]
+
     value = resolve(node.get_input_edges()[1],scope)
 
     if node.operator == "value":
@@ -269,6 +269,4 @@ def export_loopexpression_to_cpp(node, scope):
 
 def export_arrayaccess_to_cpp(node, scope):
     (array_src, array_edge), (index_src, index_edge) = node.get_input_nodes()
-    # ~ print (resolve(array_edge, scope))
-    # ~ print (resolve(index_edge, scope))
     return scope.builder.array_access(resolve(array_edge, scope), resolve(index_edge, scope))
