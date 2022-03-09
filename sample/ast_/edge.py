@@ -23,19 +23,6 @@
 #  
 
 class Edge:
-    '''
-    from
-    to
-    from_index
-    to_index
-    
-    "index": 0,
-            "nodeId": "node9",
-            "type": {
-              "location": "",
-              "name": "integer"
-            }
-    '''
+
     def __init__(self):
         pass
-    

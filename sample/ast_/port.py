@@ -24,30 +24,6 @@
 
 from sisal_type.sisal_type import *
 
- #"inPorts": [
- #   {
- #    "nodeId": "node3",
- #    "type": {
- #     "location": "1:14-1:15",
- #     "element": {
- #      "location": "1:25-1:29",
- #      "name": "real"
- #     }
- #    },
- #    "index": 0
- #   }
- #  ],
- #  "outPorts": [
- #   {
- #    "nodeId": "node3",
- #    "type": {
- #     "location": "1:38-1:42",
- #     "name": "real"
- #    },
- #    "index": 0
- #   }
- #  ],
-
 
 class Port:
 
