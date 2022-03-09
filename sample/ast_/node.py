@@ -102,13 +102,9 @@ class If(Node):
         self.then_nodes = dict(id = Node.get_node_id(), nodes = self.then_nodes)
         self.else_nodes = dict(id = Node.get_node_id(), nodes = self.else_nodes)
 
+
 class Loop(Node):
-     # ~ while_ = visited_children[6]
-    # ~ return Loop( init      = visited_children[4],
-                 # ~ loop_test = while_[4],
-                 # ~ loop_body = while_[10],
-                 # ~ ret       = while_[14],
-                 # ~ location  = self.get_location(node))
+
     def __init__(self, *args, **kwargs):
        super().__init__(**kwargs, no_id = False)
        # sub_nodes will have their own IDs so we calculate them
@@ -117,7 +113,6 @@ class Loop(Node):
        self.body_id = Node.get_node_id()
        self.ret_id  = Node.get_node_id()
 
-    pass
 
 class Algebraic(Node):
 
@@ -138,8 +133,6 @@ class Literal(Node):
 
 class Statement(Node):
 
-    #def __init__(self, *args, **kwargs):
-     #   super().__init__(**kwargs, no_id = True)
     pass
 
 class Assignment(Statement):
