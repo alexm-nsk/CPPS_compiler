@@ -1,0 +1,7 @@
+function current( M : integer returns integer )
+  M + 1 - (1 + 2 )
+end function
+
+function Main(M:integer returns integer)
+    current(M)
+end function
