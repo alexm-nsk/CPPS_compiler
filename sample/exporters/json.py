@@ -521,15 +521,29 @@ def export_algebraic_to_json (node, parent_node, slot, current_scope):
                 nodes = operand.emit_json(current_scope, 0, current_scope)
                 return_nodes.extend(nodes["nodes"])
                 return_edges.extend(nodes["edges"])
+                output_id = nodes["final_edges"][0][0]["nodeId"]
+                # ~ print (f_edges)
                 type_ = nodes["nodes"][0]["outPorts"][0]["type"]["name"]
-                return dict(id = operand.node_id, slot = 0, type = type_, parameter = False)
+                return dict(id = output_id, slot = 0, type = type_, parameter = False)
+                # ~ return dict(id = operand.node_id, slot = 0, type = type_, parameter = False)
 
         # if we still have some splitting to do:
         else:
-            operator = chunk[1]
+            low_p  = ["+", "-", ">", ">=", "<="]
+            high_p = ["*", "/", "//"]
+            # find low priority operation first
 
-            left  = chunk[  : 1]
-            right = chunk[2 :  ]
+            split_point = 1
+
+            for n, op in enumerate(chunk):
+                if "operator" in op.__dict__ and op.operator in low_p:
+                    split_point = n
+                    break
+
+            operator = chunk[split_point]
+
+            left  = chunk[                : split_point]
+            right = chunk[split_point + 1 : ]
 
             op_json = operator.emit_json(parent_node, 0, current_scope)["nodes"]
             return_nodes.extend(op_json)
