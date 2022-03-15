@@ -32,6 +32,7 @@ from wsgiref.simple_server import make_server
 import json
 import subprocess
 import os
+import time
 
 from parser.parse_file import parse_file
 
@@ -41,6 +42,7 @@ def parse(input_text):
 
 
 def compile_sisal(code):
+    t = time.time()
     parsed = parse_file(code)
     formatted = json.dumps(
                         dict(
@@ -49,6 +51,7 @@ def compile_sisal(code):
                             ),
                             indent = 1)
     print (formatted)
+    print ("finished in ", round((time.time() - t),3))
     return formatted#.decode()
 
 

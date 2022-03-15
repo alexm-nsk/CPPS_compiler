@@ -370,18 +370,22 @@ class TreeVisitor(NodeVisitor):
 #-----------------------------------------------------------------------
 #
 #-----------------------------------------------------------------------
-
+grammar = None
+function_tree_visitor = None
 
 def parse_file(input_text):
+    
+    global grammar, function_tree_visitor
     Node.nodes = {}
     Node.node_counter = 0
     # get the absolute path of the main program script
     # (so we can get correct path of files we need to load)
     import os
     path = os.path.dirname(os.path.realpath(__file__))
-
-    grammar = Grammar(open(path+ "/function_grammar.ini", "r").read())
-    function_tree_visitor = TreeVisitor()
+    
+    if grammar == None:
+        grammar = Grammar(open(path+ "/function_grammar.ini", "r").read())
+        function_tree_visitor = TreeVisitor()
 
     function_matches = re.finditer("function.*?end function", input_text, re.DOTALL)
 
