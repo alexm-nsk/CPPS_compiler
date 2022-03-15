@@ -23,3 +23,79 @@
 #
 
 #---------------------------------------------------------------------------------------------
+
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+
+from wsgiref.simple_server import make_server
+import json
+import subprocess
+import os
+
+from parser.parse_file import parse_file
+
+
+def parse(input_text):
+    return parse_file(input_text)
+
+
+def compile_sisal(code):
+    parsed = parse_file(code)
+    formatted = json.dumps(
+                        dict(
+                             functions = [o.emit_json(None) for o in parsed],
+                             declarations = {}
+                            ),
+                            indent = 1)
+    print (formatted)
+    return formatted#.decode()
+
+
+def service(environment, responce):
+
+    body= ''
+    def resp(status, output):
+        headers =  [('Content-type','application/json; charset=utf-8' )]
+        responce(status, headers)
+        return  [output.encode()]
+
+    try:
+        length= int(environment.get('CONTENT_LENGTH', '0'))
+        if length>0:
+            body= environment['wsgi.input'].read(length)
+            data = json.loads(body, strict=False)
+            if(type(data["code"])!=list):
+                inputCode = [data["code"]]
+            else:
+                inputCode = data["code"]
+
+    except ValueError:
+        return resp("400 ERROR","error in request")
+
+    try:
+        outputCodes = []
+
+        print (str(len(inputCode)) + " modules received, compiling...")
+
+        for c in inputCode:
+               outputCodes.append(compile_sisal(c))
+
+        print("done")
+        return resp("200 OK",json.dumps(outputCodes))
+
+    except Exception as e:
+        print (str(e))
+        return resp("400 ERROR",json.dumps(["error compiling"]))
+
+
+def main(args):
+    server =make_server('', 12345, service)
+    print ("serving...")
+    server.serve_forever()
+    return 0
+
+
+if __name__ == '__main__':
+    import sys
+    sys.exit(main(sys.argv))

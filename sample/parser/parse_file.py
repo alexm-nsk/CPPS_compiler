@@ -373,7 +373,8 @@ class TreeVisitor(NodeVisitor):
 
 
 def parse_file(input_text):
-
+    Node.nodes = {}
+    Node.node_counter = 0
     # get the absolute path of the main program script
     # (so we can get correct path of files we need to load)
     import os
