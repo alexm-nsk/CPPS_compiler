@@ -50,7 +50,7 @@ def compile_sisal(code):
                              declarations = {}
                             ),
                             indent = 1)
-    print (formatted)
+    # ~ print (formatted)
     print ("finished in ", round((time.time() - t),3))
     return formatted#.decode()
 
@@ -64,8 +64,8 @@ def service(environment, responce):
         return  [output.encode()]
 
     try:
-        length= int(environment.get('CONTENT_LENGTH', '0'))
-        if length>0:
+        length = int(environment.get('CONTENT_LENGTH', '0'))
+        if length > 0:
             body= environment['wsgi.input'].read(length)
             data = json.loads(body, strict=False)
             if(type(data["code"])!=list):
@@ -77,12 +77,12 @@ def service(environment, responce):
         return resp("400 ERROR","error in request")
 
     try:
-        outputCodes = []
+        output_codes = []
 
         print (str(len(inputCode)) + " modules received, compiling...")
 
         for c in inputCode:
-               outputCodes.append(compile_sisal(c))
+               output_codes.append(compile_sisal(c))
 
         print("done")
         return resp("200 OK",json.dumps(outputCodes))

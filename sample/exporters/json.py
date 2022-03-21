@@ -230,6 +230,42 @@ def export_function_to_json(node, parent_node, slot = 0, current_scope = None):
 
     # it's a top node, so no need to return edges upstream
     return ret_val
+#---------------------------------------------------------------------------------------------
+
+
+def export_functionimport_to_json(node, parent_node, slot = 0, current_scope = None):
+
+    current_scope = node.node_id
+    ret_val = {}
+
+    for field, value in node.__dict__.items():
+        IR_name          = field_sub_table[field] if field in field_sub_table else field
+        
+        ret_val[IR_name] = value
+    
+    ret_val["params"]   = function_gen_params( node ) if node.params else None
+
+    ret_val["inPorts"]  = function_gen_in_ports ( node , node.node_id)
+    ret_val["outPorts"] = function_gen_out_ports( node , node.node_id)
+
+    ret_val.pop("ret_types")
+
+    # ~ # register this node:
+    # ~ json_nodes[node.node_id] = ret_val
+
+    # ~ ret_val["nodes"] = []
+    # ~ ret_val["edges"] = []
+
+    # ~ for n, child in enumerate(node.nodes):
+        # ~ json_child = child.emit_json( node.node_id, n, current_scope)
+
+        # ~ ret_val["nodes"].extend(json_child["nodes"])
+        # ~ ret_val["edges"] += json_child["edges"] + json_child["final_edges"]
+
+    # ~ json_nodes[node.node_id].update ( ret_val )
+
+    # it's a top node, so no need to return edges upstream
+    return ret_val
 
 
 #---------------------------------------------------------------------------------------------
@@ -407,7 +443,6 @@ def export_call_to_json (node, parent_node, slot, current_scope):
     for field, value in node.__dict__.items():
         IR_name          = field_sub_table[field] if field in field_sub_table else field
         ret_val[IR_name] = value
-
 
     called_function = ast_.node.Function.functions[function_name]
 

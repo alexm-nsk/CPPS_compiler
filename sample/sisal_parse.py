@@ -24,6 +24,11 @@
 
 import json
 
+import sys
+from IPython.core import ultratb
+# ~ sys.excepthook = ultratb.FormattedTB(mode='Verbose', color_scheme='Linux', call_pdb=False)
+sys.excepthook = ultratb.ColorTB()
+
 from parser.parse_file import parse_file
 
 def parse(input_text):

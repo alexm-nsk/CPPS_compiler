@@ -69,16 +69,16 @@ class TreeVisitor(NodeVisitor):
         start_row    = text[:node.start].count("\n") + 1 # line numbers have to start from "1"
         start_column = len (  (text[:node.start].split("\n"))[-1]  )
 
-        if start_row == 1: start_column += self.column_offset
+        # ~ if start_row == 1: start_column += self.column_offset
 
         end_row      = text[:node.end].count("\n") + 1
         end_column   = len (  (text[:node.end].split("\n"))[-1]  )
 
-        if end_row == 1: end_row += self.column_offset
+        # ~ if end_row == 1: end_row += self.column_offset
 
-        return "{}:{}-{}:{}".format(start_row + self.line_offset,
+        return "{}:{}-{}:{}".format(start_row, #+ self.line_offset,
                                     start_column,
-                                    end_row + self.line_offset,
+                                    end_row, # + self.line_offset,
                                     end_column)
 
     # rule: type          = ("array" _ "of" _ type ) / std_type
@@ -135,10 +135,23 @@ class TreeVisitor(NodeVisitor):
         args_groups = unpack_rec_list(visited_children)
         return args_groups
 
+    def visit_module (self, node, visited_children):
+        functions = []
+        for n,i in enumerate(visited_children):
+            # ~ print (n, i[0][1])
+            functions.append(i[0][1])
+
+        return functions
+
+    def visit_type_list(self, node, visited_children):
+
+        return unpack_rec_list(visited_children)
+
     # rule: function_retvals   = ("returns" _ type_list) / _
     def visit_function_retvals(self, node, visited_children):
         if (visited_children != [None]):
-            ret_types = unpack_rec_list(visited_children[0][2])
+            # ~ ret_types = unpack_rec_list(visited_children[0][2])
+            ret_types = visited_children[0][2]
             return ret_types
         else:
             return None
@@ -210,10 +223,40 @@ class TreeVisitor(NodeVisitor):
                         params        = visited_children[7] if visited_children[7] else [],
                         ret_types     = ret_types if ret_types else [VoidType()]
                       )
-
+        # ~ print (visited_children[7] if visited_children[7] else [],)
         function = Function(**params)
 
         return function
+
+
+    def visit_function_import(self, node, visited_children):
+
+        name         = visited_children[3].name
+        params_types = visited_children[7] if visited_children[7] else []
+        ret_types    = visited_children[9]
+
+        params = []
+
+        for index, type_ in enumerate(params_types):
+            # ~ print (p)
+            identifier = Identifier(name = "arg" + str(index), location = "parameters - not available")
+            params.append({
+                           "type" : type_,
+                           # ~ "vars" : [{"name": "arg" + str(index), "location": "parameters - not available"} ]
+                           "vars" : [identifier]
+                          })
+
+        print (params)
+        return FunctionImport(**dict(
+                                        name = "Import",
+                                        function_name = name,
+                                        params        = params,
+                                        ret_types     = ret_types,
+                                        location      = self.get_location(node),
+                                        nodes         = [],
+                                        edges         = []
+                                    )
+                             )
 
 
     #----------------------------------------------------
@@ -280,7 +323,7 @@ class TreeVisitor(NodeVisitor):
     def visit_old(self, node, visited_children):
         # ~ for n, c in enumerate(visited_children):
             # ~ print (n, ":", c)
-            
+
         return OldValue( name     = visited_children[2],
                          location = self.get_location(node))
 
@@ -370,19 +413,22 @@ class TreeVisitor(NodeVisitor):
 #-----------------------------------------------------------------------
 #
 #-----------------------------------------------------------------------
+
+# avoids reloading when used as service
 grammar = None
 function_tree_visitor = None
 
 def parse_file(input_text):
-    
-    global grammar, function_tree_visitor
     Node.nodes = {}
     Node.node_counter = 0
     # get the absolute path of the main program script
     # (so we can get correct path of files we need to load)
     import os
     path = os.path.dirname(os.path.realpath(__file__))
-    
+
+    # avoids reloading when used as service
+    global grammar, function_tree_visitor
+
     if grammar == None:
         grammar = Grammar(open(path+ "/function_grammar.ini", "r").read())
         function_tree_visitor = TreeVisitor()
@@ -393,9 +439,13 @@ def parse_file(input_text):
 
     parsed_functions = []
 
+    return function_tree_visitor.visit( grammar.parse(input_text) )
+    return
+
     for function_text in function_matches:
 
         text  = function_text.group(0)
+        # ~ print (text)
         start = function_text.start()
         end   = function_text.end()
 
@@ -444,7 +494,7 @@ def parse_file(input_text):
         IRs.append( parsed )
 
     # ~ return {"functions":IRs}
-    
+
     return IRs
 
 

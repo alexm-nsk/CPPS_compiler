@@ -81,10 +81,20 @@ class Function(Node):
         Function.functions[self.function_name] = self
 
     def emit_json(self, parent_node, slot = 0, current_scope = None):
-            return export_function_to_json(self, parent_node,slot, current_scope)
+            return export_function_to_json(self, parent_node, slot, current_scope)
 
     def emit_graphml(self, parent_node):
             return export_function_to_graphml(self, parent_node)
+
+
+class FunctionImport(Node):
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(**kwargs)
+        Function.functions[self.function_name] = self
+
+    def emit_json(self, parent_node, slot = 0, current_scope = None):
+            return export_functionimport_to_json(self, parent_node, slot, current_scope)
 
 
 class If(Node):
@@ -174,4 +184,3 @@ class Value(Reduction):
        super().__init__(**kwargs, no_id = False)
        # this is a placeholder for now
        self.true_literal = Literal(value = True, type = BooleanType(), location = "not applicable")
-    
