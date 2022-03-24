@@ -105,6 +105,48 @@ def export_function_to_cpp(node, scope):
     return [this_function] + ([cpp_main] if cpp_main else [])
 
 
+def export_functionimport_to_cpp(node, scope):
+
+    # turn function input arguments into c++ arguments
+    args = []
+    for n, a in enumerate(node.params):
+        arg = (a, node.in_ports[n].type.emit_cpp())
+        args.append(arg)
+
+    ret_type = node.out_ports[0].type.emit_cpp()
+
+    is_main = (node.function_name == "main")
+
+    # rename "main"-function to "sisal_main" and create a C++ - main:
+    if is_main:
+        node.function_name = "sisal_main"
+
+    this_function = Function(node.function_name, ret_type, args)#, main = is_main)
+    functions[node.function_name] = this_function
+
+    # define code builder object for C++-main here so we can use it in the return value
+    # whether or not this is main (see return in this function)
+    cpp_main = None
+
+    if is_main:
+        # args is like [('N', type), ('M', other_type)...]
+        # TODO put json loader here
+        cpp_main = Function("main", None, [], main = is_main)
+        main_builder = Builder(cpp_main.get_entry_block())
+        sisal_main_result = main_builder.call(this_function, [main_builder.constant(10)], name = "sisal_main_results")
+        code = sisal_main_result.type.print_code(sisal_main_result)
+        main_builder.cpp_code( code )
+        functions["main"] = cpp_main
+
+    builder = Builder(this_function.get_entry_block())
+    scope = CppScope(this_function.get_arguments(), builder)
+
+    for edge in node.get_input_edges()[:1]: # do only one for now
+        scope.builder.ret( resolve(edge, scope) )
+
+    return [this_function] + ([cpp_main] if cpp_main else [])
+
+
 def export_literal_to_cpp(node, scope):
     return scope.builder.constant(node.value)
 

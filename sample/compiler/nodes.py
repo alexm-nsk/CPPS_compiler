@@ -322,7 +322,7 @@ class Node:
             raise Exception (f'compiling {class_name} not implemented')
 
     def emit_cpp(self, cpp_scope = None):
-        if cpp_scope == None and type(self) != Function:
+        if cpp_scope == None and type(self) != Function and type(self) != FunctionImport:
             raise Exception(f"No scope provided for{self.name} when emitting llvm-code")
 
         class_name = self.__class__.__name__
@@ -346,6 +346,10 @@ class If(Node):
 
 
 class Function(Node):
+    pass
+
+
+class FunctionImport(Node):
     pass
 
 
@@ -400,6 +404,7 @@ class ArrayAccess(Node):
 
 CLASS_MAP = {
     "Lambda" : Function,
+    "Import" : FunctionImport,
     "If":If,
     "Else": Branch,
     "ElseIf": Branch,
