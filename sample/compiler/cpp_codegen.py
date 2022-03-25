@@ -116,7 +116,8 @@ class RealType(Type):
             return "double"
 
     def print_code(self, name = "", new_indices = None):
-        return f'printf("%f", {name});'
+        return f"result[\"{name}\"] = {name};"
+        # ~ return f'printf("%f", {name});'
 
 
 class BooleanType(Type):
