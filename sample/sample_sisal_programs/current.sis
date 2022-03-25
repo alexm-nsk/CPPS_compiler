@@ -4,6 +4,6 @@ function current( M : integer returns real )
   M*3 - (1 - (1 + 2 )) * cos(1)
 end function
 
-function main(M:integer returns integer)
+function main(M:integer returns real)
     current(M)
 end function
