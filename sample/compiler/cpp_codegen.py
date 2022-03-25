@@ -619,11 +619,11 @@ class Module:
         function.containing_module = self
 
     def add_header(self, header_name):
-        self.headers.append(f"include <{header_name}>")
+        self.headers.append(f"#include <{header_name}>")
 
     def __str__(self):
         text = "//" +  self.name + "\n"
         text += header
-        text += "\n\n".join([str(h) for h in self.headers])
+        text += "\n\n".join([str(h) for h in self.headers]) + "\n\n"
         text += "\n\n".join([str(f) for name, f in self.functions.items()])
         return text.strip()
