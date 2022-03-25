@@ -89,9 +89,10 @@ def export_function_to_cpp(node, scope):
     if is_main:
         # args is like [('N', type), ('M', other_type)...]
         # TODO put json loader here
-        cpp_main = Function("main", None, [], main = is_main)
+        cpp_main = Function("main", None, [], main = True)
         main_builder = Builder(cpp_main.get_entry_block())
-        sisal_main_result = main_builder.call(this_function, [main_builder.constant(10)], name = "sisal_main_results")
+                                                    # why does this work?..
+        sisal_main_result = main_builder.call(this_function, [], name = "sisal_main_results")
         code = sisal_main_result.type.print_code(sisal_main_result)
         main_builder.cpp_code( code )
         functions["main"] = cpp_main
@@ -141,14 +142,16 @@ def export_functionimport_to_cpp(node, scope):
     builder = Builder(this_function.get_entry_block())
     scope = CppScope(this_function.get_arguments(), builder)
 
-    for edge in node.get_input_edges()[:1]: # do only one for now
-        scope.builder.ret( resolve(edge, scope) )
-
-    return [this_function] + ([cpp_main] if cpp_main else [])
+    return ""  #[this_function] + ([cpp_main] if cpp_main else [])
 
 
 def export_literal_to_cpp(node, scope):
-    return scope.builder.constant(node.value)
+    # ~ print (node.out_ports[0].type)
+    # ~ print (type(node.out_ports[0].type))
+    # ~ if (type(node.out_ports[0].type) == IntegerType):
+        # ~ print("got integer")
+    literal_type = node.out_ports[0].type.emit_cpp()
+    return scope.builder.constant(node.value, literal_type)
 
 
 def export_binary_to_cpp(node, scope):

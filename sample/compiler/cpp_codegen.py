@@ -75,7 +75,7 @@ class ArrayType(Type):
     def print_code(self, name):
 
         return f"result[\"{name}\"] = iterable_to_json({name});"
-        
+
         # ~ return f"for(unsigned int {index} = 0; {index} < {name}.size(); ++{index})\n" + \
                # ~ "{\n" + CPP_INDENT + \
                    # ~ self.element_type.print_code(str(name) + f"[{index}]") + \
@@ -236,9 +236,14 @@ class Variable(Expression):
 
 class Constant(Expression):
 
-    def __init__(self, value, name = None):
+    def __init__(self, value, type_, name = None):
         super().__init__(name)
         self.value = value
+        # ~ if value==3:
+        if type(type_) == IntegerType:
+            self.type = IntegerType(32)
+        else:
+            self.type = RealType(32)
 
     def __str__(self):
         return str(self.value)
@@ -346,7 +351,12 @@ class Binary(Expression):
         if self.operator in ["<=", "<", ">", "==", ">="]:
             self.type = BooleanType()
         else:
-            self.type = IntegerType(32)
+            # ~ print (self.right.type, self.right)
+            if type(self.left.type) == RealType or type(self.right.type) == RealType:
+                self.type = RealType(32)
+            else:
+                self.type = IntegerType(32)
+
         self.init_code = f"{str(self.left)} {self.operator} {str(self.right)}"
 
 
@@ -554,8 +564,8 @@ class Builder:
         self.block.add_init(bin_)
         return bin_
 
-    def constant(self, value):
-        c = Constant(value)
+    def constant(self, value, type_):
+        c = Constant(value, type_)
         return c
 
     def while_(self):
@@ -608,7 +618,7 @@ class Module:
         function.containing_module = self
 
     def __str__(self):
-        text = "//" +  self.name + "\n"        
+        text = "//" +  self.name + "\n"
         text += header
         text += "\n\n".join([str(f) for name, f in self.functions.items()])
         return text.strip()
