@@ -194,7 +194,7 @@ class Type:
         return type_map[self.descr]
 
     def emit_cpp(self):
-        
+
         if type(self.descr) == Type:
             return ArrayType(self.descr.emit_cpp())
         else:

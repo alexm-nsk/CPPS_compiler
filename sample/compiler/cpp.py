@@ -103,7 +103,14 @@ def export_function_to_cpp(node, scope):
     for edge in node.get_input_edges()[:1]: # do only one for now
         scope.builder.ret( resolve(edge, scope) )
 
-    return [this_function] + ([cpp_main] if cpp_main else [])
+    return dict ( functions = [this_function] + ([cpp_main] if cpp_main else []),
+                  imports = [])
+
+
+names_to_header = {
+    "cos": "math.h",
+    "sin": "math.h"
+}
 
 
 def export_functionimport_to_cpp(node, scope):
@@ -142,7 +149,7 @@ def export_functionimport_to_cpp(node, scope):
     builder = Builder(this_function.get_entry_block())
     scope = CppScope(this_function.get_arguments(), builder)
 
-    return ""  #[this_function] + ([cpp_main] if cpp_main else [])
+    return dict( functions = [], imports = [names_to_header[node.function_name]] )
 
 
 def export_literal_to_cpp(node, scope):

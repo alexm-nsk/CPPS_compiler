@@ -33,9 +33,24 @@ def compile_to_llvm(json_data):
 
 
 def compile_to_cpp(json_data, name = "module"):
+    module = Module(name)
+
     functions = [parse_node (function) for function in json_data["functions"]]
-    module = create_cpp_module(functions, name)
-    module.add_header("math.h")
+
+    for f in functions:
+        # cpp_function is a function object from C++ code generator
+        # it can be converted to a string C++ src. code using the standardized "str" method
+        # f.emit_cpp() returns a list because one function can translate to several functions in C++
+        # like main produces "main" and "sisal_main"
+        cpp_data = f.emit_cpp()
+
+        for cpp_function in cpp_data["functions"]:
+            module.add_function (cpp_function)
+
+        for import_ in cpp_data["imports"]:
+            module.add_header(import_)
+
+    # ~ module = create_cpp_module(functions, name)
     print ( module )
 
 

@@ -375,6 +375,7 @@ def unpack_variable(a):
     if type(a.type) == ArrayType:
         init_code =  f"{a.type} {a};\n"
         init_code += f"for ( unsigned int index = 0; index < root[\"{a}\"].size(); ++index )\n"
+        # TODO it's asInt now, make it an arbitrary type!
         init_code += CPP_INDENT + f"{a}.push_back(root[\"{a}\"][index].asInt());\n"
         return init_code
 
@@ -615,15 +616,18 @@ class Module:
         Module.printf = Function("printf", IntegerType(32), [("number", IntegerType(32))])
 
     def add_function(self, function):
+        # ~ function.module = self
         self.functions[function.name] = function
         function.containing_module = self
 
     def add_header(self, header_name):
-        self.headers.append(f"#include <{header_name}>")
+        # ~ self.headers.append(f"#include <{header_name}>")
+        if not header_name in self.headers:
+            self.headers.append(header_name)
 
     def __str__(self):
         text = "//" +  self.name + "\n"
         text += header
-        text += "\n\n".join([str(h) for h in self.headers]) + "\n\n"
+        text += "\n\n".join([f"#include <{str(h)}>" for h in self.headers]) + "\n\n"
         text += "\n\n".join([str(f) for name, f in self.functions.items()])
         return text.strip()
