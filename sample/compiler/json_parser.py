@@ -34,7 +34,9 @@ def compile_to_llvm(json_data):
 
 def compile_to_cpp(json_data, name = "module"):
     functions = [parse_node (function) for function in json_data["functions"]]
-    print ( create_cpp_module(functions, name) )
+    module = create_cpp_module(functions, name)
+    module.add_header("math.h")
+    print ( module )
 
 
 def main(args):

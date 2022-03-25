@@ -611,14 +611,19 @@ class Module:
     def __init__(self, name):
         self.name = name
         self.functions = {}
+        self.headers = []
         Module.printf = Function("printf", IntegerType(32), [("number", IntegerType(32))])
 
     def add_function(self, function):
         self.functions[function.name] = function
         function.containing_module = self
 
+    def add_header(self, header_name):
+        self.headers.append(f"include <{header_name}>")
+
     def __str__(self):
         text = "//" +  self.name + "\n"
         text += header
+        text += "\n\n".join([str(h) for h in self.headers])
         text += "\n\n".join([str(f) for name, f in self.functions.items()])
         return text.strip()
