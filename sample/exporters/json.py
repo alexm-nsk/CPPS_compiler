@@ -517,6 +517,10 @@ def return_type(left, right):
 
 
 #---------------------------------------------------------------------------------------------
+# this is a placeholder
+# TODO make proper methods determining result type
+def get_output_type(left_type, right_type, operator = None):
+    return left_type
 
 def setup_binarys_ports(binary, left, right):
     # ~ inPorts  = [dict (
@@ -544,7 +548,8 @@ def setup_binarys_ports(binary, left, right):
                             dict(index = 1, nodeId = binary["id"], type = right["type"])
                         ]
     binary["outPorts"] = [
-                            dict(index = 0, nodeId = binary["id"], type = left["type"]),
+                            dict(index = 0, nodeId = binary["id"],
+                            type = get_output_type(left["type"], right["type"]))
                          ]
     pass
 

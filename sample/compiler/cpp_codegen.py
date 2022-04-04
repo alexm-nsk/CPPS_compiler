@@ -617,6 +617,8 @@ vector<I> operator | (const vector<I>& lhs, const vector<I>& rhs){
     result.insert(result.end(), rhs.begin(), rhs.end());
     return result;	// returning the vector "result"
 }
+
+//---------------------------------------------------------------------
 '''
 
 class Module:
