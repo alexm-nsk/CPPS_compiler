@@ -246,7 +246,6 @@ class TreeVisitor(NodeVisitor):
                            "vars" : [identifier]
                           })
 
-        print (params)
         return FunctionImport(**dict(
                                         name = "Import",
                                         function_name = name,

@@ -353,8 +353,11 @@ class Binary(Expression):
             self.type = BooleanType()
         else:
             # ~ print (self.right.type, self.right)
+            # TODO write proper type
             if type(self.left.type) == RealType or type(self.right.type) == RealType:
                 self.type = RealType(32)
+            elif type(self.left.type) == ArrayType or type(self.right.type) == ArrayType:
+                self.type = self.left.type
             else:
                 self.type = IntegerType(32)
 
@@ -606,7 +609,15 @@ Json::Value iterable_to_json(Iterable const& cont) {
         v.append(element);
      }
     return v;
-}\n\n'''
+}
+
+template <typename I>
+vector<I> operator | (const vector<I>& lhs, const vector<I>& rhs){
+    vector<I> result = lhs;
+    result.insert(result.end(), rhs.begin(), rhs.end());
+    return result;	// returning the vector "result"
+}
+'''
 
 class Module:
 

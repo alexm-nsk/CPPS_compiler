@@ -1,0 +1,3 @@
+function main( M : array of integer returns array of integer )
+  M | M
+end function

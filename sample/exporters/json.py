@@ -89,6 +89,7 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
         port_type = "outPorts" if parent else "inPorts"
         dst_port = json_nodes[to][port_type][dst_index]
         dst_type = dst_port["type"]
+        # ~ print (src_type)
 
     except Exception as e:
         print (json_nodes[to][port_type],dst_index)
@@ -106,8 +107,8 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
                 dict_[k] = remove_locations(v)
         return (dict_)
 
-    c_src_type = remove_locations(copy.deepcopy(src_type))
-    c_dst_type = remove_locations(copy.deepcopy(dst_type))
+    # ~ c_src_type = remove_locations(copy.deepcopy(src_type))
+    # ~ c_dst_type = remove_locations(copy.deepcopy(dst_type))
 
     #check_type_matching(c_src_type, c_dst_type, from_, to)
 
@@ -508,12 +509,44 @@ def gen_ports(ins, outs, node_id):
 
 
 def return_type(left, right):
+    return left
+    # ~ if left == "real" or right == "real":
+        # ~ return "real"
+    # ~ else:
+        # ~ return "integer"
 
-    if left == "real" or right == "real":
-        return "real"
-    else:
-        return "integer"
 
+#---------------------------------------------------------------------------------------------
+
+def setup_binarys_ports(binary, left, right):
+    # ~ inPorts  = [dict (
+                                    # ~ index = n,
+                                    # ~ nodeId = node.node_id,
+                                    # ~ type = {"location":"not applicable",
+                                            # ~ "name" : operator_in_type_map[node.operator]}
+                                    # ~ )
+                                # ~ for n in range(2)],
+
+                    # ~ outPorts = [
+                                    # ~ dict(
+                                            # ~ index = 0,
+                                            # ~ nodeId = node.node_id,
+                                            # ~ type = dict(
+                                                        # ~ location = "not applicable",
+                                                        # ~ #TODO put the type here
+                                                        # ~ name = operator_out_type_map[node.operator]
+                                                    # ~ )
+                                        # ~ )
+                                # ~ ],
+    # ~ print (binary)
+    binary["inPorts"] = [
+                            dict(index = 0, nodeId = binary["id"], type = left["type"]),
+                            dict(index = 1, nodeId = binary["id"], type = right["type"])
+                        ]
+    binary["outPorts"] = [
+                            dict(index = 0, nodeId = binary["id"], type = left["type"]),
+                         ]
+    pass
 
 #---------------------------------------------------------------------------------------------
 
@@ -544,7 +577,8 @@ def export_algebraic_to_json (node, parent_node, slot, current_scope):
                     var_name, var_type = p
                     if(var_name == name):
                         identifier_slot = n
-                        type_ = var_type["type"]["name"]
+                        # ~ print (var_type)
+                        type_ = var_type["type"]#["name"]
                         break
                 # if we haven't found it, raise an exception:
                 if identifier_slot == -1:
@@ -558,7 +592,7 @@ def export_algebraic_to_json (node, parent_node, slot, current_scope):
                 return_edges.extend(nodes["edges"])
                 output_id = nodes["final_edges"][0][0]["nodeId"]
                 # ~ print (f_edges)
-                type_ = nodes["nodes"][0]["outPorts"][0]["type"]["name"]
+                type_ = nodes["nodes"][0]["outPorts"][0]["type"]#["name"]
                 return dict(id = output_id, slot = 0, type = type_, parameter = False)
                 # ~ return dict(id = operand.node_id, slot = 0, type = type_, parameter = False)
 
@@ -583,9 +617,12 @@ def export_algebraic_to_json (node, parent_node, slot, current_scope):
             op_json = operator.emit_json(parent_node, 0, current_scope)["nodes"]
             return_nodes.extend(op_json)
 
+            
             left_node = get_nodes(left)
             right_node = get_nodes(right)
 
+            setup_binarys_ports(op_json[0], left_node, right_node)
+            
             return_edges.append(
                     make_json_edge(left_node["id"],  operator.node_id,
                                    left_node["slot"],  0,
@@ -598,7 +635,7 @@ def export_algebraic_to_json (node, parent_node, slot, current_scope):
 
             type_ = return_type(left_node["type"], right_node["type"])
 
-            op_json[0]["outPorts"][0]["type"]["name"] = type_
+            # ~ op_json[0]["outPorts"][0]["type"]["name"] = type_
 
             return dict(id = operator.node_id, slot = 0, type = type_, parameter = False)
 
@@ -689,25 +726,25 @@ def export_bin_to_json (node, parent_node, slot, current_scope):
                     operator = node.operator,
                     location = node.location,
 
-                    inPorts  = [dict (
-                                    index = n,
-                                    nodeId = node.node_id,
-                                    type = {"location":"not applicable",
-                                            "name" : operator_in_type_map[node.operator]}
-                                    )
-                                for n in range(2)],
+                    # ~ inPorts  = [dict (
+                                    # ~ index = n,
+                                    # ~ nodeId = node.node_id,
+                                    # ~ type = {"location":"not applicable",
+                                            # ~ "name" : operator_in_type_map[node.operator]}
+                                    # ~ )
+                                # ~ for n in range(2)],
 
-                    outPorts = [
-                                    dict(
-                                            index = 0,
-                                            nodeId = node.node_id,
-                                            type = dict(
-                                                        location = "not applicable",
-                                                        #TODO put the type here
-                                                        name = operator_out_type_map[node.operator]
-                                                    )
-                                        )
-                                ],
+                    # ~ outPorts = [
+                                    # ~ dict(
+                                            # ~ index = 0,
+                                            # ~ nodeId = node.node_id,
+                                            # ~ type = dict(
+                                                        # ~ location = "not applicable",
+                                                        # ~ #TODO put the type here
+                                                        # ~ name = operator_out_type_map[node.operator]
+                                                    # ~ )
+                                        # ~ )
+                                # ~ ],
                 )
     json_nodes[node.node_id] = ret_val
 
