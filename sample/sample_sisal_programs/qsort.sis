@@ -1,5 +1,3 @@
-definition QuickSort
-
 function sort(A: array[integer] returns array[integer])
   if size(A) <= 1 then A else let
       Less := for a in A returns array of a when a < A[1] end for;
@@ -8,11 +6,4 @@ function sort(A: array[integer] returns array[integer])
     in sort(Less) || Same || sort(More)
     end let 
   end if
-end function
-
-function tr(A: array[array[integer]] returns array[array[integer]])
-  for i in 1, size(A) cross j in i, size(A) repeat
-     A := old A[i, j := A[j, i]]
-  returns value of A
-  end for
 end function
