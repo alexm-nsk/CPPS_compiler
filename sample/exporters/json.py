@@ -553,7 +553,7 @@ def setup_binarys_ports(binary, left, right):
                                 # ~ ],
     # ~ print (binary)
     binary["inPorts"] = [
-                            dict(index = 0, nodeId = binary["id"], type = left["type"]),
+                            dict(index = 0, nodeId = binary["id"], type = left ["type"]),
                             dict(index = 1, nodeId = binary["id"], type = right["type"])
                         ]
     binary["outPorts"] = [
