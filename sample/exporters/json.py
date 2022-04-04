@@ -241,9 +241,9 @@ def export_functionimport_to_json(node, parent_node, slot = 0, current_scope = N
 
     for field, value in node.__dict__.items():
         IR_name          = field_sub_table[field] if field in field_sub_table else field
-        
+
         ret_val[IR_name] = value
-    
+
     ret_val["params"]   = function_gen_params( node ) if node.params else None
 
     ret_val["inPorts"]  = function_gen_in_ports ( node , node.node_id)
@@ -520,7 +520,16 @@ def return_type(left, right):
 # this is a placeholder
 # TODO make proper methods determining result type
 def get_output_type(left_type, right_type, operator = None):
-    return left_type
+    if "name" in left_type and "name" in right_type:
+        if left_type["name"] == "real" or right_type["name"] == "real":
+            return left_type if left_type["name"] == "real" else right_type
+        else:
+            return left_type
+    elif "element" in left_type and "element" in right_type:
+        return left_type
+    else:
+        raise Exception(f"I don't know what to do with these types: {left_type} and {right_type} when applying the {operator}-operator")
+
 
 def setup_binarys_ports(binary, left, right):
     # ~ inPorts  = [dict (
@@ -622,12 +631,12 @@ def export_algebraic_to_json (node, parent_node, slot, current_scope):
             op_json = operator.emit_json(parent_node, 0, current_scope)["nodes"]
             return_nodes.extend(op_json)
 
-            
+
             left_node = get_nodes(left)
             right_node = get_nodes(right)
 
             setup_binarys_ports(op_json[0], left_node, right_node)
-            
+
             return_edges.append(
                     make_json_edge(left_node["id"],  operator.node_id,
                                    left_node["slot"],  0,
