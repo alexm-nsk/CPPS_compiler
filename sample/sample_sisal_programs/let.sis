@@ -1,4 +1,4 @@
-function Main( M, N, K : integer returns integer)
+function main( M, N, K : integer returns integer)
     let 
        A := M;
        B := N
