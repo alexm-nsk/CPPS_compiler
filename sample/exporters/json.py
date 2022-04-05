@@ -221,15 +221,13 @@ def export_function_to_json(node, parent_node, slot = 0, current_scope = None):
     ret_val["nodes"] = []
     ret_val["edges"] = []
 
-
-
     for n, child in enumerate(node.nodes):
         json_child = child.emit_json( node.node_id, n, current_scope)
 
         ret_val["nodes"].extend(json_child["nodes"])
         ret_val["edges"] += json_child["edges"] + json_child["final_edges"]
 
-        # populate "edges" with parameters' edges:
+        # ~ # populate "edges" with parameters' edges:
         for n, (param, param_contents) in enumerate( ret_val["params"]) :
             ret_val["edges"] += make_json_edge( node.node_id, child.node_id,
                             n, n,
@@ -239,6 +237,8 @@ def export_function_to_json(node, parent_node, slot = 0, current_scope = None):
 
     # it's a top node, so no need to return edges upstream
     return ret_val
+
+
 #---------------------------------------------------------------------------------------------
 
 
@@ -935,11 +935,11 @@ def export_let_to_json(node, parent_node, slot, current_scope):
                     outPorts = out_ports
                   )
 
-    
+
     json_nodes[node.node_id] = retval
-    
+
     copy_ports_and_params(retval, json_nodes[parent_node], out_ports=False)
-    # ~ print (parent_node)
+    print (parent_node)
     create_init(node, retval, parent_node, slot, current_scope)
     create_body_for_let(node, retval, parent_node, slot, current_scope)
 
