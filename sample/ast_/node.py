@@ -88,7 +88,7 @@ class Function(Node):
 
 
 class FunctionImport(Node):
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
         Function.functions[self.function_name] = self
@@ -121,6 +121,15 @@ class Loop(Node):
        self.test_id = Node.get_node_id()
        self.body_id = Node.get_node_id()
        self.ret_id  = Node.get_node_id()
+
+
+class Let(Node):
+
+    def __init__(self, *args, **kwargs):
+       super().__init__(**kwargs, no_id = False)
+       # sub_nodes will have their own IDs so we calculate them
+       self.init_id = Node.get_node_id()
+       self.body_id = Node.get_node_id()
 
 
 class Algebraic(Node):

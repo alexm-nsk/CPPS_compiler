@@ -288,10 +288,15 @@ class TreeVisitor(NodeVisitor):
                     )
 
     # let = "let" _ statements _ "in" _ exp _ "end" _ "let"
-    def visit_let(self, visited_children):
+    def visit_let(self, node, visited_children):
+        init = visited_children [2]
+        body = visited_children [6]
+        return Let(
+                    init = init,
+                    body = body,
+                    location   = self.get_location(node)
+                  )
 
-        print (visited_children)
-        
     #----------------------------------------------------
     #
     #----------------------------------------------------

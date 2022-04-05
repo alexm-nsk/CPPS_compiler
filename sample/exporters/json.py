@@ -221,11 +221,19 @@ def export_function_to_json(node, parent_node, slot = 0, current_scope = None):
     ret_val["nodes"] = []
     ret_val["edges"] = []
 
+
+
     for n, child in enumerate(node.nodes):
         json_child = child.emit_json( node.node_id, n, current_scope)
 
         ret_val["nodes"].extend(json_child["nodes"])
         ret_val["edges"] += json_child["edges"] + json_child["final_edges"]
+
+        # populate "edges" with parameters' edges:
+        for n, (param, param_contents) in enumerate( ret_val["params"]) :
+            ret_val["edges"] += make_json_edge( node.node_id, child.node_id,
+                            n, n,
+                            False, True)
 
     json_nodes[node.node_id].update ( ret_val )
 
@@ -272,22 +280,25 @@ def export_functionimport_to_json(node, parent_node, slot = 0, current_scope = N
 #---------------------------------------------------------------------------------------------
 
 # duplicates ports and parameters from src_node and changes "nodeId" to target's id
-def copy_ports_and_params(target, src_node):
+def copy_ports_and_params(target, src_node, in_ports = True, out_ports = True, params = True ):
 
-    if "inPorts" in src_node:
-        target["inPorts"]  = copy.deepcopy(src_node["inPorts"])
-        for i in target["inPorts"]:
-            i["nodeId"] = target["id"]
+    if in_ports:
+        if "inPorts" in src_node:
+            target["inPorts"]  = copy.deepcopy(src_node["inPorts"])
+            for i in target["inPorts"]:
+                i["nodeId"] = target["id"]
 
-    if "outPorts" in src_node:
-        target["outPorts"] = copy.deepcopy(src_node["outPorts"])
-        for i in target["outPorts"]:
-            i["nodeId"] = target["id"]
+    if out_ports:
+        if "outPorts" in src_node:
+            target["outPorts"] = copy.deepcopy(src_node["outPorts"])
+            for i in target["outPorts"]:
+                i["nodeId"] = target["id"]
 
-    if "params" in src_node:
-        target["params"]   = copy.deepcopy(src_node["params"])
-        for i in target["params"]:
-            i[1]["nodeId"] = target["id"]
+    if params:
+        if "params" in src_node:
+            target["params"]   = copy.deepcopy(src_node["params"])
+            for i in target["params"]:
+                i[1]["nodeId"] = target["id"]
 
     return target
 
@@ -862,7 +873,7 @@ def pull_value_from_scope(name, current_scope, location):
 
     raise Exception ("Identifier %s not found in this scope!(%s)" % (name, location))
 
-# we find the appropriate in-port by the identifier and connect it to old_value's sole input
+# we find the appropriate in-port by the identifier and connect it to old_value's only input
 def export_oldvalue_to_json (node, parent_node, slot, current_scope):
 
     param = pull_value_from_scope(node.name, current_scope, node.location)
@@ -891,7 +902,7 @@ def export_sum_to_json(node, parent_node, slot, current_scope):
                 )
 
 
-#TODO register new variables in the scope
+# TODO register new variables in the scope
 def export_assignment_to_json(node, parent_node, slot, current_scope):
 
     value_ast = node.value.emit_json (parent_node, slot, current_scope)
@@ -899,6 +910,40 @@ def export_assignment_to_json(node, parent_node, slot, current_scope):
     #TODO get type from what you get in value:
 
     return value_ast
+
+
+def create_body_for_let(node, retval, parent_node, slot, current_scope):
+    pass
+
+
+def export_let_to_json(node, parent_node, slot, current_scope):
+
+    init = {}
+    body = {}
+    out_ports = []
+
+    retval = dict (
+                    name     = "Let",
+                    location = node.location,
+                    init     = init,
+                    body     = body,
+                    nodes    = [],
+                    edges    = [],
+                    params   = [],
+                    id       = node.node_id,
+                    inPorts  = [],
+                    outPorts = out_ports
+                  )
+
+    
+    json_nodes[node.node_id] = retval
+    
+    copy_ports_and_params(retval, json_nodes[parent_node], out_ports=False)
+    # ~ print (parent_node)
+    create_init(node, retval, parent_node, slot, current_scope)
+    create_body_for_let(node, retval, parent_node, slot, current_scope)
+
+    return dict(nodes = [retval], edges = [], final_edges = [])
 
 
 #---------------------------------------------------------------------------------------------
@@ -912,12 +957,12 @@ def create_parameter_definition(name, type_, node_id):
 
 
 #---------------------------------------------------------------------------------------------
-# used to create loop's initiaization
+# used to create loop's or let's initiaization
 # init doesn't contain variables defined in it as parameters
 # instead, they are placed in preCondition, body and reduction BEFORE function's arguments
 
 
-def create_init_for_loop(node, retval, parent_node, slot, current_scope):
+def create_init(node, retval, parent_node, slot, current_scope):
 
     nodes = []
     edges = []
@@ -1100,7 +1145,7 @@ def export_loop_to_json (node, parent_node, slot, current_scope):
     copy_ports_and_params(retval, json_nodes[current_scope])
     json_nodes[node.node_id] = retval
 
-    create_init_for_loop(node, retval, parent_node, slot, current_scope)
+    create_init(node, retval, parent_node, slot, current_scope)
     create_test_for_loop(node, retval, parent_node, slot, current_scope)
     create_body_for_loop(node, retval, parent_node, slot, current_scope)
     create_ret_for_loop (node, retval, parent_node, slot, current_scope)
