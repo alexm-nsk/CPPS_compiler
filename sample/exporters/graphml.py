@@ -105,7 +105,11 @@ def make_node(node):
                     if ir_name in node])
 
     ports_str = ""
+
+    # gets the name of the variable that is passed through this port
+    # (if it's available) type_ is either "results" or "params"
     get_var_name = lambda node, n, type_: "label=\""+node[type_][n][0] +"\"" if type_ in node else ""
+    
     if "inPorts" in node:
         ports_str =  "".join(
                     [f'<port name=\"in{n}\" {get_var_name(node, n, "params")} type=\"{ get_type (port["type"]) }\"/>\n'

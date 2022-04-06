@@ -935,7 +935,7 @@ def create_body_for_let(node, retval, parent_node, slot, current_scope):
                          )
 
     json_nodes[node.body_id] = retval["body"]
-    internals = node.body[0].emit_json(parent_node, 0, node.body_id)
+    internals = node.body[0].emit_json(node.body_id, 0, node.body_id)
     # ~ print (internals["nodes"])
     retval["body"]["nodes"] = internals["nodes"]
     retval["body"]["edges"] = internals["edges"] + internals["final_edges"]
