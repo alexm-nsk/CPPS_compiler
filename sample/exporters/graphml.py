@@ -108,17 +108,27 @@ def make_node(node):
 
     # gets the name of the variable that is passed through this port
     # (if it's available) type_ is either "results" or "params"
-    get_var_name = lambda node, n, type_: "label=\""+node[type_][n][0] +"\"" if type_ in node else ""
+    get_var_name = lambda node, n, type_: f'"{node[type_][n][0]}"' if type_ in node else ""
+
+    # <data key="label">A</data>
     
     if "inPorts" in node:
         ports_str =  "".join(
-                    [f'<port name=\"in{n}\" {get_var_name(node, n, "params")} type=\"{ get_type (port["type"]) }\"/>\n'
+                    [f'<port name=\"in{n}\" type=\"{ get_type (port["type"]) }\"/>\n'
+                        if not "params" in node else
+
+                        f'<port name=\"in{n}\" type=\"{ get_type (port["type"]) }\">\n  <data key="label">{node["params"][n][0]}</data>\n</port>\n'
+                        
                         for n, port in enumerate(node["inPorts"])]
                    )
 
     if "outPorts" in node:
         ports_str +=  "\n".join(
-                    [f'<port name=\"out{n}\" {get_var_name(node, n, "results")} type=\"{ get_type (port["type"]) }\"/>'
+                    [f'<port name=\"out{n}\" type=\"{ get_type (port["type"]) }\"/>\n'
+                        if not "results" in node else
+
+                        f'<port name=\"out{n}\" type=\"{ get_type (port["type"]) }\">\n  <data key="label">{node["results"][n][0]}</data>\n</port>\n'
+                        
                         for n, port in enumerate(node["outPorts"])]
                    )
 
