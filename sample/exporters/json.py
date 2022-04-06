@@ -930,7 +930,8 @@ def create_body_for_let(node, retval, parent_node, slot, current_scope):
                             id = node.body_id,
                             params = params,
                             inPorts = [make_port(i, node.body_id, param[1]["type"]) for i, param in enumerate(params)],
-                            outPorts = [make_port(i, node.body_id, output_types[i]) for i in range(num_outputs)]
+                            outPorts = [make_port(i, node.body_id, output_types[i]) for i in range(num_outputs)],
+                            name = "Body"
                          )
 
     json_nodes[node.body_id] = retval["body"]
