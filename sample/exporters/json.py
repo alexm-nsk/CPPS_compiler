@@ -967,7 +967,9 @@ def export_let_to_json(node, parent_node, slot, current_scope):
     create_init(node, ret_val, parent_node, slot, current_scope)
     create_body_for_let(node, ret_val, parent_node, slot, current_scope = node.node_id)
 
-    return dict(nodes = [ret_val], edges = [], final_edges = [])
+    final_edge = make_json_edge(node.node_id, current_scope, 0, 0, parent = True)
+
+    return dict(nodes = [ret_val], edges = [], final_edges = [final_edge])
 
 
 #---------------------------------------------------------------------------------------------
