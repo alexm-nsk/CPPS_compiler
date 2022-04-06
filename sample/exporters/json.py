@@ -229,9 +229,9 @@ def export_function_to_json(node, parent_node, slot = 0, current_scope = None):
 
         # ~ # populate "edges" with parameters' edges:
         for n, (param, param_contents) in enumerate( ret_val["params"]) :
-            ret_val["edges"] += make_json_edge( node.node_id, child.node_id,
+            ret_val["edges"].append(make_json_edge( node.node_id, child.node_id,
                             n, n,
-                            False, True)
+                            False, True))
 
     json_nodes[node.node_id].update ( ret_val )
 
@@ -913,7 +913,31 @@ def export_assignment_to_json(node, parent_node, slot, current_scope):
 
 
 def create_body_for_let(node, retval, parent_node, slot, current_scope):
-    pass
+
+    params = []
+    # TODO put it in separate function for let and loop test
+    for index, param in enumerate(json_nodes[node.init_id]["results"] + json_nodes[current_scope]["params"]):
+        new_param = param
+        new_param[1]["nodeId"] = node.body_id
+        new_param[1]["index"] = index
+        params.append(new_param)
+
+    num_outputs = len(node.body)
+    # ~ print (json_nodes[current_scope])
+    output_types = [output["type"] for output in json_nodes[current_scope]["outPorts"]]
+
+    retval["body"] = dict(
+                            id = node.body_id,
+                            params = params,
+                            inPorts = [make_port(i, node.body_id, param[1]["type"]) for i, param in enumerate(params)],
+                            outPorts = [make_port(i, node.body_id, output_types[i]) for i in range(num_outputs)]
+                         )
+
+    json_nodes[node.body_id] = retval["body"]
+    internals = node.body[0].emit_json(parent_node, 0, node.body_id)
+    # ~ print (internals["nodes"])
+    retval["body"]["nodes"] = internals["nodes"]
+    retval["body"]["edges"] = internals["edges"] + internals["final_edges"]
 
 
 def export_let_to_json(node, parent_node, slot, current_scope):
@@ -922,7 +946,7 @@ def export_let_to_json(node, parent_node, slot, current_scope):
     body = {}
     out_ports = []
 
-    retval = dict (
+    ret_val = dict (
                     name     = "Let",
                     location = node.location,
                     init     = init,
@@ -936,14 +960,14 @@ def export_let_to_json(node, parent_node, slot, current_scope):
                   )
 
 
-    json_nodes[node.node_id] = retval
+    json_nodes[node.node_id] = ret_val
 
-    copy_ports_and_params(retval, json_nodes[parent_node], out_ports=False)
-    print (parent_node)
-    create_init(node, retval, parent_node, slot, current_scope)
-    create_body_for_let(node, retval, parent_node, slot, current_scope)
+    copy_ports_and_params(ret_val, json_nodes[parent_node])#, out_ports=False)
 
-    return dict(nodes = [retval], edges = [], final_edges = [])
+    create_init(node, ret_val, parent_node, slot, current_scope)
+    create_body_for_let(node, ret_val, parent_node, slot, current_scope = node.node_id)
+
+    return dict(nodes = [ret_val], edges = [], final_edges = [])
 
 
 #---------------------------------------------------------------------------------------------

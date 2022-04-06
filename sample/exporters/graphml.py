@@ -84,7 +84,7 @@ def make_node(node):
         edges_string = ""
         if "edges" in node:
             for e in node["edges"]:
-                source_port_type = "in" if is_parent(e[0]["nodeId"], e[1]["nodeId"]) else "out"
+                source_port_type = "in"  if is_parent(e[0]["nodeId"], e[1]["nodeId"]) else "out"
                 target_port_type = "out" if is_parent(e[1]["nodeId"], e[0]["nodeId"]) else "in"
 
                 if e[0]["nodeId"] == e[1]["nodeId"]:
@@ -120,6 +120,7 @@ def make_node(node):
     if "nodes" in node and node["nodes"]:
         contents = "\n".join([make_node(node) for node in node["nodes"]])
         contents += make_edges()
+        # ~ print (contents)
         contents = make_graph(node["id"]+"_graph", contents)
     #TODO make test for "If" here: (and add join below)
     elif "branches" in node:
@@ -131,6 +132,14 @@ def make_node(node):
 
         contents  = "".join(
                             [make_node(node[field]) for field in ["init", "body", "preCondition", "reduction"]]
+                            )
+
+        contents += make_edges()
+        contents  = make_graph(node["id"]+"_graph", contents)
+    elif node["name"] == "Let":
+
+        contents  = "".join(
+                            [make_node(node[field]) for field in ["init", "body"]]
                             )
 
         contents += make_edges()
