@@ -96,6 +96,8 @@ class FunctionImport(Node):
     def emit_json(self, parent_node, slot = 0, current_scope = None):
             return export_functionimport_to_json(self, parent_node, slot, current_scope)
 
+    def emit_graphml(self, parent_node):
+            return export_function_to_graphml(self, parent_node)
 
 class If(Node):
 
@@ -187,6 +189,8 @@ class Reduction(Node):
 class Sum(Reduction):
     pass
 
+class ArrayOf(Reduction):
+    pass
 
 class Value(Reduction):
     def __init__(self, *args, **kwargs):

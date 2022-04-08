@@ -346,6 +346,14 @@ class TreeVisitor(NodeVisitor):
                      ret       = while_[14],
                      location  = self.get_location(node))
 
+    # ~ for_in = "for" _ identifier _ "in" _ identifier _
+    # ~             "returns" _ reduction _
+    # ~          "end" _ "for"
+
+    def visit_for_in(self, node, visited_children):
+
+        print (visited_children[2])
+    
     # ~ statements         = (statement _)*
     # ~ statement          = assignment
     # ~ assignment         = identifier _ ":=" _ exp_singular
@@ -373,6 +381,15 @@ class TreeVisitor(NodeVisitor):
 
         return Value(value = visited_children[4])
 
+    # ~ reduction_array_of = "array" _ "of" _ exp_singular (_ "when" _ exp_singular)?
+
+    def visit_reduction_array_of(self, node, visited_children):
+        array_of_what = visited_children[4]
+        # when is optional:
+        when = visited_children[5][0][3] if type(visited_children[5])==list else None
+        # ~ print (when)
+        
+        return ArrayOf(array_of_what = array_of_what, when = when, location = self.get_location(node))
 
     #----------------------------------------------------
     #

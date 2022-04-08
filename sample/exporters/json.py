@@ -228,10 +228,10 @@ def export_function_to_json(node, parent_node, slot = 0, current_scope = None):
         ret_val["edges"] += json_child["edges"] + json_child["final_edges"]
 
         # ~ # populate "edges" with parameters' edges:
-        for n, (param, param_contents) in enumerate( ret_val["params"]) :
-            ret_val["edges"].append(make_json_edge( node.node_id, child.node_id,
-                            n, n,
-                            False, True))
+        # ~ for n, (param, param_contents) in enumerate( ret_val["params"]) :
+            # ~ ret_val["edges"].append(make_json_edge( node.node_id, child.node_id,
+                            # ~ n, n,
+                            # ~ False, True))
 
     json_nodes[node.node_id].update ( ret_val )
 
@@ -615,6 +615,7 @@ def export_algebraic_to_json (node, parent_node, slot, current_scope):
                 nodes = operand.emit_json(current_scope, 0, current_scope)
                 return_nodes.extend(nodes["nodes"])
                 return_edges.extend(nodes["edges"])
+                # ~ print (nodes)
                 output_id = nodes["final_edges"][0][0]["nodeId"]
                 # ~ print (f_edges)
                 type_ = nodes["nodes"][0]["outPorts"][0]["type"]#["name"]
@@ -889,8 +890,8 @@ def export_oldvalue_to_json (node, parent_node, slot, current_scope):
     json_nodes[node.node_id] = retval
 
     return dict(nodes = [ retval ],
-         edges = [ make_json_edge(current_scope, node.node_id, param["index"], 0, parameter = True) ],
-         final_edges = [])
+         edges = [  ],
+         final_edges = [make_json_edge(current_scope, node.node_id, param["index"], 0, parameter = True)])
 
 
 def export_sum_to_json(node, parent_node, slot, current_scope):

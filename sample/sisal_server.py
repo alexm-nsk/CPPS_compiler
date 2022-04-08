@@ -65,6 +65,9 @@ def service(environment, responce):
 
     try:
         length = int(environment.get('CONTENT_LENGTH', '0'))
+
+        operation = data["operation"]
+        
         if length > 0:
             body= environment['wsgi.input'].read(length)
             data = json.loads(body, strict=False)
@@ -82,7 +85,7 @@ def service(environment, responce):
         print (str(len(inputCode)) + " modules received, compiling...")
 
         for c in inputCode:
-               output_codes.append(compile_sisal(c))
+               output_codes.append(compile_sisal(c) if operation == "compile" else parse(c))
 
         print("done")
         return resp("200 OK",json.dumps(outputCodes))
