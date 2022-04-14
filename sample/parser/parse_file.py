@@ -329,35 +329,62 @@ class TreeVisitor(NodeVisitor):
 
     # old = "old" _ identifier
     def visit_old(self, node, visited_children):
-        # ~ for n, c in enumerate(visited_children):
-            # ~ print (n, ":", c)
 
         return OldValue( name     = visited_children[2],
                          location = self.get_location(node))
 
     # "for" _ "initial" _ statements _ while _  "end" _ "for"
     # while = "while" _ lpar _ exp _ rpar _ "repeat" _ statements _ "returns" _ reduction
-    def visit_for_while(self, node, visited_children):
+    # ~ def visit_for_while(self, node, visited_children):
 
-        while_ = visited_children[6]
-        return Loop( init      = visited_children[4],
-                     loop_test = while_[4],
-                     loop_body = while_[10],
-                     ret       = while_[14],
-                     location  = self.get_location(node))
+        # ~ while_ = visited_children[6]
+        # ~ return Loop( init      = visited_children[4],
+                     # ~ loop_test = while_[4],
+                     # ~ loop_body = while_[10],
+                     # ~ ret       = while_[14],
+                     # ~ location  = self.get_location(node))
 
     # ~ for_in = "for" _ identifier _ "in" _ identifier _
     # ~             "returns" _ reduction _
     # ~          "end" _ "for"
 
-    def visit_for_in(self, node, visited_children):
-
-        print (visited_children[2])
+    # ~ def visit_for_in(self, node, visited_children):
+        # ~ what = visited_children[2]
+        # ~ in_what = visited_children[6]
+        # ~ reduction = visited_children[10]
+        # ~ return ForIn(what = what, in_what = in_what, reduction = reduction, location = self.get_location(node))
     
     # ~ statements         = (statement _)*
     # ~ statement          = assignment
     # ~ assignment         = identifier _ ":=" _ exp_singular
+    
+    # returns None if optional node is absent, or node itself otherwise
+    def optional_node(self, node):
+        return node if type(node) == list else None
+        
+    #loop = "for" _ range? _ initial? _ while? _ returns? _ "end" _ "for"
+    def visit_loop(self, node, visited_children):
+        
+        range_  = self.optional_node( visited_children[2] )        
+        init    = self.optional_node( visited_children[4] )
+        while_  = self.optional_node( visited_children[6] )
+        returns = self.optional_node( visited_children[8] )
+        # ~ print (returns)
+        return Loop(range = range_, init = init, while_ = while_, returns = returns, location = self.get_location(node))
 
+    def visit_returns(self, node, visited_children):
+        # ~ print (visited_children[2])
+        return 
+    
+    def visit_while(self, node, visited_children):
+        
+        return None
+    
+    def visit_range_in(self, node, visited_children):
+        what    = visited_children[0]
+        in_what = visited_children[4]
+        return RangeIn(what = what, in_what = in_what)
+    
     def visit_statements(self, node, visited_children):
 
         statements = [statement[0] for statement in visited_children]
@@ -372,24 +399,24 @@ class TreeVisitor(NodeVisitor):
         return Assignment(identifier = identifier, value = value)
 
     # ~ reduction_sum      = "sum" _ "of" _ exp
-    def visit_reduction_sum(self, node, visited_children):
+    # ~ def visit_reduction_sum(self, node, visited_children):
 
-        return Sum(exp = visited_children[4])
+        # ~ return Sum(exp = visited_children[4])
 
     # ~ reduction_value    = "value"   _ "of" _ exp
-    def visit_reduction_value(self, node, visited_children):
+    # ~ def visit_reduction_value(self, node, visited_children):
 
-        return Value(value = visited_children[4])
+        # ~ return Value(value = visited_children[4])
 
     # ~ reduction_array_of = "array" _ "of" _ exp_singular (_ "when" _ exp_singular)?
 
-    def visit_reduction_array_of(self, node, visited_children):
-        array_of_what = visited_children[4]
-        # when is optional:
-        when = visited_children[5][0][3] if type(visited_children[5])==list else None
+    # ~ def visit_reduction_array_of(self, node, visited_children):
+        # ~ array_of_what = visited_children[4]
+        # ~ # when is optional:
+        # ~ when = visited_children[5][0][3] if type(visited_children[5])==list else None
         # ~ print (when)
         
-        return ArrayOf(array_of_what = array_of_what, when = when, location = self.get_location(node))
+        # ~ return ArrayOf(array_of_what = array_of_what, when = when, location = self.get_location(node))
 
     #----------------------------------------------------
     #
@@ -417,9 +444,16 @@ class TreeVisitor(NodeVisitor):
     def visit_array_index(self, node, visited_children):
         return visited_children[0]
 
+    # ~ reduction          = reduction_type _ "of" _ exp_singular (_ "when" _ exp_singular)?
     def visit_reduction(self, node, visited_children):
-        return visited_children[0]
-
+        what    = visited_children[0]
+        of_what = visited_children[4]
+        return Reduction(what = what, of_what = of_what)
+    
+    # ~ reduction_type     = "array" / "value" / "sum"
+    def visit_reduction_type(self, node, visited_children):
+        return node.text
+        
     def visit_statement(self, node, visited_children):
         return visited_children[0]
 

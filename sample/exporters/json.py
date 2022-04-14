@@ -1172,11 +1172,11 @@ def export_loop_to_json (node, parent_node, slot, current_scope):
 
     copy_ports_and_params(retval, json_nodes[current_scope])
     json_nodes[node.node_id] = retval
-
-    create_init(node, retval, parent_node, slot, current_scope)
-    create_test_for_loop(node, retval, parent_node, slot, current_scope)
-    create_body_for_loop(node, retval, parent_node, slot, current_scope)
-    create_ret_for_loop (node, retval, parent_node, slot, current_scope)
+    if node.init:
+        create_init(node, retval, parent_node, slot, current_scope)
+    # ~ create_test_for_loop(node, retval, parent_node, slot, current_scope)
+    # ~ create_body_for_loop(node, retval, parent_node, slot, current_scope)
+    # ~ create_ret_for_loop (node, retval, parent_node, slot, current_scope)
 
     in_edges = []
     # make edges that connect the scope to whis node

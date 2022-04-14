@@ -119,11 +119,24 @@ class Loop(Node):
     def __init__(self, *args, **kwargs):
        super().__init__(**kwargs, no_id = False)
        # sub_nodes will have their own IDs so we calculate them
-       self.init_id = Node.get_node_id()
-       self.test_id = Node.get_node_id()
-       self.body_id = Node.get_node_id()
-       self.ret_id  = Node.get_node_id()
+       for sub in ["range", "init", "returns", "while", "body"]:
+            if sub in self.__dict__:
+                self.__dict__[sub + "_id"] = Node.get_node_id()
+       #self.init_id = Node.get_node_id()
+       #self.test_id = Node.get_node_id()
+       #self.body_id = Node.get_node_id()
+       #self.ret_id  = Node.get_node_id()
 
+
+class RangeIn(Node):
+    
+    pass
+
+
+class Init(Node):
+    
+    pass
+    
 
 class Let(Node):
 
@@ -189,8 +202,10 @@ class Reduction(Node):
 class Sum(Reduction):
     pass
 
+
 class ArrayOf(Reduction):
     pass
+
 
 class Value(Reduction):
     def __init__(self, *args, **kwargs):
