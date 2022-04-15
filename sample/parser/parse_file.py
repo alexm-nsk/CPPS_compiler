@@ -356,7 +356,7 @@ class TreeVisitor(NodeVisitor):
     
     # returns None if optional node is absent, or node itself otherwise
     def optional_node(self, node):
-        return node if type(node) == list else None
+        return node[0] if type(node) == list else None
         
     #loop = "for" _ range? _ initial? _ while? _ returns? _ "end" _ "for"
     def visit_loop(self, node, visited_children):
@@ -445,7 +445,7 @@ class TreeVisitor(NodeVisitor):
         what     = visited_children[0]
         of_what  = visited_children[4]
         optional = self.optional_node(visited_children[5])
-        when     = optional[0][3] if optional else None
+        when     = optional[3] if optional else None
         return Reduction(what = what, of_what = of_what, when = when)
     
     # ~ reduction_type     = "array" / "value" / "sum"

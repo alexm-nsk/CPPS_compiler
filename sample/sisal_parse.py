@@ -78,13 +78,12 @@ def main(args):
                                              functions = [o.emit_json(None) for o in output],
                                              declarations = {}
                                             ),
-                                       indent = 1)
+                                       indent = 2)
                 if "--color" in args:
                     colored_json = highlight(formatted, lexers.JsonLexer(), formatters.Terminal256Formatter(style=color_style))
                     print(colored_json)
                 else:
                     print( formatted )
-                # ~ print (len(formatted.split("\n")))
 
         except Exception as e:
             if "--debug" in args:

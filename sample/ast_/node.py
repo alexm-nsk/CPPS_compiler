@@ -48,7 +48,8 @@ class Node:
 
         # TODO consider list of allowed props (https://stackoverflow.com/questions/8187082/how-can-you-set-class-attributes-from-variable-arguments-kwargs-in-python)
         self.__dict__.update(kwargs)
-
+    
+    # deprecated, separate compiler used insted:
     def emit_llvm(self, scope = None):
         if not getattr(type(self),"__emit_llvm__", None):
             class_name = self.__class__.__name__
@@ -168,6 +169,7 @@ class Statement(Node):
 
     pass
 
+
 class Assignment(Statement):
 
     def __init__(self, *args, **kwargs):
@@ -175,8 +177,10 @@ class Assignment(Statement):
 
     pass
 
+
 class Returns(Node):
     pass
+
 
 class OldValue(Node):
     def __init__(self, *args, **kwargs):
