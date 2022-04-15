@@ -25,15 +25,12 @@
 import json
 
 import sys
-from IPython.core import ultratb
-# ~ sys.excepthook = ultratb.FormattedTB(mode='Verbose', color_scheme='Linux', call_pdb=False)
-sys.excepthook = ultratb.ColorTB()
+
 
 from parser.parse_file import parse_file
 
 def parse(input_text):
     return parse_file(input_text)
-
 
 def main(args):
 
@@ -50,16 +47,27 @@ def main(args):
             return 1
 
         try:
+
+            if "--debug" in args:
+                from IPython.core import ultratb
+                # ~ sys.excepthook = ultratb.FormattedTB(mode='Verbose', color_scheme='Linux', call_pdb=False)
+                sys.excepthook = ultratb.ColorTB()
+
+            if "--color" in args:
+                from pygments.styles import get_all_styles
+                from pygments import highlight, lexers, formatters
+                styles = list(get_all_styles())
+                color_style = styles[15] if len(styles) > 15 else styles[0]
+
             output = parse(file_contents)
 
             if "--graph" in args:
                 from exporters.graphml import make_document
                 graphs = "\n".join([o.emit_graphml(None) for o in output])
                 graphml_text = make_document(graphs)
-                
+
                 if "--color" in args:
-                    from pygments import highlight, lexers, formatters
-                    colored_graphml = highlight(graphml_text, lexers.XmlLexer(), formatters.TerminalFormatter())
+                    colored_graphml = highlight(graphml_text, lexers.XmlLexer(), formatters.Terminal256Formatter(style=color_style))
                     print(colored_graphml)
                 else:
                     print (graphml_text)
@@ -72,8 +80,7 @@ def main(args):
                                             ),
                                        indent = 1)
                 if "--color" in args:
-                    from pygments import highlight, lexers, formatters
-                    colored_json = highlight(formatted, lexers.JsonLexer(), formatters.TerminalFormatter())
+                    colored_json = highlight(formatted, lexers.JsonLexer(), formatters.Terminal256Formatter(style=color_style))
                     print(colored_json)
                 else:
                     print( formatted )
