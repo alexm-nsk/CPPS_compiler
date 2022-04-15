@@ -119,7 +119,7 @@ class Loop(Node):
     def __init__(self, *args, **kwargs):
        super().__init__(**kwargs, no_id = False)
        # sub_nodes will have their own IDs so we calculate them
-       for sub in ["range", "init", "returns", "while", "body"]:
+       for sub in ["range", "init", "returns", "while"]:
             if sub in self.__dict__:
                 self.__dict__[sub + "_id"] = Node.get_node_id()
        #self.init_id = Node.get_node_id()
@@ -175,6 +175,8 @@ class Assignment(Statement):
 
     pass
 
+class Returns(Node):
+    pass
 
 class OldValue(Node):
     def __init__(self, *args, **kwargs):
@@ -205,6 +207,7 @@ class Sum(Reduction):
 
 class ArrayOf(Reduction):
     pass
+    
 
 
 class Value(Reduction):

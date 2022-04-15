@@ -69,12 +69,8 @@ class TreeVisitor(NodeVisitor):
         start_row    = text[:node.start].count("\n") + 1 # line numbers have to start from "1"
         start_column = len (  (text[:node.start].split("\n"))[-1]  )
 
-        # ~ if start_row == 1: start_column += self.column_offset
-
         end_row      = text[:node.end].count("\n") + 1
         end_column   = len (  (text[:node.end].split("\n"))[-1]  )
-
-        # ~ if end_row == 1: end_row += self.column_offset
 
         return "{}:{}-{}:{}".format(start_row, #+ self.line_offset,
                                     start_column,
@@ -373,8 +369,8 @@ class TreeVisitor(NodeVisitor):
         return Loop(range = range_, init = init, while_ = while_, returns = returns, location = self.get_location(node))
 
     def visit_returns(self, node, visited_children):
-        # ~ print (visited_children[2])
-        return 
+        reduction = visited_children[2]
+        return Returns(reduction = reduction)
     
     def visit_while(self, node, visited_children):
         
@@ -446,9 +442,11 @@ class TreeVisitor(NodeVisitor):
 
     # ~ reduction          = reduction_type _ "of" _ exp_singular (_ "when" _ exp_singular)?
     def visit_reduction(self, node, visited_children):
-        what    = visited_children[0]
-        of_what = visited_children[4]
-        return Reduction(what = what, of_what = of_what)
+        what     = visited_children[0]
+        of_what  = visited_children[4]
+        optional = self.optional_node(visited_children[5])
+        when     = optional[0][3] if optional else None
+        return Reduction(what = what, of_what = of_what, when = when)
     
     # ~ reduction_type     = "array" / "value" / "sum"
     def visit_reduction_type(self, node, visited_children):

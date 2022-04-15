@@ -56,7 +56,12 @@ def main(args):
                 from exporters.graphml import make_document
                 graphs = "\n".join([o.emit_graphml(None) for o in output])
                 graphml_text = make_document(graphs)
-                print (graphml_text)
+                
+                from pygments import highlight, lexers, formatters
+                colored_graphml = highlight(graphml_text, lexers.XmlLexer(), formatters.TerminalFormatter())
+                print(colored_graphml)
+                
+                # ~ print (graphml_text)
             else:
 
                 formatted = json.dumps(
@@ -65,7 +70,12 @@ def main(args):
                                              declarations = {}
                                             ),
                                        indent = 1)
-                print( formatted )
+
+                from pygments import highlight, lexers, formatters
+                colored_json = highlight(formatted, lexers.JsonLexer(), formatters.TerminalFormatter())
+                print(colored_json)
+
+                # ~ print( formatted )
                 # ~ print (len(formatted.split("\n")))
 
         except Exception as e:

@@ -894,13 +894,13 @@ def export_oldvalue_to_json (node, parent_node, slot, current_scope):
          final_edges = [make_json_edge(current_scope, node.node_id, param["index"], 0, parameter = True)])
 
 
-def export_sum_to_json(node, parent_node, slot, current_scope):
+# ~ def export_sum_to_json(node, parent_node, slot, current_scope):
 
-    return dict(
-                 nodes = [],
-                 edges = [],
-                 final_edges = []
-                )
+    # ~ return dict(
+                 # ~ nodes = [],
+                 # ~ edges = [],
+                 # ~ final_edges = []
+                # ~ )
 
 
 # TODO register new variables in the scope
