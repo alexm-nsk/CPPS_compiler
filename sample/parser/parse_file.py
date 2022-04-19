@@ -446,11 +446,11 @@ class TreeVisitor(NodeVisitor):
         of_what  = visited_children[4]
         optional = self.optional_node(visited_children[5])
         when     = optional[3] if optional else None
-        return dict(what = what, of_what = of_what, when = when)
+        return Reduction(type = what, of_what = of_what, when = when)
     
     # ~ reduction_type     = "array" / "value" / "sum"
     def visit_reduction_type(self, node, visited_children):
-        return Reduction(type = node.text)
+        return node.text
         
     def visit_statement(self, node, visited_children):
         return visited_children[0]

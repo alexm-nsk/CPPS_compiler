@@ -1127,18 +1127,30 @@ def export_value_to_json(node, parent_node, slot, current_scope):
 
 
 def export_reduction_to_json(node, parent_node, slot, current_scope):
-
+    # resolve of_what to get type for the third port (through edge)
+    # resolve when and route it to first port
+    # both need to be done inside if node.type == "array":
+    print (node)
+    if node.type == "array":
+        out_ports = [make_port(0,node.node_id, IntegerType())]
+        in_ports  = [
+                              make_port(0, node.node_id, BooleanType()),
+                              make_port(1, node.node_id, IntegerType()),
+                              make_port(2, node.node_id, IntegerType())
+                    ]
+    elif node.type == "value":
+        pass
+    elif node.type == "sum":
+        pass
+        
     retval = dict(
                 name     = "Reduction",
                 operator = node.type,
                 location = "not applicable",
                 # TODO make appropriate type (get it from type of the variable we
                 # get the value of)
-                outPorts = [make_port(0,node.node_id, IntegerType())],
-                inPorts  = [
-                            make_port(0,node.node_id, IntegerType()),
-                            make_port(1,node.node_id, BooleanType())
-                            ],
+                outPorts = out_ports,
+                inPorts  = in_ports,
                 id       = node.node_id,
                 params   = []
              )
@@ -1188,12 +1200,12 @@ def create_returns_for_loop(node, retval, parent_node, slot, current_scope):
     add_ports_and_params(ret , json_nodes[current_scope], out_ports = False)
 
     # ~ "what", "of_what", "when"
-    reduction_ast = node.returns["what"].emit_json( node.returns_id, 0, node.returns_id )
+    reduction_ast = node.returns.emit_json( node.returns_id, 0, node.returns_id )
     # TODO cover multiple outputs
-    ret_ast = node.returns["of_what"][0].emit_json( node.returns_id, 0, node.returns_id )
+    # ~ ret_ast = node.returns.of_what[0].emit_json( node.returns_id, 0, node.returns_id )
     # ~ print (ret_ast)
-    ret["nodes"].extend(ret_ast["nodes"])
-    ret["edges"].extend(ret_ast["edges"] + ret_ast["final_edges"])
+    # ~ ret["nodes"].extend(ret_ast["nodes"])
+    # ~ ret["edges"].extend(ret_ast["edges"] + ret_ast["final_edges"])
 
     retval["reduction"] = ret
 
