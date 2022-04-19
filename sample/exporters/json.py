@@ -1125,6 +1125,10 @@ def export_value_to_json(node, parent_node, slot, current_scope):
                  final_edges = [final_edge]
                 )
 
+# will copy newly defined variables from node's results to dst's in_ports and params:
+def turn_results_into_in_ports_and_params(src, dst):
+    for res in src["results"]:
+        
 
 # this is different "returns"! (it's an IR-returns node
 def create_returns_for_loop(node, retval, parent_node, slot, current_scope):
