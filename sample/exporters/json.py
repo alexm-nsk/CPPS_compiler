@@ -1130,12 +1130,16 @@ def export_reduction_to_json(node, parent_node, slot, current_scope):
     # resolve of_what to get type for the third port (through edge)
     # resolve when and route it to first port
     # both need to be done inside if node.type == "array":
-    print (node)
+    # ~ print (node.type)
+    # ~ print (node.of_what)
+    # ~ print (node.when)
+
+    
     if node.type == "array":
         out_ports = [make_port(0,node.node_id, IntegerType())]
         in_ports  = [
                               make_port(0, node.node_id, BooleanType()),
-                              make_port(1, node.node_id, IntegerType()),
+                              make_port(1, node.node_id, IntegerType()), # starting index
                               make_port(2, node.node_id, IntegerType())
                     ]
     elif node.type == "value":
@@ -1146,16 +1150,36 @@ def export_reduction_to_json(node, parent_node, slot, current_scope):
     retval = dict(
                 name     = "Reduction",
                 operator = node.type,
-                location = "not applicable",
-                # TODO make appropriate type (get it from type of the variable we
-                # get the value of)
+                location = "not applicable",            
                 outPorts = out_ports,
                 inPorts  = in_ports,
                 id       = node.node_id,
-                params   = []
+                params   = [
+                    ["filter", {"index" : 0, "type" : BooleanType(), "nodeId" : node.node_id}],
+                    ["start index", {"index" : 1, "type" : IntegerType(), "nodeId" : node.node_id}],
+                    ["value input", {"index" : 2, "type" : IntegerType(), "nodeId" : node.node_id}],
+                            ]
              )
 
-    return dict(nodes = [retval], edges = [], final_edges = [])
+    json_nodes[node.node_id] = retval
+
+    of_what_ast = node.of_what[0].emit_json(node.node_id, 2, current_scope)
+    # get the type from the edge of the node that puts out the value of reduction expression
+    # we then copy it to in_ports[1] so all the types match
+    edge = of_what_ast["final_edges"][0]
+    type_ = edge[1]["type"]
+    edge[0]["type"] = type_
+    retval["inPorts"][2]["type"] = type_
+    retval["params"][2][1]["type"] = type_
+
+    # ~ print (retval["inPorts"])
+    # ~ print (retval["params"])
+    # ~ print ( of_what_ast["final_edges"][0][0] )
+    # ~ print ( of_what_ast["final_edges"][0][1] )
+
+    return dict(nodes = [retval] + of_what_ast["nodes"],
+                edges = [] + of_what_ast["edges"] + of_what_ast["final_edges"],
+                final_edges = [])
 
 
 # will copy newly defined variables from node's results to dst's in_ports and params:
@@ -1201,6 +1225,8 @@ def create_returns_for_loop(node, retval, parent_node, slot, current_scope):
 
     # ~ "what", "of_what", "when"
     reduction_ast = node.returns.emit_json( node.returns_id, 0, node.returns_id )
+    ret["nodes"].extend(reduction_ast["nodes"])
+    ret["edges"].extend(reduction_ast["edges"] + reduction_ast["final_edges"])
     # TODO cover multiple outputs
     # ~ ret_ast = node.returns.of_what[0].emit_json( node.returns_id, 0, node.returns_id )
     # ~ print (ret_ast)
@@ -1208,7 +1234,8 @@ def create_returns_for_loop(node, retval, parent_node, slot, current_scope):
     # ~ ret["edges"].extend(ret_ast["edges"] + ret_ast["final_edges"])
 
     retval["reduction"] = ret
-
+    # ~ print (ret["params"])
+    # ~ print (ret["inPorts"])
 
 def create_range_for_loop(node, retval, parent_node, slot, current_scope):
     var_name = node.range.what.name
@@ -1222,7 +1249,7 @@ def create_range_for_loop(node, retval, parent_node, slot, current_scope):
 
     type_["location"] = node.range.what.location
 
-    # TODO maybe we should have multiple, but now we have and array with just one pair name-contents
+    # TODO maybe we should have multiple, but now we have array with just one pair name-contents
     results = [ [var_name,
                     {
                         "nodeId"  : node.range_id,
