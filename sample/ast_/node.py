@@ -178,8 +178,8 @@ class Assignment(Statement):
     pass
 
 
-class Returns(Node):
-    pass
+# ~ class Returns(Node):
+    # ~ pass
 
 
 class OldValue(Node):
@@ -201,21 +201,21 @@ class Call(Node):
     pass
 
 
-class Reduction(Node):
-    pass
+# ~ class Reduction(Node):
+    # ~ pass
 
 
-class Sum(Reduction):
-    pass
+# ~ class Sum(Reduction):
+    # ~ pass
 
 
-class ArrayOf(Reduction):
-    pass
+# ~ class ArrayOf(Reduction):
+    # ~ pass
     
 
 
-class Value(Reduction):
-    def __init__(self, *args, **kwargs):
-       super().__init__(**kwargs, no_id = False)
-       # this is a placeholder for now
-       self.true_literal = Literal(value = True, type = BooleanType(), location = "not applicable")
+# ~ class Value(Reduction):
+    # ~ def __init__(self, *args, **kwargs):
+       # ~ super().__init__(**kwargs, no_id = False)
+       # ~ # this is a placeholder for now
+       # ~ self.true_literal = Literal(value = True, type = BooleanType(), location = "not applicable")

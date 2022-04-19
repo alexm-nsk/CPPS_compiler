@@ -1126,31 +1126,6 @@ def export_value_to_json(node, parent_node, slot, current_scope):
                 )
 
 
-def export_reduction_to_json(node, parent_node, slot, current_scope):
-    # ~ node.when
-    # ~ node.of_what
-    # ~ node.what (str)
-    ret_val = dict(
-                    id = node.node_id,
-                    
-                 )
-                 
-    json_nodes[node.node_id] = ret_val    
-    
-    node.when.emit_json(node.node_id, 0, current_scope)
-    return dict(nodes = [ret_val], edges = [], final_edges = [])
-    
-    
-# this is "returns" in terms of reductions
-def export_returns_to_json(node, parent_node, slot, current_scope):
-    # ~ node.reduction.when
-    # ~ node.reduction.of_what
-    # ~ node.reduction.what (str)
-    # ~ print (node.reduction.when)
-    reduction_json = node.reduction.emit_json(parent_node, slot, current_scope)
-    return reduction_json
-    # ~ return dict(nodes = [], edges = [], final_edges = [])
-
 # this is different "returns"! (it's an IR-returns node
 def create_returns_for_loop(node, retval, parent_node, slot, current_scope):
 
@@ -1179,14 +1154,27 @@ def create_returns_for_loop(node, retval, parent_node, slot, current_scope):
 
     # register the "returns" node:
     json_nodes[ret_id] = ret
+
+    # ~ print (retval["range"])
+    # ~ add_ports_and_params(ret , retval["range"], out_ports = False)
+
+    print (retval["range"]["inPorts"])
+    
     # copy parameters and ports from the scope:
     add_ports_and_params(ret , json_nodes[current_scope], out_ports = False)
+    # ~ print (retval["range"])
+    # ~ for k, v in node.returns.items():
+        # ~ print (k, ":", v)
 
+    # ~ "what", "of_what", "when"
+    # ~ node.returns
+
+    
     # TODO cover multiple outputs
-    ret_ast = node.returns.emit_json( node.returns_id, 0, node.returns_id )
+    ret_ast = node.returns["of_what"][0].emit_json( node.returns_id, 0, node.returns_id )
 
-    ret["nodes"].extend(ret_ast["nodes"])
-    ret["edges"].extend(ret_ast["edges"] + ret_ast["final_edges"])
+    # ~ ret["nodes"].extend(ret_ast["nodes"])
+    # ~ ret["edges"].extend(ret_ast["edges"] + ret_ast["final_edges"])
 
     retval["reduction"] = ret
 
@@ -1197,12 +1185,12 @@ def create_range_for_loop(node, retval, parent_node, slot, current_scope):
 
     # find iterated variable among function's parameters
     try:
-        type_ = next (filter (lambda x:  x[0]==iterable_name, retval["params"]))[1]["type"]
+        type_ = next (filter (lambda x:  x[0]==iterable_name, retval["params"]))[1]["type"]["element"]
     except Exception as a:
-        raise Exception(f"parameter {node.range.in_what.name} not found in function parameters ({node.range.in_what.location})")
+        raise Exception(f"parameter {node.range.in_what.name} not found in scope ({node.range.in_what.location})")
 
     type_["location"] = node.range.what.location
-    
+
     results = [var_name,
                     {
                         "nodeId"  : node.range_id,
@@ -1211,8 +1199,19 @@ def create_range_for_loop(node, retval, parent_node, slot, current_scope):
                     }
                 ]
     # TODO get index, get type from node.range.in_what, get node_id from range_id
-    print (results)
-    pass
+    # ~ print (results)
+
+    retval["range"] = dict(
+                            name     = "RangeGen",
+                            results  = results,
+                            id       = node.range_id,
+                            outPorts = [make_port(0,node.range_id, type_)],
+                            
+                            nodes    = [],
+                            edges    = [])
+    # ~ print ("here")
+    copy_ports_and_params(retval["range"], json_nodes[current_scope], out_ports = False)
+    json_nodes[node.range_id] = retval["range"]
 
 
 def export_loop_to_json (node, parent_node, slot, current_scope):

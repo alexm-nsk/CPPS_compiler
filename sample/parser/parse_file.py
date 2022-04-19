@@ -370,7 +370,7 @@ class TreeVisitor(NodeVisitor):
 
     def visit_returns(self, node, visited_children):
         reduction = visited_children[2]
-        return Returns(reduction = reduction)
+        return reduction
     
     def visit_while(self, node, visited_children):
         
@@ -446,7 +446,7 @@ class TreeVisitor(NodeVisitor):
         of_what  = visited_children[4]
         optional = self.optional_node(visited_children[5])
         when     = optional[3] if optional else None
-        return Reduction(what = what, of_what = of_what, when = when)
+        return dict(what = what, of_what = of_what, when = when)
     
     # ~ reduction_type     = "array" / "value" / "sum"
     def visit_reduction_type(self, node, visited_children):
