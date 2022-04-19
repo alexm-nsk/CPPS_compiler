@@ -201,8 +201,8 @@ class Call(Node):
     pass
 
 
-# ~ class Reduction(Node):
-    # ~ pass
+class Reduction(Node):
+    pass
 
 
 # ~ class Sum(Reduction):

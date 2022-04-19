@@ -1125,13 +1125,33 @@ def export_value_to_json(node, parent_node, slot, current_scope):
                  final_edges = [final_edge]
                 )
 
+
+def export_reduction_to_json(node, parent_node, slot, current_scope):
+
+    retval = dict(
+                name     = "Reduction",
+                operator = node.type,
+                location = "not applicable",
+                # TODO make appropriate type (get it from type of the variable we
+                # get the value of)
+                outPorts = [make_port(0,node.node_id, IntegerType())],
+                inPorts  = [
+                            make_port(0,node.node_id, IntegerType()),
+                            make_port(1,node.node_id, BooleanType())
+                            ],
+                id       = node.node_id,
+                params   = []
+             )
+
+    return dict(nodes = [retval], edges = [], final_edges = [])
+
+
 # will copy newly defined variables from node's results to dst's in_ports and params:
 def turn_results_into_in_ports_and_params(src, dst):
-    # ~ print (src["results"])
     for i, res in enumerate(src["results"]):
-        # ~ print (res)
         dst["inPorts"].insert(i, make_port(i, dst["id"], res[1]["type"]))
         dst["params"].insert(i, [res[0], res[1]["type"]])
+
 
 # this is different "returns"! (it's an IR-returns node
 def create_returns_for_loop(node, retval, parent_node, slot, current_scope):
@@ -1163,15 +1183,15 @@ def create_returns_for_loop(node, retval, parent_node, slot, current_scope):
     json_nodes[ret_id] = ret
 
     turn_results_into_in_ports_and_params(retval["range"], ret)
-    
+
     # copy parameters and ports from the scope:
     add_ports_and_params(ret , json_nodes[current_scope], out_ports = False)
 
     # ~ "what", "of_what", "when"
-    
+    reduction_ast = node.returns["what"].emit_json( node.returns_id, 0, node.returns_id )
     # TODO cover multiple outputs
     ret_ast = node.returns["of_what"][0].emit_json( node.returns_id, 0, node.returns_id )
-    print (ret_ast)
+    # ~ print (ret_ast)
     ret["nodes"].extend(ret_ast["nodes"])
     ret["edges"].extend(ret_ast["edges"] + ret_ast["final_edges"])
 
@@ -1190,6 +1210,7 @@ def create_range_for_loop(node, retval, parent_node, slot, current_scope):
 
     type_["location"] = node.range.what.location
 
+    # TODO maybe we should have multiple, but now we have and array with just one pair name-contents
     results = [ [var_name,
                     {
                         "nodeId"  : node.range_id,
@@ -1198,14 +1219,13 @@ def create_range_for_loop(node, retval, parent_node, slot, current_scope):
                     }]
                 ]
     # TODO get index, get type from node.range.in_what, get node_id from range_id
-    # ~ print (results)
 
     retval["range"] = dict(
                             name     = "RangeGen",
                             results  = results,
                             id       = node.range_id,
                             outPorts = [make_port(0,node.range_id, type_)],
-                            
+
                             nodes    = [],
                             edges    = [])
     # ~ print ("here")

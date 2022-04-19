@@ -450,7 +450,7 @@ class TreeVisitor(NodeVisitor):
     
     # ~ reduction_type     = "array" / "value" / "sum"
     def visit_reduction_type(self, node, visited_children):
-        return node.text
+        return Reduction(type = node.text)
         
     def visit_statement(self, node, visited_children):
         return visited_children[0]
