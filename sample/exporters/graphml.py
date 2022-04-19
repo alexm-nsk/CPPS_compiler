@@ -146,19 +146,17 @@ def make_node(node):
     elif node["name"] == "LoopExpression":
 
         contents  = "".join(
-                            [make_node(node[field]) if field in node else "" for field in ["init", "body", "preCondition", "reduction"]]
+                            [make_node(node[field]) if field in node else "" for field in ["range", "init", "body", "preCondition", "reduction"]]
                             )
 
         contents += make_edges()
         contents  = make_graph(node["id"]+"_graph", contents)
+        
     elif node["name"] == "Let":
-
-        contents  = "".join(
-                            [make_node(node[field]) for field in ["init", "body"]]
-                            )
-
+        contents  = "".join( [make_node(node[field]) for field in ["init", "body"]] )
         contents += make_edges()
         contents  = make_graph(node["id"]+"_graph", contents)
+        
     else:
         contents = make_edges()
         if contents:

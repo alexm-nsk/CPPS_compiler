@@ -1127,8 +1127,11 @@ def export_value_to_json(node, parent_node, slot, current_scope):
 
 # will copy newly defined variables from node's results to dst's in_ports and params:
 def turn_results_into_in_ports_and_params(src, dst):
-    for res in src["results"]:
-        
+    # ~ print (src["results"])
+    for i, res in enumerate(src["results"]):
+        # ~ print (res)
+        dst["inPorts"].insert(i, make_port(i, dst["id"], res[1]["type"]))
+        dst["params"].insert(i, [res[0], res[1]["type"]])
 
 # this is different "returns"! (it's an IR-returns node
 def create_returns_for_loop(node, retval, parent_node, slot, current_scope):
@@ -1159,26 +1162,18 @@ def create_returns_for_loop(node, retval, parent_node, slot, current_scope):
     # register the "returns" node:
     json_nodes[ret_id] = ret
 
-    # ~ print (retval["range"])
-    # ~ add_ports_and_params(ret , retval["range"], out_ports = False)
-
-    print (retval["range"]["inPorts"])
+    turn_results_into_in_ports_and_params(retval["range"], ret)
     
     # copy parameters and ports from the scope:
     add_ports_and_params(ret , json_nodes[current_scope], out_ports = False)
-    # ~ print (retval["range"])
-    # ~ for k, v in node.returns.items():
-        # ~ print (k, ":", v)
 
     # ~ "what", "of_what", "when"
-    # ~ node.returns
-
     
     # TODO cover multiple outputs
     ret_ast = node.returns["of_what"][0].emit_json( node.returns_id, 0, node.returns_id )
-
-    # ~ ret["nodes"].extend(ret_ast["nodes"])
-    # ~ ret["edges"].extend(ret_ast["edges"] + ret_ast["final_edges"])
+    print (ret_ast)
+    ret["nodes"].extend(ret_ast["nodes"])
+    ret["edges"].extend(ret_ast["edges"] + ret_ast["final_edges"])
 
     retval["reduction"] = ret
 
@@ -1195,12 +1190,12 @@ def create_range_for_loop(node, retval, parent_node, slot, current_scope):
 
     type_["location"] = node.range.what.location
 
-    results = [var_name,
+    results = [ [var_name,
                     {
                         "nodeId"  : node.range_id,
                         "type"  : type_ ,
                         "index" : 0
-                    }
+                    }]
                 ]
     # TODO get index, get type from node.range.in_what, get node_id from range_id
     # ~ print (results)
