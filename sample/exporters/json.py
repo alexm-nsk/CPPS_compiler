@@ -603,7 +603,10 @@ def export_algebraic_to_json (node, parent_node, slot, current_scope):
                     if(var_name == name):
                         identifier_slot = n
                         # ~ print (var_type)
-                        type_ = var_type["type"]#["name"]
+                        try:
+                            type_ = var_type#["type"]#["name"]
+                        except:
+                            print (var_type)
                         break
                 # if we haven't found it, raise an exception:
                 if identifier_slot == -1:
@@ -1171,14 +1174,12 @@ def export_reduction_to_json(node, parent_node, slot, current_scope):
     edge[0]["type"] = type_
     retval["inPorts"][2]["type"] = type_
     retval["params"][2][1]["type"] = type_
+    print (node.when)
+    when_ast = node.when.emit_json(node.node_id, 0, current_scope)
 
-    # ~ print (retval["inPorts"])
-    # ~ print (retval["params"])
-    # ~ print ( of_what_ast["final_edges"][0][0] )
-    # ~ print ( of_what_ast["final_edges"][0][1] )
-
+    final_edge = make_json_edge(node.node_id, parent_node,0 , slot, parent = True) 
     return dict(nodes = [retval] + of_what_ast["nodes"],
-                edges = [] + of_what_ast["edges"] + of_what_ast["final_edges"],
+                edges = [final_edge] + of_what_ast["edges"] + of_what_ast["final_edges"],
                 final_edges = [])
 
 
