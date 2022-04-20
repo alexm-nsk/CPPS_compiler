@@ -116,26 +116,20 @@ def make_node(node):
         ports_str =  "".join(
                     [f'<port name=\"in{n}\" type=\"{ get_type (port["type"]) }\"/>\n'
                         if not "params" in node else
-
                         f'<port name=\"in{n}\" type=\"{ get_type (port["type"]) }\">\n  <data key="label">{node["params"][n][0]}</data>\n</port>\n'
-                        
-                        for n, port in enumerate(node["inPorts"])]
-                   )
+                        for n, port in enumerate(node["inPorts"])])
 
     if "outPorts" in node:
         ports_str +=  "\n".join(
                     [f'<port name=\"out{n}\" type=\"{ get_type (port["type"]) }\"/>\n'
                         if not "results" in node else
-
                         f'<port name=\"out{n}\" type=\"{ get_type (port["type"]) }\">\n  <data key="label">{node["results"][n][0]}</data>\n</port>\n'
-                        
                         for n, port in enumerate(node["outPorts"])]
                    )
 
     if "nodes" in node and node["nodes"]:
         contents = "\n".join([make_node(node) for node in node["nodes"]])
         contents += make_edges()
-        # ~ print (contents)
         contents = make_graph(node["id"]+"_graph", contents)
     #TODO make test for "If" here: (and add join below)
     elif "branches" in node:
@@ -144,19 +138,14 @@ def make_node(node):
         contents += make_edges()
         contents  = make_graph(node["id"]+"_graph", contents)
     elif node["name"] == "LoopExpression":
-
-        contents  = "".join(
-                            [make_node(node[field]) if field in node else "" for field in ["range", "init", "body", "preCondition", "reduction"]]
-                            )
-
+        contents  = "".join([make_node(node[field]) if field in node else ""
+                             for field in ["range", "init", "body", "preCondition", "reduction"]])
         contents += make_edges()
         contents  = make_graph(node["id"]+"_graph", contents)
-        
     elif node["name"] == "Let":
         contents  = "".join( [make_node(node[field]) for field in ["init", "body"]] )
         contents += make_edges()
         contents  = make_graph(node["id"]+"_graph", contents)
-        
     else:
         contents = make_edges()
         if contents:

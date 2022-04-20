@@ -57,7 +57,7 @@ def main(args):
                 from pygments.styles import get_all_styles
                 from pygments import highlight, lexers, formatters
                 styles = list(get_all_styles())
-                color_style = styles[15] if len(styles) > 15 else styles[0]
+                color_style = styles[14] if len(styles) > 15 else styles[0]
 
             output = parse(file_contents)
 
