@@ -1174,16 +1174,18 @@ def export_reduction_to_json(node, parent_node, slot, current_scope):
     edge[0]["type"] = type_
     retval["inPorts"][2]["type"] = type_
     retval["params"][2][1]["type"] = type_
-    print (node.when)
+
     when_ast = node.when.emit_json(node.node_id, 0, current_scope)
 
-    final_edge = make_json_edge(node.node_id, parent_node, 0 , slot, parent = True)
-
-    # ~ one = ast.node.Literal(value = 1, type = IntegerType)
+    one = ast_.node.Literal(value = 1, type = IntegerType(), location = "N/A")
+    one_ast = one.emit_json(node.node_id, 1, current_scope)
     
-    return dict(nodes = [retval] + of_what_ast["nodes"] + when_ast["nodes"],
+    final_edge = make_json_edge(node.node_id, parent_node, 0 , slot, parent = True)
+    
+    return dict(nodes = [retval] + of_what_ast["nodes"] + when_ast["nodes"] + one_ast["nodes"],
                 edges = [final_edge] + of_what_ast["edges"] + of_what_ast["final_edges"]
-                        + when_ast["edges"] + when_ast["final_edges"],
+                        + when_ast["edges"] + when_ast["final_edges"]
+                        + one_ast["edges"] + one_ast["final_edges"],
                 final_edges = [final_edge])
 
 
