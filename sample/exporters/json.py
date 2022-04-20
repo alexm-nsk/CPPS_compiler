@@ -603,10 +603,10 @@ def export_algebraic_to_json (node, parent_node, slot, current_scope):
                     if(var_name == name):
                         identifier_slot = n
                         # ~ print (var_type)
-                        try:
-                            type_ = var_type#["type"]#["name"]
-                        except:
-                            print (var_type)
+                        # ~ try:
+                        type_ = var_type#["type"]#["name"]
+                        # ~ except:
+                            # ~ print (var_type)
                         break
                 # if we haven't found it, raise an exception:
                 if identifier_slot == -1:
@@ -1178,9 +1178,10 @@ def export_reduction_to_json(node, parent_node, slot, current_scope):
     when_ast = node.when.emit_json(node.node_id, 0, current_scope)
 
     final_edge = make_json_edge(node.node_id, parent_node,0 , slot, parent = True) 
-    return dict(nodes = [retval] + of_what_ast["nodes"],
-                edges = [final_edge] + of_what_ast["edges"] + of_what_ast["final_edges"],
-                final_edges = [])
+    return dict(nodes = [retval] + of_what_ast["nodes"] + when_ast["nodes"],
+                edges = [final_edge] + of_what_ast["edges"] + of_what_ast["final_edges"]
+                        + when_ast["edges"] + when_ast["final_edges"],
+                final_edges = [final_edge])
 
 
 # will copy newly defined variables from node's results to dst's in_ports and params:
