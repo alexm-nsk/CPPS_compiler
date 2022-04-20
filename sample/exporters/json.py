@@ -604,7 +604,7 @@ def export_algebraic_to_json (node, parent_node, slot, current_scope):
                         identifier_slot = n
                         # ~ print (var_type)
                         # ~ try:
-                        type_ = var_type#["type"]#["name"]
+                        type_ = var_type["type"]#["name"]
                         # ~ except:
                             # ~ print (var_type)
                         break
@@ -1177,7 +1177,10 @@ def export_reduction_to_json(node, parent_node, slot, current_scope):
     print (node.when)
     when_ast = node.when.emit_json(node.node_id, 0, current_scope)
 
-    final_edge = make_json_edge(node.node_id, parent_node,0 , slot, parent = True) 
+    final_edge = make_json_edge(node.node_id, parent_node, 0 , slot, parent = True)
+
+    # ~ one = ast.node.Literal(value = 1, type = IntegerType)
+    
     return dict(nodes = [retval] + of_what_ast["nodes"] + when_ast["nodes"],
                 edges = [final_edge] + of_what_ast["edges"] + of_what_ast["final_edges"]
                         + when_ast["edges"] + when_ast["final_edges"],
@@ -1188,7 +1191,10 @@ def export_reduction_to_json(node, parent_node, slot, current_scope):
 def turn_results_into_in_ports_and_params(src, dst):
     for i, res in enumerate(src["results"]):
         dst["inPorts"].insert(i, make_port(i, dst["id"], res[1]["type"]))
-        dst["params"].insert(i, [res[0], res[1]["type"]])
+        for p in dst["params"]:
+            p[1]["type"]["index"] += 1
+        dst["params"].insert(i, [res[0], {"type": res[1]["type"], "location" : "N/A", "index" : i}])
+        
 
 
 # this is different "returns"! (it's an IR-returns node
