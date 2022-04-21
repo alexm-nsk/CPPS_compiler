@@ -1244,7 +1244,6 @@ def create_returns_for_loop(node, retval, parent_node, slot, current_scope):
 def export_scatter_to_json(node, parent_node, slot, current_scope):
     var_name = node.what.name
     iterable_name = node.in_what.name # TODO it's not always an identifier
-
     # find iterated variable among function's parameters
     try:
         input_type = next (filter (lambda x:  x[0]==iterable_name, json_nodes[current_scope]["params"]))[1]["type"]
@@ -1268,8 +1267,12 @@ def export_scatter_to_json(node, parent_node, slot, current_scope):
 
     json_nodes[node.node_id] = retval
     
+    iterated_ast = node.in_what.emit_json(node.node_id, 0, current_scope)
+    
     output_edge = make_json_edge(node.node_id, parent_node, 0, 0, parent = True)
-    return dict (nodes = [retval], edges = [output_edge], final_edges = [])
+    return dict (nodes = [retval] + iterated_ast["nodes"],
+                edges = [output_edge] + iterated_ast["edges"],
+                final_edges = [] + iterated_ast["final_edges"])
 
 
 def extend_graph(node, subgraph):
