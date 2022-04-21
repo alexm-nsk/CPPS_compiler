@@ -1183,9 +1183,9 @@ def export_reduction_to_json(node, parent_node, slot, current_scope):
     final_edge = make_json_edge(node.node_id, parent_node, 0 , slot, parent = True)
 
     return dict(nodes = [retval] + of_what_ast["nodes"] + when_ast["nodes"] + one_ast["nodes"],
-                edges = [final_edge] + of_what_ast["edges"] + of_what_ast["final_edges"]
-                        + when_ast["edges"] + when_ast["final_edges"]
-                        + one_ast["edges"] + one_ast["final_edges"],
+                edges =   of_what_ast["edges"] + of_what_ast["final_edges"]
+                        + when_ast["edges"]    + when_ast["final_edges"]
+                        + one_ast["edges"]     + one_ast["final_edges"],
                 final_edges = [final_edge])
 
 
@@ -1261,16 +1261,17 @@ def export_scatter_to_json(node, parent_node, slot, current_scope):
                                             ]
     json_nodes[parent_node]["outPorts"] = [make_port(0, parent_node, type_)]
     retval = dict(id       = node.node_id,
+                  results  = [["item", type_],["index", IntegerType()]],
                   outPorts = [make_port(0, node.node_id, type_), make_port(1, node.node_id, type_)],
                   inPorts  = [make_port(0, node.node_id, input_type)] ,
                   name     = "Scatter")
 
     json_nodes[node.node_id] = retval
-    
+
     iterated_ast = node.in_what.emit_json(node.node_id, 0, current_scope)
-    
+
     output_edge = make_json_edge(node.node_id, parent_node, 0, 0, parent = True)
-    
+
     return dict (nodes = [retval] + iterated_ast["nodes"],
                 edges = [output_edge] + iterated_ast["edges"],
                 final_edges = [] + iterated_ast["final_edges"])
@@ -1294,7 +1295,6 @@ def create_range_for_loop(node, retval, parent_node, slot, current_scope):
 
     range_ast = node.range.emit_json(node.range_id, 0, node.range_id)
     extend_graph(retval["range"],range_ast)
-    
 
 
 def export_loop_to_json (node, parent_node, slot, current_scope):
