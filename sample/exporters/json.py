@@ -1137,7 +1137,7 @@ def export_reduction_to_json(node, parent_node, slot, current_scope):
     # ~ print (node.of_what)
     # ~ print (node.when)
 
-    
+
     if node.type == "array":
         out_ports = [make_port(0,node.node_id, IntegerType())]
         in_ports  = [
@@ -1149,11 +1149,11 @@ def export_reduction_to_json(node, parent_node, slot, current_scope):
         pass
     elif node.type == "sum":
         pass
-        
+
     retval = dict(
                 name     = "Reduction",
                 operator = node.type,
-                location = "not applicable",            
+                location = "not applicable",
                 outPorts = out_ports,
                 inPorts  = in_ports,
                 id       = node.node_id,
@@ -1179,9 +1179,9 @@ def export_reduction_to_json(node, parent_node, slot, current_scope):
 
     one = ast_.node.Literal(value = 1, type = IntegerType(), location = "N/A")
     one_ast = one.emit_json(node.node_id, 1, current_scope)
-    
+
     final_edge = make_json_edge(node.node_id, parent_node, 0 , slot, parent = True)
-    
+
     return dict(nodes = [retval] + of_what_ast["nodes"] + when_ast["nodes"] + one_ast["nodes"],
                 edges = [final_edge] + of_what_ast["edges"] + of_what_ast["final_edges"]
                         + when_ast["edges"] + when_ast["final_edges"]
@@ -1196,7 +1196,7 @@ def turn_results_into_in_ports_and_params(src, dst):
         for p in dst["params"]:
             p[1]["type"]["index"] += 1
         dst["params"].insert(i, [res[0], {"type": res[1]["type"], "location" : "N/A", "index" : i}])
-        
+
 
 
 # this is different "returns"! (it's an IR-returns node
@@ -1237,49 +1237,60 @@ def create_returns_for_loop(node, retval, parent_node, slot, current_scope):
     reduction_ast = node.returns.emit_json( node.returns_id, 0, node.returns_id )
     ret["nodes"].extend(reduction_ast["nodes"])
     ret["edges"].extend(reduction_ast["edges"] + reduction_ast["final_edges"])
-    # TODO cover multiple outputs
-    # ~ ret_ast = node.returns.of_what[0].emit_json( node.returns_id, 0, node.returns_id )
-    # ~ print (ret_ast)
-    # ~ ret["nodes"].extend(ret_ast["nodes"])
-    # ~ ret["edges"].extend(ret_ast["edges"] + ret_ast["final_edges"])
 
     retval["reduction"] = ret
-    # ~ print (ret["params"])
-    # ~ print (ret["inPorts"])
 
-def create_range_for_loop(node, retval, parent_node, slot, current_scope):
-    var_name = node.range.what.name
-    iterable_name = node.range.in_what.name
+
+def export_scatter_to_json(node, parent_node, slot, current_scope):
+    var_name = node.what.name
+    iterable_name = node.in_what.name # TODO it's not always an identifier
 
     # find iterated variable among function's parameters
     try:
-        type_ = next (filter (lambda x:  x[0]==iterable_name, retval["params"]))[1]["type"]["element"]
+        input_type = next (filter (lambda x:  x[0]==iterable_name, json_nodes[current_scope]["params"]))[1]["type"]
+        type_ = input_type["element"]
     except Exception as a:
-        raise Exception(f"parameter {node.range.in_what.name} not found in scope ({node.range.in_what.location})")
+        raise Exception(f"parameter {node.in_what.name} not found in scope ({node.in_what.location})")
 
-    type_["location"] = node.range.what.location
+    json_nodes[parent_node]["results"] =   [ [var_name,
+                                                {
+                                                    "nodeId"  : parent_node,
+                                                    "type"  : type_ ,
+                                                    "index" : 0
+                                                }]
+                                            ]
+    json_nodes[parent_node]["outPorts"] = [make_port(0, parent_node, type_)]
+    retval = dict(id       = node.node_id,
+                  outPorts = [make_port(0, node.node_id, type_), make_port(1, node.node_id, type_)],
+                  inPorts  = [make_port(0, node.node_id, input_type)] ,
+                  name     = "Scatter"
+                  )
 
-    # TODO maybe we should have multiple, but now we have array with just one pair name-contents
-    results = [ [var_name,
-                    {
-                        "nodeId"  : node.range_id,
-                        "type"  : type_ ,
-                        "index" : 0
-                    }]
-                ]
-    # TODO get index, get type from node.range.in_what, get node_id from range_id
+    json_nodes[node.node_id] = retval
+    
+    output_edge = make_json_edge(node.node_id, parent_node, 0, 0, parent = True)
+    return dict (nodes = [retval], edges = [output_edge], final_edges = [])
 
+
+def extend_graph(node, subgraph):
+    node["nodes"].extend(subgraph["nodes"])
+    node["edges"].extend(subgraph["edges"])
+    node["edges"].extend(subgraph["final_edges"])
+
+
+def create_range_for_loop(node, retval, parent_node, slot, current_scope):
     retval["range"] = dict(
                             name     = "RangeGen",
-                            results  = results,
                             id       = node.range_id,
-                            outPorts = [make_port(0,node.range_id, type_)],
-
                             nodes    = [],
                             edges    = [])
-    # ~ print ("here")
     copy_ports_and_params(retval["range"], json_nodes[current_scope], out_ports = False)
+    # ~ print (retval["range"])
     json_nodes[node.range_id] = retval["range"]
+
+    range_ast = node.range.emit_json(node.range_id, 0, node.range_id)
+    extend_graph(retval["range"],range_ast)
+    
 
 
 def export_loop_to_json (node, parent_node, slot, current_scope):
