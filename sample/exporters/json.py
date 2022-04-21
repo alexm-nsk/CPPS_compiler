@@ -1153,7 +1153,7 @@ def export_reduction_to_json(node, parent_node, slot, current_scope):
     retval = dict(
                 name     = "Reduction",
                 operator = node.type,
-                location = "not applicable",
+                location = node.location,
                 outPorts = out_ports,
                 inPorts  = in_ports,
                 id       = node.node_id,
@@ -1206,7 +1206,7 @@ def create_returns_for_loop(node, retval, parent_node, slot, current_scope):
 
     ret = {
             "name":     "Returns",
-            "location": "not applicable",
+            "location": node.location,
             "outPorts": [make_port(0,node.node_id, IntegerType())],
             "inPorts":  [],
             "id":       ret_id,
@@ -1219,7 +1219,7 @@ def create_returns_for_loop(node, retval, parent_node, slot, current_scope):
     if node.init:
         for index, arg in enumerate(node.init):
             for double in range(2):
-                ret["inPorts"].append(make_port(len(ret["inPorts"]) ,node.node_id, IntegerType()))
+                ret["inPorts"].append(make_port(len(ret["inPorts"]), node.node_id, IntegerType()))
                 ret["params"].append([arg.identifier.name,
                                     emit_type_object(node.node_id, IntegerType(),
                                                     len(ret["params"]),

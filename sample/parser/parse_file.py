@@ -449,7 +449,7 @@ class TreeVisitor(NodeVisitor):
         of_what  = visited_children[4]
         optional = self.optional_node(visited_children[5])
         when     = optional[3] if optional else None
-        return Reduction(type = what, of_what = of_what, when = when)
+        return Reduction(type = what, of_what = of_what, when = when, location = self.get_location(node))
     
     # ~ reduction_type     = "array" / "value" / "sum"
     def visit_reduction_type(self, node, visited_children):
