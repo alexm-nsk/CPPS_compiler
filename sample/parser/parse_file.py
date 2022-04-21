@@ -376,10 +376,13 @@ class TreeVisitor(NodeVisitor):
         
         return None
     
-    def visit_range_in(self, node, visited_children):
+    def visit_range(self, node, visited_children):
+        return visited_children[0]
+    
+    def visit_range_scatter(self, node, visited_children):
         what    = visited_children[0]
         in_what = visited_children[4]
-        return RangeIn(what = what, in_what = in_what)
+        return Scatter(what = what, in_what = in_what)
     
     def visit_statements(self, node, visited_children):
 

@@ -129,7 +129,7 @@ class Loop(Node):
        #self.ret_id  = Node.get_node_id()
 
 
-class RangeIn(Node):
+class Scatter(Node):
     
     pass
 
