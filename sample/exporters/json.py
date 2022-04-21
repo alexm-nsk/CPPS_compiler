@@ -1251,7 +1251,8 @@ def export_scatter_to_json(node, parent_node, slot, current_scope):
     except Exception as a:
         raise Exception(f"parameter {node.in_what.name} not found in scope ({node.in_what.location})")
 
-    json_nodes[parent_node]["results"] =   [ [var_name,
+    json_nodes[parent_node]["results"] =   [
+                                                [var_name,
                                                 {
                                                     "nodeId"  : parent_node,
                                                     "type"  : type_ ,
@@ -1262,14 +1263,14 @@ def export_scatter_to_json(node, parent_node, slot, current_scope):
     retval = dict(id       = node.node_id,
                   outPorts = [make_port(0, node.node_id, type_), make_port(1, node.node_id, type_)],
                   inPorts  = [make_port(0, node.node_id, input_type)] ,
-                  name     = "Scatter"
-                  )
+                  name     = "Scatter")
 
     json_nodes[node.node_id] = retval
     
     iterated_ast = node.in_what.emit_json(node.node_id, 0, current_scope)
     
     output_edge = make_json_edge(node.node_id, parent_node, 0, 0, parent = True)
+    
     return dict (nodes = [retval] + iterated_ast["nodes"],
                 edges = [output_edge] + iterated_ast["edges"],
                 final_edges = [] + iterated_ast["final_edges"])
