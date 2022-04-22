@@ -500,7 +500,6 @@ def parse_file(input_text):
     parsed_functions = []
 
     return function_tree_visitor.visit( grammar.parse(input_text) )
-    return
 
     for function_text in function_matches:
 
