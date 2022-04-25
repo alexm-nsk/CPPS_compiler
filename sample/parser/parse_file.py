@@ -397,6 +397,9 @@ class TreeVisitor(NodeVisitor):
         #print ("value", value)
         return Assignment(identifier = identifier, value = value)
 
+
+    def visit_equation(self, node, visited_children):
+        return dict(left = visited_children[0], right = visited_children[4])
     # ~ reduction_sum      = "sum" _ "of" _ exp
     # ~ def visit_reduction_sum(self, node, visited_children):
 

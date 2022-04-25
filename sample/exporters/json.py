@@ -1158,9 +1158,10 @@ def export_reduction_to_json(node, parent_node, slot, current_scope):
                 inPorts  = in_ports,
                 id       = node.node_id,
                 params   = [
-                    ["filter", {"index" : 0, "type" : BooleanType(), "nodeId" : node.node_id}],
-                    ["start index", {"index" : 1, "type" : IntegerType(), "nodeId" : node.node_id}],
-                    ["value input", {"index" : 2, "type" : IntegerType(), "nodeId" : node.node_id}],
+                    # TODO check why it's neccessary to put emit_json for JSON export, and not for GraphML
+                    ["filter", {"index" : 0, "type" : BooleanType().emit_json(), "nodeId" : node.node_id}],
+                    ["start index", {"index" : 1, "type" : IntegerType().emit_json(), "nodeId" : node.node_id}],
+                    ["value input", {"index" : 2, "type" : IntegerType().emit_json(), "nodeId" : node.node_id}],
                             ]
              )
 
@@ -1261,7 +1262,7 @@ def export_scatter_to_json(node, parent_node, slot, current_scope):
                                             ]
     json_nodes[parent_node]["outPorts"] = [make_port(0, parent_node, type_)]
     retval = dict(id       = node.node_id,
-                  results  = [["item", type_],["index", IntegerType()]],
+                  results  = [["item", type_],["index", IntegerType().emit_json()]],
                   outPorts = [make_port(0, node.node_id, type_), make_port(1, node.node_id, type_)],
                   inPorts  = [make_port(0, node.node_id, input_type)] ,
                   name     = "Scatter")
