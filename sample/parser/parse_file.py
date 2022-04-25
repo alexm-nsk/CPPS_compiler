@@ -400,6 +400,14 @@ class TreeVisitor(NodeVisitor):
 
     def visit_equation(self, node, visited_children):
         return dict(left = visited_children[0], right = visited_children[4])
+
+
+    def visit_builtin_call(self, node, visited_children):
+        name = visited_children[1].text
+        # ~ for n,i in enumerate(visited_children):
+            # ~ print (n, ": ", visited_children[n])
+        # ~ print (node)
+        return BuiltInCall(function_name = name, arguments = visited_children[5], location = self.get_location(node))
     # ~ reduction_sum      = "sum" _ "of" _ exp
     # ~ def visit_reduction_sum(self, node, visited_children):
 

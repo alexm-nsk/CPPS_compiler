@@ -205,6 +205,10 @@ class Reduction(Node):
     pass
 
 
+class BuiltInCall(Node):
+    pass
+
+
 # ~ class Sum(Reduction):
     # ~ pass
 

@@ -488,6 +488,51 @@ def export_call_to_json (node, parent_node, slot, current_scope):
 #---------------------------------------------------------------------------------------------
 
 
+def export_builtincall_to_json (node, parent_node, slot, current_scope):
+
+    function_name = node.function_name
+
+    if not function_name in ast_.node.Function.functions:
+        raise Exception ("Function '%s' referenced to at %s not found" % (function_name, node.location))
+
+    ret_val = {}
+
+    for field, value in node.__dict__.items():
+        IR_name          = field_sub_table[field] if field in field_sub_table else field
+        ret_val[IR_name] = value
+
+    called_function = ast_.node.Function.functions[function_name]
+
+    ret_val = dict(inPorts  = function_gen_in_ports(called_function, node.node_id),
+                   outPorts = function_gen_out_ports(called_function, node.node_id))
+
+    ret_val.update( dict(
+                    id       = node.node_id,
+                    callee   = function_name,
+                    location = node.location,
+                    name     = "FunctionCall",
+                    params   = function_gen_params(called_function),
+                   ))
+
+    json_nodes[node.node_id] = ret_val
+
+    args_nodes = []
+    args_edges = []
+
+    for i, arg in enumerate(node.args):
+        children = arg.emit_json(node.node_id, 0, current_scope)
+        args_nodes.extend ( children ["nodes"] )
+        args_edges.extend ( children ["edges"] + children ["final_edges"] )
+
+    json_nodes[node.node_id].update ( ret_val )
+
+    final_edge = make_json_edge(node.node_id, parent_node, 0, slot, parent = (parent_node == current_scope))
+    return dict(nodes = [ret_val] + args_nodes, edges = args_edges , final_edges = [final_edge])
+
+
+#---------------------------------------------------------------------------------------------
+
+
 def gen_ports(ins, outs, node_id):
 
     inPorts  = []
