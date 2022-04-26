@@ -76,6 +76,9 @@ class Function(Node):
 
     #static field storing name - function node pairs
     functions = {}
+    built_ins = {
+                    "size" : dict (in_ports = [ArrayType(IntegerType())], out_ports = [IntegerType()])
+                }
 
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)

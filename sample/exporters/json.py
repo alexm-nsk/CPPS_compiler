@@ -83,7 +83,7 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
         src_type = src_port["type"]
 
     except Exception as e:
-        print ("no src ", str(e))
+        print ("no src ", str(e), json_nodes[from_][port_type], src_index)
 
     try:
         port_type = "outPorts" if parent else "inPorts"
@@ -492,8 +492,8 @@ def export_builtincall_to_json (node, parent_node, slot, current_scope):
 
     function_name = node.function_name
 
-    if not function_name in ast_.node.Function.functions:
-        raise Exception ("Function '%s' referenced to at %s not found" % (function_name, node.location))
+    # ~ if not function_name in ast_.node.Function.functions:
+        # ~ raise Exception ("Function '%s' referenced to at %s not found" % (function_name, node.location))
 
     ret_val = {}
 
@@ -501,18 +501,22 @@ def export_builtincall_to_json (node, parent_node, slot, current_scope):
         IR_name          = field_sub_table[field] if field in field_sub_table else field
         ret_val[IR_name] = value
 
-    called_function = ast_.node.Function.functions[function_name]
+    #define jsons for built-ins
+    called_function = ast_.node.Function.built_ins[function_name]
 
-    ret_val = dict(inPorts  = function_gen_in_ports(called_function, node.node_id),
-                   outPorts = function_gen_out_ports(called_function, node.node_id))
-
-    ret_val.update( dict(
-                    id       = node.node_id,
-                    callee   = function_name,
-                    location = node.location,
-                    name     = "FunctionCall",
-                    params   = function_gen_params(called_function),
-                   ))
+    in_ports  = [ make_port(n, node.node_id, type_) for n, type_ in enumerate( called_function["in_ports"] )]
+    out_ports = [ make_port(n, node.node_id, type_) for n, type_ in enumerate( called_function["out_ports"] )]
+    params    = [   ["arg" + str(n), make_port(n, node.node_id, type_)]
+                    for n, type_ in enumerate( called_function["in_ports"] ) ]
+    
+    ret_val = dict(inPorts  = in_ports,
+                   outPorts = out_ports,
+                   params   = params,
+                   id       = node.node_id,
+                   callee   = function_name,
+                   location = node.location,
+                   name     = "BuiltInFunctionCall",
+                   )
 
     json_nodes[node.node_id] = ret_val
 
@@ -891,7 +895,7 @@ def export_arrayaccess_to_json (node, parent_node, slot, current_scope):
             # i.e A[][][][*this one*]
             if not node.subarray:
                 final_edges = [make_json_edge(node.node_id, current_scope, 0, slot, True)]
-                array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, False, parameter = False)
+                array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, False, parameter = True)
             else:
                 final_edges = []
                 array_input_edge = make_json_edge(parent_node, node.node_id, array_index_in_params, 0, False, parameter = True)
@@ -1253,7 +1257,7 @@ def create_returns_for_loop(node, retval, parent_node, slot, current_scope):
     ret = {
             "name":     "Returns",
             "location": node.location,
-            "outPorts": [make_port(0,node.node_id, IntegerType())],
+            "outPorts": [make_port(0, ret_id, IntegerType())],
             "inPorts":  [],
             "id":       ret_id,
             "nodes" :   [],

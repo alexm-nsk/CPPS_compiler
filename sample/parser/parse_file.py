@@ -407,7 +407,7 @@ class TreeVisitor(NodeVisitor):
         # ~ for n,i in enumerate(visited_children):
             # ~ print (n, ": ", visited_children[n])
         # ~ print (node)
-        return BuiltInCall(function_name = name, arguments = visited_children[5], location = self.get_location(node))
+        return BuiltInCall(function_name = name, args = visited_children[5], location = self.get_location(node))
     # ~ reduction_sum      = "sum" _ "of" _ exp
     # ~ def visit_reduction_sum(self, node, visited_children):
 
