@@ -211,6 +211,8 @@ class Reduction(Node):
 class BuiltInCall(Node):
     pass
 
+class Equation(Node):
+    pass
 
 # ~ class Sum(Reduction):
     # ~ pass

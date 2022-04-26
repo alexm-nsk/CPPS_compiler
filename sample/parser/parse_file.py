@@ -399,7 +399,7 @@ class TreeVisitor(NodeVisitor):
 
 
     def visit_equation(self, node, visited_children):
-        return dict(left = visited_children[0], right = visited_children[4])
+        return Equation(left = visited_children[0], right = visited_children[4])
 
 
     def visit_builtin_call(self, node, visited_children):

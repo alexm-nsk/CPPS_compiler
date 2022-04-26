@@ -1225,6 +1225,8 @@ def export_reduction_to_json(node, parent_node, slot, current_scope):
     retval["inPorts"][2]["type"] = type_
     retval["params"][2][1]["type"] = type_
 
+    print (node.when, type(node.when))
+
     when_ast = node.when.emit_json(node.node_id, 0, current_scope)
 
     one = ast_.node.Literal(value = 1, type = IntegerType(), location = "N/A")
