@@ -1,3 +1,7 @@
+function identity( M : array of integer returns array of integer )
+    M
+end function
+
 function main( M : array of integer returns array of integer )
-  M | M
+  identity(M) | identity(M) | M
 end function

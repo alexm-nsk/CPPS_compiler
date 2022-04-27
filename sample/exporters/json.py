@@ -611,7 +611,7 @@ def setup_binarys_ports(binary, left, right):
                                                     # ~ )
                                         # ~ )
                                 # ~ ],
-    # ~ print (binary)
+    print (binary)
     binary["inPorts"] = [
                             dict(index = 0, nodeId = binary["id"], type = left ["type"]),
                             dict(index = 1, nodeId = binary["id"], type = right["type"])
@@ -627,6 +627,7 @@ def setup_binarys_ports(binary, left, right):
 #TODO make it return used variables (put them into the scope?)
 def export_algebraic_to_json (node, parent_node, slot, current_scope):
 
+    # ~ print (node, "\n")
     return_nodes = []
     return_edges = []
     exp = node.expression
@@ -651,11 +652,7 @@ def export_algebraic_to_json (node, parent_node, slot, current_scope):
                     var_name, var_type = p
                     if(var_name == name):
                         identifier_slot = n
-                        # ~ print (var_type)
-                        # ~ try:
                         type_ = var_type["type"]#["name"]
-                        # ~ except:
-                            # ~ print (var_type)
                         break
                 # if we haven't found it, raise an exception:
                 if identifier_slot == -1:
@@ -667,12 +664,9 @@ def export_algebraic_to_json (node, parent_node, slot, current_scope):
                 nodes = operand.emit_json(current_scope, 0, current_scope)
                 return_nodes.extend(nodes["nodes"])
                 return_edges.extend(nodes["edges"])
-                # ~ print (nodes)
                 output_id = nodes["final_edges"][0][0]["nodeId"]
-                # ~ print (f_edges)
                 type_ = nodes["nodes"][0]["outPorts"][0]["type"]#["name"]
                 return dict(id = output_id, slot = 0, type = type_, parameter = False)
-                # ~ return dict(id = operand.node_id, slot = 0, type = type_, parameter = False)
 
         # if we still have some splitting to do:
         else:
@@ -713,13 +707,11 @@ def export_algebraic_to_json (node, parent_node, slot, current_scope):
 
             type_ = return_type(left_node["type"], right_node["type"])
 
-            # ~ op_json[0]["outPorts"][0]["type"]["name"] = type_
-
             return dict(id = operator.node_id, slot = 0, type = type_, parameter = False)
 
     # the node that puts out result of this algebraic expression:
     final_node = get_nodes(exp)["id"]
-    #     Here we check if target node is the scope, this determines wether we target our output edge at "in" or "out" port
+    # Here we check if target node is the scope, this determines wether we target our output edge at "in" or "out" port
     final_edge = make_json_edge(final_node, parent_node, 0, slot, parent = (parent_node == current_scope))
 
     # TODO is this necessary?
@@ -769,29 +761,6 @@ def export_literal_to_json (node, parent_node, slot, current_scope):
     return dict(nodes = [ret_val], edges = [], final_edges = [final_edge])
 
 
-#---------------------------------------------------------------------------------------------
-
-
-operator_out_type_map = {
-    "<" : "boolean",
-    ">" : "boolean",
-    "+" : "integer",
-    "-" : "integer",
-    "*" : "integer",
-    "<=" : "integer",
-    ">=" : "integer",
-}
-
-operator_in_type_map = {
-    "<" : "integer",
-    ">" : "integer",
-    "+" : "integer",
-    "-" : "integer",
-    "*" : "integer",
-    "<=" : "integer",
-    ">=" : "integer",
-}
-
 
 #---------------------------------------------------------------------------------------------
 
@@ -803,32 +772,10 @@ def export_bin_to_json (node, parent_node, slot, current_scope):
                     name = "Binary",
                     operator = node.operator,
                     location = node.location,
-
-                    # ~ inPorts  = [dict (
-                                    # ~ index = n,
-                                    # ~ nodeId = node.node_id,
-                                    # ~ type = {"location":"not applicable",
-                                            # ~ "name" : operator_in_type_map[node.operator]}
-                                    # ~ )
-                                # ~ for n in range(2)],
-
-                    # ~ outPorts = [
-                                    # ~ dict(
-                                            # ~ index = 0,
-                                            # ~ nodeId = node.node_id,
-                                            # ~ type = dict(
-                                                        # ~ location = "not applicable",
-                                                        # ~ #TODO put the type here
-                                                        # ~ name = operator_out_type_map[node.operator]
-                                                    # ~ )
-                                        # ~ )
-                                # ~ ],
                 )
     json_nodes[node.node_id] = ret_val
 
-
     return dict(nodes = [ret_val], edges = [])
-
 
 #---------------------------------------------------------------------------------------------
 
@@ -1225,7 +1172,7 @@ def export_reduction_to_json(node, parent_node, slot, current_scope):
     retval["inPorts"][2]["type"] = type_
     retval["params"][2][1]["type"] = type_
 
-    print (node.when, type(node.when))
+    # ~ print (node.when, type(node.when))
 
     when_ast = node.when.emit_json(node.node_id, 0, current_scope)
 
@@ -1390,3 +1337,6 @@ def export_loop_to_json (node, parent_node, slot, current_scope):
                 nodes       = [retval],
                 edges       = in_edges + out_edges,
                 final_edges = [])
+
+def export_equation_to_json(node, parent_node, slot, current_scope):
+    return dict(nodes = [], edges = [], final_edges = [])
