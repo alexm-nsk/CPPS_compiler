@@ -92,11 +92,12 @@ def make_json_edge(from_, to, src_index, dst_index, parent = False, parameter = 
         # ~ print (src_type)
 
     except Exception as e:
-        print (json_nodes[to][port_type],dst_index)
-        print ("no dst",str(e),"\n\n", json_nodes[from_],"\n\n", json_nodes[to])
-        exc_type, exc_obj, exc_tb = sys.exc_info()
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        print(exc_type, fname, exc_tb.tb_lineno)
+        # ~ print (json_nodes[to][port_type],dst_index)
+        # ~ print ("no dst",str(e),"\n\n", json_nodes[from_],"\n\n", json_nodes[to])
+        # ~ exc_type, exc_obj, exc_tb = sys.exc_info()
+        # ~ fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        # ~ print(exc_type, fname, exc_tb.tb_lineno)
+        raise (e)
 
     #check if parameters match:
     #make copies for comparison (we are going to remove locations)
@@ -508,7 +509,7 @@ def export_builtincall_to_json (node, parent_node, slot, current_scope):
     out_ports = [ make_port(n, node.node_id, type_) for n, type_ in enumerate( called_function["out_ports"] )]
     params    = [   ["arg" + str(n), make_port(n, node.node_id, type_)]
                     for n, type_ in enumerate( called_function["in_ports"] ) ]
-    
+
     ret_val = dict(inPorts  = in_ports,
                    outPorts = out_ports,
                    params   = params,
@@ -910,7 +911,8 @@ def create_body_for_let(node, retval, parent_node, slot, current_scope):
                             params = params,
                             inPorts = [make_port(i, node.body_id, param[1]["type"]) for i, param in enumerate(params)],
                             outPorts = [make_port(i, node.body_id, output_types[i]) for i in range(num_outputs)],
-                            name = "Body"
+                            name = "Body",
+                            location = node.location
                          )
 
     json_nodes[node.body_id] = retval["body"]
@@ -944,7 +946,7 @@ def export_let_to_json(node, parent_node, slot, current_scope):
 
     copy_ports_and_params(ret_val, json_nodes[parent_node])#, out_ports=False)
 
-    create_init(node, ret_val, parent_node, slot, current_scope)
+    create_init(node, ret_val, parent_node, slot, current_scope = node.node_id)
     create_body_for_let(node, ret_val, parent_node, slot, current_scope = node.node_id)
 
     final_edge = make_json_edge(node.node_id, current_scope, 0, 0, parent = True)
@@ -1078,16 +1080,20 @@ def create_init(node, retval, parent_node, slot, current_scope):
     add_ports_and_params(json_nodes[node_id], json_nodes[current_scope], out_ports = False, params = True)
 
     for n, i in enumerate(node.init):
-        json_nodes[node_id]["outPorts"].append(make_port(n, node_id , IntegerType()))
-        json_nodes[node_id]["results"].append(
+
+        # ~ print (init_ast["final_edges"])
+        output_type = ArrayType(IntegerType())
+        json_nodes[node_id]["outPorts"].insert(n,make_port(n, node_id , output_type))
+        json_nodes[node_id]["results"].insert(n,
                                     [
                                         i.identifier.name,
                                         dict(
                                                nodeId = node_id,
-                                               type   = IntegerType().emit_json(),
+                                               type   = output_type.emit_json(),
                                                index = n
                                             )
                                     ] )
+                                    
         init_ast = i.emit_json(node_id, n, node_id)
         nodes.extend(init_ast["nodes"])
         edges.extend(init_ast["edges"] + init_ast["final_edges"])
@@ -1097,6 +1103,7 @@ def create_init(node, retval, parent_node, slot, current_scope):
                     location = "not applicable",
                     edges    = edges,
                     nodes    = nodes,
+                    # ~ location = no
                     # ~ id       =  node_id
                 ))
 
@@ -1276,7 +1283,7 @@ def export_loop_to_json (node, parent_node, slot, current_scope):
                     location  = node.location
                  )
 
-    copy_ports_and_params(retval, json_nodes[current_scope])
+    copy_ports_and_params(retval, json_nodes[current_scope], out_ports = False)
     json_nodes[node.node_id] = retval
     if node.init:
         create_init (node, retval, parent_node, slot, node.node_id)
@@ -1287,7 +1294,7 @@ def export_loop_to_json (node, parent_node, slot, current_scope):
     create_returns_for_loop (node, retval, parent_node, slot, node.node_id)
 
     in_edges = []
-    # make edges that connect the scope to whis node
+    # make edges that connect the scope to this node
     for n, param in enumerate(json_nodes[parent_node]["params"]):
         in_edges.append(
                         make_json_edge(parent_node, node.node_id,
@@ -1296,18 +1303,26 @@ def export_loop_to_json (node, parent_node, slot, current_scope):
 
     out_edges = []
 
-    for n, output in enumerate(json_nodes[parent_node]["outPorts"]):
-         out_edges.append(
+    #TODO COPY output ports of returns:
+    copy_ports_and_params(retval, retval["reduction"], in_ports = False, out_ports = True, params = False)
+    # ~ for n, output in enumerate(json_nodes[parent_node]["outPorts"]):
+         # ~ out_edges.append(
+                        # ~ make_json_edge(node.node_id, parent_node,
+                                       # ~ n,            n,
+                                       # ~ parent = True)
+                       # ~ )
+    for n, output in enumerate(retval["outPorts"]):
+        out_edges.append(
                         make_json_edge(node.node_id, parent_node,
-                                       n,            n,
+                                       n,            slot,
                                        parent = True)
                        )
     # ~ print (retval["outPorts"])
     # ~ print (retval["params"])
     return dict(
                 nodes       = [retval],
-                edges       = in_edges + out_edges,
-                final_edges = [])
+                edges       = in_edges,
+                final_edges = out_edges)
 
 def export_equation_to_json(node, parent_node, slot, current_scope):
     return dict(nodes = [], edges = [], final_edges = [])

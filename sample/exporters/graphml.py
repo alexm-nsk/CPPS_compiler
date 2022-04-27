@@ -118,7 +118,6 @@ def make_node(node):
                         if not "params" in node else
                         f'<port name=\"in{n}\" type=\"{ get_type (port["type"]) }\">\n  <data key="label">{node["params"][n][0]}</data>\n</port>\n'
                         for n, port in enumerate(node["inPorts"])])
-
     if "outPorts" in node:
         ports_str +=  "\n".join(
                     [f'<port name=\"out{n}\" type=\"{ get_type (port["type"]) }\"/>\n'
@@ -126,6 +125,7 @@ def make_node(node):
                         f'<port name=\"out{n}\" type=\"{ get_type (port["type"]) }\">\n  <data key="label">{node["results"][n][0]}</data>\n</port>\n'
                         for n, port in enumerate(node["outPorts"])]
                    )
+
 
     if "nodes" in node and node["nodes"]:
         contents = "\n".join([make_node(node) for node in node["nodes"]])
