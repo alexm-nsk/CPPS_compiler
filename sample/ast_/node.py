@@ -25,7 +25,6 @@
 
 from exporters.json    import *
 from exporters.graphml import *
-# ~ from exporters.llvm import *
 
 
 class Node:
@@ -49,13 +48,6 @@ class Node:
         # TODO consider list of allowed props (https://stackoverflow.com/questions/8187082/how-can-you-set-class-attributes-from-variable-arguments-kwargs-in-python)
         self.__dict__.update(kwargs)
     
-    # deprecated, separate compiler used insted:
-    def emit_llvm(self, scope = None):
-        if not getattr(type(self),"__emit_llvm__", None):
-            class_name = self.__class__.__name__
-            type(self).__emit_llvm__ = globals() [ "export_" + class_name.lower() + "_to_llvm"];
-        return type(self).__emit_llvm__(self, scope)
-
     def emit_json(self, parent_node, slot, current_scope):
         if not getattr(type(self),"__emit_json__", None):
             class_name = self.__class__.__name__
