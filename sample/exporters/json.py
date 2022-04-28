@@ -1118,6 +1118,7 @@ def export_reduction_to_json(node, parent_node, slot, current_scope):
 
     if node.type == "array":
         out_ports = [make_port(0,node.node_id, ArrayType(IntegerType()))]
+        json_nodes[parent_node]["outPorts"] = [make_port(0, parent_node, ArrayType(IntegerType()))]
         in_ports  = [
                               make_port(0, node.node_id, BooleanType()),
                               make_port(1, node.node_id, IntegerType()), # starting index
@@ -1186,7 +1187,8 @@ def create_returns_for_loop(node, retval, parent_node, slot, current_scope):
     ret = {
             "name":     "Returns",
             "location": node.location,
-            "outPorts": [make_port(0, ret_id, ArrayType(IntegerType()))],
+            # added later in reduction
+            # ~ "outPorts": [make_port(0, ret_id, ArrayType(IntegerType()))],
             "inPorts":  [],
             "id":       ret_id,
             "nodes" :   [],
