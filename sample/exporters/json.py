@@ -809,13 +809,13 @@ def export_arrayaccess_to_json (node, parent_node, slot, current_scope):
             json_node = dict(
                                 name = "ArrayAccess",
                                 location = node.location,
-
-                                inPorts = [dict(node_Id = node.node_id, type = type_, index = 0),
-                                           dict(node_Id = node.node_id, type =
+                                # TODO replace with make_port:
+                                inPorts = [dict(nodeId = node.node_id, type = type_, index = 0),
+                                           dict(nodeId = node.node_id, type =
                                                     dict(location = "not applicable", name = "integer"),
                                            index = 1)],
 
-                                outPorts = [dict(node_Id = node.node_id, type = type_["element"], index = 0)],
+                                outPorts = [dict(nodeId = node.node_id, type = type_["element"], index = 0)],
 
                                 id = node.node_id
                             )

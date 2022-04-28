@@ -48,16 +48,18 @@ def get_type(type_object):
 
 
 def get_ports(ports):
-
-    return [
-                Port(
-                 node_id = p["nodeId"],
-                 type    = get_type(p["type"]),
-                 index   = p["index"]
-                )
-                for p in ports
-            ]
-
+    try:
+        return [
+                    Port(
+                     node_id = p["nodeId"],
+                     type    = get_type(p["type"]),
+                     index   = p["index"]
+                    )
+                    for p in ports
+                ]
+    except Exception as e:
+        print (ports)
+        raise (e)
 
 def get_edges(edges):
     ret_edges = []
@@ -88,49 +90,6 @@ def parse_node(node):
 
     return CLASS_MAP[name](node)
     #TODO delete these after testing:
-
-    if name == "Lambda":
-        return Function(node)
-
-    elif name == "If":
-        return If(node)
-
-    elif name == "Condition":
-        return Condition(node)
-
-    elif name == "Binary":
-        return Binary(node)
-
-    elif name == "FunctionCall":
-        return FunctionCall(node)
-
-    elif name == "Literal":
-        return Literal(node)
-
-    elif name == "LoopExpression":
-        return LoopExpression(node)
-
-    elif name == "Init":
-        return Init(node)
-
-    elif name == "PreCondition":
-        return PreCondition(node)
-
-    elif name == "Body":
-        return Body(node)
-
-    elif name == "Returns":
-        return Returns(node)
-
-    elif name in BRANCH_NAMES:
-        return Branch(node)
-
-    elif name == "OldValue":
-        return OldValue(node)
-
-    elif name == "Reduction":
-        return Reduction(node)
-
 
 
 def parse_nodes(nodes):
@@ -395,6 +354,14 @@ class Reduction(Node):
     pass
 
 
+class BuiltInFunctionCall(Node):
+    pass
+
+
+class Let(Node):
+    pass
+
+
 # --------------------------------------
 
 
@@ -421,4 +388,6 @@ CLASS_MAP = {
     "OldValue": OldValue,
     "Reduction": Reduction,
     "ArrayAccess": ArrayAccess,
+    "BuiltInFunctionCall": BuiltInFunctionCall,
+    "Let": Let,
 }
