@@ -250,23 +250,6 @@ class Constant(Expression):
         return str(self.value)
 
 
-class Call(Expression):
-
-    def __init__(self, function, args : "a list of c++ identifiers", name = None):
-        super().__init__(name)
-        self.function = function
-
-        self.type = function.return_type
-
-        # TODO probably not the best way to do this:
-        if function.name == MAIN_FUNCTION_NAME:
-            args = [v.name for v in function.arguments]
-            self.init_code = self.function.name + "(" + ",".join((str(s) for s in args)) + ")"
-        else:
-            self.args = args
-            self.init_code = self.function.name + "(" + ",".join((str(s) for s in self.args)) + ")"
-
-
 class If(Expression):
 
     def __init__(self, cond, indent_level, name = None):
@@ -408,6 +391,61 @@ def indent_cpp(code, steps = 1):
     return CPP_INDENT * steps + code.replace('\n', '\n' + CPP_INDENT * steps)
 
 
+class Block:
+
+    def __init__(self, indent_offset = 1, name = None):
+        self.inits = []
+        self.statements = []
+        self.indent_level = indent_offset
+        self.name = name
+
+    def add_expression(self, exp, name = None):
+        self.statements.append(exp)
+        if type (exp) == Variable:
+            inits.append(exp)
+
+    def add_init(self, identifier):
+        self.inits.append(identifier)
+
+    def __str__(self):
+
+        label = "" if self.name == None else CPP_INDENT * self.indent_level + f"// {self.name}:"  + "\n"
+
+        inits = "".join(  CPP_INDENT * self.indent_level +
+                            str(s.type) + " "  +
+                            str(s.name) +
+                            ((" = " + str(s.init_code)) if s.init_code not in ["", None] else "") +
+                            ("" if s.no_semicolon else ";") + "\n"
+                            for s in self.inits)
+
+        # ~ body = "\n".join( CPP_INDENT * self.indent_level +
+                            # ~ str(s) + (";" if type(s) not in [If, WhileLoop] else "") for s in self.statements)
+
+        body = "\n".join( CPP_INDENT * self.indent_level +
+                            str(s) + ("" if s.no_semicolon else ";") for s in self.statements)
+
+        return label + inits + body + "\n"
+
+    def add_ret(self, object_):
+        self.statements.append(Return(object_))
+
+    def add_if(self, if_):
+        self.statements.append(if_)
+
+    def add_bin(self, bin_):
+        self.statements.append(bin_)
+
+    def add_assignment(self, assignment):
+        self.statements.append(assignment)
+
+    def add_while_loop(self, wl):
+        self.statements.append(wl)
+
+    def add_array_access(self, aa):
+        self.statements.append(aa)
+
+
+
 class Function:
 
     functions = {}
@@ -483,58 +521,37 @@ class Function:
         return text
 
 
-class Block:
+class Call(Expression):
 
-    def __init__(self, indent_offset = 1, name = None):
-        self.inits = []
-        self.statements = []
-        self.indent_level = indent_offset
-        self.name = name
+    def __init__(self, function, args : "a list of c++ identifiers", name = None):
+        super().__init__(name)
+        self.function = function
 
-    def add_expression(self, exp, name = None):
-        self.statements.append(exp)
-        if type (exp) == Variable:
-            inits.append(exp)
+        self.type = function.return_type
 
-    def add_init(self, identifier):
-        self.inits.append(identifier)
+        # TODO probably not the best way to do this:
+        if function.name == MAIN_FUNCTION_NAME:
+            args = [v.name for v in function.arguments]
+            self.init_code = self.function.name + "(" + ",".join((str(s) for s in args)) + ")"
+        else:
+            self.args = args
+            self.init_code = self.function.name + "(" + ",".join((str(s) for s in self.args)) + ")"
 
-    def __str__(self):
 
-        label = "" if self.name == None else CPP_INDENT * self.indent_level + f"// {self.name}:"  + "\n"
+class BuiltInFunctionCall(Expression):
+    #def __init__(self, name, return_type, arguments: "list of (name, type) - tuples", main = False):
+    built_ins = dict(
+                      size = Function("size", ArrayType(IntegerType()), arguments = [("array", ArrayType(IntegerType()))])
+                    )
 
-        inits = "".join(  CPP_INDENT * self.indent_level +
-                            str(s.type) + " "  +
-                            str(s.name) +
-                            ((" = " + str(s.init_code)) if s.init_code not in ["", None] else "") +
-                            ("" if s.no_semicolon else ";") + "\n"
-                            for s in self.inits)
+    def __init__(self, function_name, args : "a list of C++ identifiers", name = None):
+        super().__init__(name)
+        callee = BuiltInFunctionCall.built_ins[function_name]
+        self.function = BuiltInFunctionCall.built_ins[function_name]
+        self.type = callee.return_type
 
-        # ~ body = "\n".join( CPP_INDENT * self.indent_level +
-                            # ~ str(s) + (";" if type(s) not in [If, WhileLoop] else "") for s in self.statements)
-
-        body = "\n".join( CPP_INDENT * self.indent_level +
-                            str(s) + ("" if s.no_semicolon else ";") for s in self.statements)
-
-        return label + inits + body + "\n"
-
-    def add_ret(self, object_):
-        self.statements.append(Return(object_))
-
-    def add_if(self, if_):
-        self.statements.append(if_)
-
-    def add_bin(self, bin_):
-        self.statements.append(bin_)
-
-    def add_assignment(self, assignment):
-        self.statements.append(assignment)
-
-    def add_while_loop(self, wl):
-        self.statements.append(wl)
-
-    def add_array_access(self, aa):
-        self.statements.append(aa)
+        self.args = args
+        self.init_code = self.function.name + "(" + ",".join((str(s) for s in self.args)) + ")"
 
 
 class Builder:
@@ -544,6 +561,11 @@ class Builder:
 
     def call(self, function, args, name = None):
         call = Call(function, args, name)
+        self.block.add_init(call)
+        return call
+
+    def built_in_call(self, function_name, args, name = None): # "name" is name for defined value, not the function
+        call = BuiltInFunctionCall(function_name, args, name)
         self.block.add_init(call)
         return call
 

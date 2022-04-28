@@ -206,6 +206,21 @@ def export_functioncall_to_cpp(node, scope):
     return result
 
 
+def export_builtinfunctioncall_to_cpp(node, scope):
+    input_nodes = node.get_input_nodes()
+    num_args = len(input_nodes)
+    args = [None for a in range(num_args)]
+
+    for (arg_node, edge) in input_nodes:
+        index = edge.to_index
+        args[index] = resolve(edge, scope)
+
+    # Here we replace callee with sisal main if we call main (because main is now a C++ "int main(etc...")
+
+    result = scope.builder.built_in_call(node.callee, args)
+    return result
+
+
 def export_if_to_cpp(node, scope):
     cond = node.condition.emit_cpp(scope)
 
