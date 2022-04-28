@@ -1117,8 +1117,15 @@ def create_init(node, retval, parent_node, slot, current_scope):
 def export_reduction_to_json(node, parent_node, slot, current_scope):
 
     if node.type == "array":
-        out_ports = [make_port(0,node.node_id, ArrayType(IntegerType()))]
-        json_nodes[parent_node]["outPorts"] = [make_port(0, parent_node, ArrayType(IntegerType()))]
+
+        # Returns node has it's element type in port # 0, so we take the type from that 
+        element_type = json_nodes[parent_node]["inPorts"][0]["type"]#IntegerType()
+
+        output_type = ArrayType(element_type)
+
+        out_ports = [make_port(0,node.node_id, output_type)]
+        json_nodes[parent_node]["outPorts"] = [make_port(0, parent_node, output_type)]
+
         in_ports  = [
                               make_port(0, node.node_id, BooleanType()),
                               make_port(1, node.node_id, IntegerType()), # starting index

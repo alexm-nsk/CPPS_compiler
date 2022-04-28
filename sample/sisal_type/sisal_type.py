@@ -101,7 +101,7 @@ class ArrayType(BaseType):
         self.location = location
 
     def emit_json(self):
-        return dict(location = self.location , element = self.element_type.emit_json())
+        return dict(location = self.location , element = self.element_type if type(self.element_type) == dict else self.element_type.emit_json())
 
 class CustomType:
 
