@@ -1123,6 +1123,7 @@ def export_reduction_to_json(node, parent_node, slot, current_scope):
 
         output_type = ArrayType(element_type)
 
+        # we make output ports for both this reduction-node and it's parent's "Returns"-node
         out_ports = [make_port(0,node.node_id, output_type)]
         json_nodes[parent_node]["outPorts"] = [make_port(0, parent_node, output_type)]
 
