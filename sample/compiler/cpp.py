@@ -221,6 +221,12 @@ def export_builtinfunctioncall_to_cpp(node, scope):
     return result
 
 
+def export_let_to_cpp(node, scope):
+    # ~ print (dir (node))
+    result = scope.builder.constant(1, IntegerType())
+    return result
+
+
 def export_if_to_cpp(node, scope):
     cond = node.condition.emit_cpp(scope)
 
