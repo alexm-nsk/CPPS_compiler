@@ -76,10 +76,13 @@ def get_params(params):
     ret_params = {}
     for p in params:
         name, data = p
+        # ~ try:
         ret_params[name] = dict(
-                                type  = get_type(data["type"]),
-                                index = data["index"]
-                                )
+                            type  = get_type(data["type"]),
+                            index = data["index"]
+                            )
+        # ~ except:
+            # ~ print (name, data)
 
     return ret_params
 
@@ -120,6 +123,9 @@ def parse_json_fields(self, node):
     if ("branches" in node ):     self.branches      = parse_nodes(node["branches"])
     if ("nodes" in node ):        self.nodes         = parse_nodes(node["nodes"])
 
+    if ("range" in node ):
+        print (node["range"])
+        self.range         = parse_node(node["range"])
 
     # Loop:
 
@@ -362,6 +368,14 @@ class Let(Node):
     pass
 
 
+class RangeGen(Node):
+    pass
+
+
+class Scatter(Node):
+    pass
+
+
 # --------------------------------------
 
 
@@ -390,4 +404,6 @@ CLASS_MAP = {
     "ArrayAccess": ArrayAccess,
     "BuiltInFunctionCall": BuiltInFunctionCall,
     "Let": Let,
+    "RangeGen": RangeGen,
+    "Scatter": Scatter,
 }

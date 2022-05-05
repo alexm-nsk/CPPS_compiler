@@ -1118,9 +1118,9 @@ def export_reduction_to_json(node, parent_node, slot, current_scope):
 
     if node.type == "array":
         # get the output array's element type:
-        # "Returns" node has it's element type in port # 0, so we take the type from that 
+        # "Returns" node has it's element type in port # 0, so we take the type from that
         element_type = json_nodes[parent_node]["inPorts"][0]["type"]
-        
+
         output_type = ArrayType(element_type)
         # we make output ports for both this "reduction" node and it's parent's "Returns" node
         out_ports = [make_port(0, node.node_id, output_type)]
@@ -1248,8 +1248,10 @@ def export_scatter_to_json(node, parent_node, slot, current_scope):
                                                 }]
                                             ]
     json_nodes[parent_node]["outPorts"] = [make_port(0, parent_node, type_)]
+    # ~ make_param
     retval = dict(id       = node.node_id,
-                  results  = [["item", type_],["index", IntegerType().emit_json()]],
+                  results  = [["item", {"type": type_, "index":0, "nodeId":node.node_id}],
+                            ["index", {"type": IntegerType().emit_json(), "index": 1, "nodeId":node.node_id}]],
                   outPorts = [make_port(0, node.node_id, type_), make_port(1, node.node_id, type_)],
                   inPorts  = [make_port(0, node.node_id, input_type)] ,
                   name     = "Scatter")

@@ -29,21 +29,24 @@ import sys
 
 from parser.parse_file import parse_file
 
+
 def parse(input_text):
     return parse_file(input_text)
 
+
 def main(args):
 
-    if ( len( args ) < 2 ):
-        print ( "usage: python sisal_parse.py source_code.sis" )
+    if (len(args) < 2):
+        print("usage: python sisal_parse.py source_code.sis")
     else:
 
         input_file_name = args[1]
         try:
             file_contents = open(input_file_name, "r").read()
-        except:
+        except Exception as e:
             # TODO make sure to isolate I/O error from malformed commandline parameters
             print ("error reading %s" % input_file_name)
+            print (str(e))
             return 1
 
         try:

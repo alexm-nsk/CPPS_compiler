@@ -224,6 +224,28 @@ def export_builtinfunctioncall_to_cpp(node, scope):
 def export_let_to_cpp(node, scope):
     # ~ print (dir (node))
     result = scope.builder.constant(1, IntegerType())
+
+    new_vars = []
+    # put newly defined variables into new vars (we will add them to scops)
+    for index, port in enumerate(node.init.out_ports):
+        init_values = node.init.get_result_nodes()
+        value_node = next(node for node, edge in init_values if edge.to_index == index)
+        if index != 1:
+            calculated_value = value_node.emit_cpp(scope)
+        else:
+            calculated_value = 0
+        # ~ print (index, "\n"*2, value_node, "\n"*5)
+        # ~ print (calculated_value)
+
+        type_ = port.type.emit_cpp()
+        # get variable's name from body's parameters:
+        var_name = list(  node.body.params.items()  )[index][0]
+        # initialize it:
+        new_variable = scope.builder.define(type_, value = calculated_value, name = var_name)
+        new_vars.append(new_variable)
+
+    new_vars = new_vars + scope.vars
+
     return result
 
 
@@ -295,47 +317,51 @@ def export_returns_to_cpp(node, scope):
 
 def export_loopexpression_to_cpp(node, scope):
     # TODO make use of "results" in the nodes
-    result = scope.builder.define(node.out_ports[0].type.emit_cpp(), name = "while_result",  value = 0)
+    result = scope.builder.define(node.out_ports[0].type.emit_cpp(),  value = 0)
     # initialize variables from init-node and put them in new scope (at the beginning of the list)
     # the variables we introduce in this loop:
 
     new_vars = []
+    print (node.range)
+    if "init" in node.__dict__:
 
-    # put newly defined variables into new vars (we will add them to scops)
-    for index, port in enumerate(node.init.out_ports):
-        type_ = port.type.emit_cpp()
-        # get variable's name from body's parameters:
-        var_name = list(  node.body.params.items()  )[index][0]
-        # initialize it:
-        new_variable = scope.builder.define(type_, value = 0, name = var_name)
-        new_vars.append(new_variable)
+        # put newly defined variables into new vars (we will add them to the scope)
+        for index, port in enumerate(node.init.out_ports):
+            type_ = port.type.emit_cpp()
+            # get variable's name from body's parameters:
+            var_name = list(  node.body.params.items()  )[index][0]
+            # initialize it:
+            new_variable = scope.builder.define(type_, value = 0, name = var_name)
+            new_vars.append(new_variable)
 
-    new_vars = new_vars + scope.vars
+        new_vars = new_vars + scope.vars
 
     # make a new scope based on the provided one
-    while_scope_vars = new_vars + scope.get_vars_copy() + [result]
-    while_ = scope.builder.while_()
+    loop_scope_vars = new_vars + scope.get_vars_copy() + [result]
+    loop = scope.builder.loop()
 
-    # process pre-condition:
-    pre_cond_builder = while_.get_pre_cond_builder()
-    pre_cond_scope = CppScope(while_scope_vars, pre_cond_builder)
-    node.pre_condition.emit_cpp(pre_cond_scope)
+    # ~ # process pre-condition:
+    # ~ if "pre_condition" in node.__dict__:
+        # ~ pre_cond_builder = loop.get_pre_cond_builder()
+        # ~ pre_cond_scope = CppScope(loop_scope_vars, pre_cond_builder)
+        # ~ node.pre_condition.emit_cpp(pre_cond_scope)
 
-    # process the body:
-    body_builder = while_.get_body_builder()
-    body_scope = CppScope(while_scope_vars, body_builder)
-    node.body.emit_cpp(body_scope)
+    # ~ # process the body:
+    # ~ if "body" in node.__dict__:
+        # ~ body_builder = loop.get_body_builder()
+        # ~ body_scope = CppScope(loop_scope_vars, body_builder)
+        # ~ node.body.emit_cpp(body_scope)
 
     # process the reduction:
-    reduction_builder = while_.get_reduction_builder()
-    # TODO double the variables here
-    reduction_scope_vars = []
-    for v in new_vars:
-        for a in range(2):
-            reduction_scope_vars.append(v)
+    # ~ reduction_builder = loop.get_reduction_builder()
+    # ~ # TODO double the variables here
+    # ~ reduction_scope_vars = []
+    # ~ for v in new_vars:
+        # ~ for a in range(2):
+            # ~ reduction_scope_vars.append(v)
 
-    reduction_scope = CppScope(reduction_scope_vars + scope.vars + [result], reduction_builder)
-    node.reduction.emit_cpp(reduction_scope)
+    # ~ reduction_scope = CppScope(reduction_scope_vars + scope.vars + [result], reduction_builder)
+    # ~ node.reduction.emit_cpp(reduction_scope)
 
     return result
 

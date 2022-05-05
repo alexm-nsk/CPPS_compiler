@@ -280,15 +280,48 @@ class If(Expression):
                 str(self.else_) +""+ ind + "}"
 
 
-class WhileLoop(Expression):
+# ~ class WhileLoop(Expression):
+
+    # ~ def __init__(self, indent_level = 0, name = None):
+        # ~ super().__init__(name)
+        # ~ self.no_semicolon = True
+        # ~ self.indent_level = indent_level
+        # ~ self.pre_cond = Block(indent_level + 1, name = "precondition")
+        # ~ self.body = Block(indent_level + 1, name = "body")
+        # ~ self.reduction = Block(indent_level + 1, name = "reduction")
+
+    # ~ def get_pre_cond_builder(self):
+        # ~ return Builder(self.pre_cond)
+
+    # ~ def get_body_builder(self):
+        # ~ return Builder(self.body)
+
+    # ~ def get_reduction_builder(self):
+        # ~ return Builder(self.reduction)
+
+    # ~ def __str__(self):
+        # ~ ind = self.indent_level * CPP_INDENT
+        # ~ cond_code = self.pre_cond.inits[0].init_code
+        # ~ if REDUCTION_FIRST:
+            # ~ return "while( " + cond_code + " )\n" + ind + "{\n" + \
+                    # ~ str(self.reduction) + \
+                    # ~ str(self.body) + ind + \
+                    # ~ "}"
+        # ~ else:
+            # ~ return "while( " + cond_code + " )\n" + ind + "{\n" + \
+                    # ~ str(self.body) + \
+                    # ~ str(self.reduction) + ind + \
+                    # ~ "}"
+
+class LoopExpression(Expression):
 
     def __init__(self, indent_level = 0, name = None):
         super().__init__(name)
         self.no_semicolon = True
         self.indent_level = indent_level
-        self.pre_cond = Block(indent_level + 1, name = "precondition")
-        self.body = Block(indent_level + 1, name = "body")
-        self.reduction = Block(indent_level + 1, name = "reduction")
+        # ~ self.pre_cond = Block(indent_level + 1, name = "precondition")
+        # ~ self.body = Block(indent_level + 1, name = "body")
+        # ~ self.reduction = Block(indent_level + 1, name = "reduction")
 
     def get_pre_cond_builder(self):
         return Builder(self.pre_cond)
@@ -301,17 +334,18 @@ class WhileLoop(Expression):
 
     def __str__(self):
         ind = self.indent_level * CPP_INDENT
-        cond_code = self.pre_cond.inits[0].init_code
-        if REDUCTION_FIRST:
-            return "while( " + cond_code + " )\n" + ind + "{\n" + \
-                    str(self.reduction) + \
-                    str(self.body) + ind + \
-                    "}"
-        else:
-            return "while( " + cond_code + " )\n" + ind + "{\n" + \
-                    str(self.body) + \
-                    str(self.reduction) + ind + \
-                    "}"
+        return ""
+        # ~ cond_code = self.pre_cond.inits[0].init_code
+        # ~ if REDUCTION_FIRST:
+            # ~ return "while( " + cond_code + " )\n" + ind + "{\n" + \
+                    # ~ str(self.reduction) + \
+                    # ~ str(self.body) + ind + \
+                    # ~ "}"
+        # ~ else:
+            # ~ return "while( " + cond_code + " )\n" + ind + "{\n" + \
+                    # ~ str(self.body) + \
+                    # ~ str(self.reduction) + ind + \
+                    # ~ "}"
 
 
 class CppCode(Expression):
@@ -438,8 +472,11 @@ class Block:
     def add_assignment(self, assignment):
         self.statements.append(assignment)
 
-    def add_while_loop(self, wl):
-        self.statements.append(wl)
+    # ~ def add_while_loop(self, wl):
+        # ~ self.statements.append(wl)
+
+    def add_loop(self, loop):
+        self.statements.append(loop)
 
     def add_array_access(self, aa):
         self.statements.append(aa)
@@ -595,10 +632,15 @@ class Builder:
         c = Constant(value, type_)
         return c
 
-    def while_(self):
-        while_loop = WhileLoop(indent_level = self.block.indent_level)
-        self.block.add_while_loop(while_loop)
-        return while_loop
+    # ~ def while_(self):
+        # ~ while_loop = WhileLoop(indent_level = self.block.indent_level)
+        # ~ self.block.add_while_loop(while_loop)
+        # ~ return while_loop
+
+    def loop(self):
+        loop_ = LoopExpression(indent_level = self.block.indent_level)
+        self.block.add_loop(loop_)
+        return loop_
 
     def assignment(self, var, value):
         assignment = Assignment(var, value)
@@ -629,7 +671,7 @@ Json::Value iterable_to_json(Iterable const& cont) {
     Json::Value v;
     for (auto&& element: cont) {
         v.append(element);
-     }
+    }
     return v;
 }
 
