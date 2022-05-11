@@ -26,8 +26,8 @@ from compiler.cpp_codegen import *
 
 
 type_map = {
-    "integer" : IntegerType(32),
-    "realv" : RealType(32),
+    "integer": IntegerType(32),
+    "realv": RealType(32),
 }
 
 
@@ -36,7 +36,7 @@ functions = {}
 
 def resolve(edge, scope):
     from_node = edge.get_from_node()
-    to_node   = edge.get_to_node()
+    to_node = edge.get_to_node()
 
     if to_node.is_node_parent(edge.from_) or from_node == to_node:
         return scope.vars[edge.from_index]
@@ -55,7 +55,7 @@ def create_cpp_module(functions, name):
         # cpp_function is a function object from C++ code generator
         # it can be converted to a string C++ src. code using the standardized "str" method
         for cpp_function in f.emit_cpp():
-            module.add_function (cpp_function)
+            module.add_function(cpp_function)
 
     return module
 
@@ -74,13 +74,13 @@ def export_function_to_cpp(node, scope):
 
     ret_type = node.out_ports[0].type.emit_cpp()
 
-    is_main = (node.function_name == "main")
+    is_main = node.function_name == "main"
 
     # rename "main"-function to "sisal_main" and create a C++ - main:
     if is_main:
         node.function_name = "sisal_main"
 
-    this_function = Function(node.function_name, ret_type, args)#, main = is_main)
+    this_function = Function(node.function_name, ret_type, args)  # , main = is_main)
     functions[node.function_name] = this_function
 
     # define code builder object for C++-main here so we can use it in the return value
@@ -90,28 +90,28 @@ def export_function_to_cpp(node, scope):
     if is_main:
         # args is like [('N', type), ('M', other_type)...]
         # TODO put json loader here
-        cpp_main = Function("main", None, [], main = True)
+        cpp_main = Function("main", None, [], main=True)
         main_builder = Builder(cpp_main.get_entry_block())
-                                                    # why does this work?..
-        sisal_main_result = main_builder.call(this_function, [], name = "sisal_main_results")
+        # why does this work?..
+        sisal_main_result = main_builder.call(
+            this_function, [], name="sisal_main_results"
+        )
         code = sisal_main_result.type.print_code(sisal_main_result)
-        main_builder.cpp_code( code )
+        main_builder.cpp_code(code)
         functions["main"] = cpp_main
 
     builder = Builder(this_function.get_entry_block())
     scope = CppScope(this_function.get_arguments(), builder)
 
-    for edge in node.get_input_edges()[:1]: # do only one for now
-        scope.builder.ret( resolve(edge, scope) )
+    for edge in node.get_input_edges()[:1]:  # do only one for now
+        scope.builder.ret(resolve(edge, scope))
 
-    return dict ( functions = [this_function] + ([cpp_main] if cpp_main else []),
-                  imports = [])
+    return dict(
+        functions=[this_function] + ([cpp_main] if cpp_main else []), imports=[]
+    )
 
 
-names_to_header = {
-    "cos": "math.h",
-    "sin": "math.h"
-}
+names_to_header = {"cos": "math.h", "sin": "math.h"}
 
 
 def export_functionimport_to_cpp(node, scope):
@@ -124,13 +124,13 @@ def export_functionimport_to_cpp(node, scope):
 
     ret_type = node.out_ports[0].type.emit_cpp()
 
-    is_main = (node.function_name == "main")
+    is_main = node.function_name == "main"
 
     # rename "main"-function to "sisal_main" and create a C++ - main:
     if is_main:
         node.function_name = "sisal_main"
 
-    this_function = Function(node.function_name, ret_type, args)#, main = is_main)
+    this_function = Function(node.function_name, ret_type, args)  # , main = is_main)
     functions[node.function_name] = this_function
 
     # define code builder object for C++-main here so we can use it in the return value
@@ -140,24 +140,26 @@ def export_functionimport_to_cpp(node, scope):
     if is_main:
         # args is like [('N', type), ('M', other_type)...]
         # TODO put json loader here
-        cpp_main = Function("main", None, [], main = is_main)
+        cpp_main = Function("main", None, [], main=is_main)
         main_builder = Builder(cpp_main.get_entry_block())
-        sisal_main_result = main_builder.call(this_function, [main_builder.constant(10)], name = "sisal_main_results")
+        sisal_main_result = main_builder.call(
+            this_function, [main_builder.constant(10)], name="sisal_main_results"
+        )
         code = sisal_main_result.type.print_code(sisal_main_result)
-        main_builder.cpp_code( code )
+        main_builder.cpp_code(code)
         functions["main"] = cpp_main
 
     builder = Builder(this_function.get_entry_block())
     scope = CppScope(this_function.get_arguments(), builder)
 
-    return dict( functions = [], imports = [names_to_header[node.function_name]] )
+    return dict(functions=[], imports=[names_to_header[node.function_name]])
 
 
 def export_literal_to_cpp(node, scope):
     # ~ print (node.out_ports[0].type)
     # ~ print (type(node.out_ports[0].type))
     # ~ if (type(node.out_ports[0].type) == IntegerType):
-        # ~ print("got integer")
+    # ~ print("got integer")
     literal_type = node.out_ports[0].type.emit_cpp()
     return scope.builder.constant(node.value, literal_type)
 
@@ -174,7 +176,7 @@ def export_binary_to_cpp(node, scope):
 
 
 def export_condition_to_cpp(node, scope):
-    (result, edge), = node.get_result_nodes()
+    ((result, edge),) = node.get_result_nodes()
 
     return result.emit_cpp(scope)
 
@@ -182,7 +184,7 @@ def export_condition_to_cpp(node, scope):
 def export_branch_to_cpp(node, scope):
     results = node.get_result_nodes()
     if results != []:
-        (result, edge), = node.get_result_nodes()
+        ((result, edge),) = node.get_result_nodes()
 
         return result.emit_cpp(scope)
     else:
@@ -203,7 +205,9 @@ def export_functioncall_to_cpp(node, scope):
 
     # Here we replace callee with sisal main if we call main (because main is now a C++ "int main(etc...")
 
-    result = scope.builder.call(functions["sisal_main" if node.callee == "main" else node.callee], args)
+    result = scope.builder.call(
+        functions["sisal_main" if node.callee == "main" else node.callee], args
+    )
     return result
 
 
@@ -240,9 +244,11 @@ def export_let_to_cpp(node, scope):
 
         type_ = port.type.emit_cpp()
         # get variable's name from body's parameters:
-        var_name = list(  node.body.params.items()  )[index][0]
+        var_name = list(node.body.params.items())[index][0]
         # initialize it:
-        new_variable = scope.builder.define(type_, value = calculated_value, name = var_name)
+        new_variable = scope.builder.define(
+            type_, value=calculated_value, name=var_name
+        )
         new_vars.append(new_variable)
 
     new_vars = new_vars + scope.vars
@@ -259,7 +265,7 @@ def export_if_to_cpp(node, scope):
 
     type_ = node.out_ports[0].type.emit_cpp()
 
-    result = scope.builder.define(type_, name = "if_result")
+    result = scope.builder.define(type_, name="if_result")
 
     then = if_.get_then_builder()
     then_scope = CppScope(scope.vars, then)
@@ -276,7 +282,7 @@ def export_if_to_cpp(node, scope):
 
 def export_precondition_to_cpp(node, scope):
     # the node that puts out the condition value:
-    result_node, result_edge = node.get_result_nodes() [0]
+    result_node, result_edge = node.get_result_nodes()[0]
     result_node.emit_cpp(scope)
 
 
@@ -305,9 +311,9 @@ def export_reduction_to_cpp(node, scope):
         return scope.builder.assignment(scope.vars[-1], value)
 
     elif node.operator == "sum":
-        return scope.builder.assignment(scope.vars[-1],
-                scope.builder.binary(  scope.vars[-1], value, "+")
-            )
+        return scope.builder.assignment(
+            scope.vars[-1], scope.builder.binary(scope.vars[-1], value, "+")
+        )
 
 
 def export_returns_to_cpp(node, scope):
@@ -315,29 +321,32 @@ def export_returns_to_cpp(node, scope):
     for result_node, result_edge in node.get_result_nodes():
         return result_node.emit_cpp(scope)
 
+
 def get_name_by_index(obj, index):
     return list(obj.keys()[index])
 
+
 def export_rangegen_to_cpp(node, scope):
     # ~ for (auto&& element: cont) {
-        # ~ v.append(element);
+    # ~ v.append(element);
     # ~ }
     # it shouldn't have edges from the outside, only from the inside
     input_node, edge = node.get_input_nodes()[0]
 
-
     input_node.emit_cpp(scope)
-    counter = scope.loop_init_builder.define( IntegerType(32), value = 0, name = "counter")
+    counter = scope.loop_init_builder.define(IntegerType(32), value=0, name="counter")
     scope.builder.cpp_code(counter.name + "++;")
 
-    if input_node.name == "Scatter": #means we can use for-loop
+    if input_node.name == "Scatter":  # means we can use for-loop
         type_ = sisal_to_cpp_type(input_node.out_ports[0].type)
-        current_item = scope.builder.define( type_, value = scope.builder.array_access(scope.vars[0], counter) , name = list(node.results.keys())[0])
-
+        current_item = scope.builder.define(
+            type_,
+            value=scope.builder.array_access(scope.vars[0], counter),
+            name=list(node.results.keys())[0],
+        )
 
     # ~ scope.add_var_to_front(counter)
     scope.add_var_to_front(current_item)
-
 
     return None
 
@@ -349,7 +358,7 @@ def export_scatter_to_cpp(node, scope):
 
 def export_loopexpression_to_cpp(node, scope):
     # TODO make use of "results" in the nodes
-    result = scope.builder.define(node.out_ports[0].type.emit_cpp(),  value = 0)
+    result = scope.builder.define(node.out_ports[0].type.emit_cpp(), value=0)
     # initialize variables from init-node and put them in new scope (at the beginning of the list)
     # the variables we introduce in this loop:
 
@@ -361,13 +370,12 @@ def export_loopexpression_to_cpp(node, scope):
         for index, port in enumerate(node.init.out_ports):
             type_ = port.type.emit_cpp()
             # get variable's name from body's parameters:
-            var_name = list(  node.body.params.items()  )[index][0]
+            var_name = list(node.body.params.items())[index][0]
             # initialize it:
-            new_variable = scope.builder.define(type_, value = 0, name = var_name)
+            new_variable = scope.builder.define(type_, value=0, name=var_name)
             new_vars.append(new_variable)
 
         new_vars = new_vars + scope.vars
-
 
     # make a new scope based on the provided one
     loop_scope_vars = new_vars + scope.get_vars_copy() + [result]
@@ -375,29 +383,29 @@ def export_loopexpression_to_cpp(node, scope):
 
     if "range" in node.__dict__:
         range_builder = loop.get_range_builder()
-        range_scope   = CppScope(loop_scope_vars, range_builder)
+        range_scope = CppScope(loop_scope_vars, range_builder)
         range_scope.loop_init_builder = loop.get_init_builder()
         node.range.emit_cpp(range_scope)
 
     # ~ # process pre-condition:
     # ~ if "pre_condition" in node.__dict__:
-        # ~ pre_cond_builder = loop.get_pre_cond_builder()
-        # ~ pre_cond_scope = CppScope(loop_scope_vars, pre_cond_builder)
-        # ~ node.pre_condition.emit_cpp(pre_cond_scope)
+    # ~ pre_cond_builder = loop.get_pre_cond_builder()
+    # ~ pre_cond_scope = CppScope(loop_scope_vars, pre_cond_builder)
+    # ~ node.pre_condition.emit_cpp(pre_cond_scope)
 
     # ~ # process the body:
     # ~ if "body" in node.__dict__:
-        # ~ body_builder = loop.get_body_builder()
-        # ~ body_scope = CppScope(loop_scope_vars, body_builder)
-        # ~ node.body.emit_cpp(body_scope)
+    # ~ body_builder = loop.get_body_builder()
+    # ~ body_scope = CppScope(loop_scope_vars, body_builder)
+    # ~ node.body.emit_cpp(body_scope)
 
     # process the reduction:
     # ~ reduction_builder = loop.get_reduction_builder()
     # ~ # TODO double the variables here
     # ~ reduction_scope_vars = []
     # ~ for v in new_vars:
-        # ~ for a in range(2):
-            # ~ reduction_scope_vars.append(v)
+    # ~ for a in range(2):
+    # ~ reduction_scope_vars.append(v)
 
     # ~ reduction_scope = CppScope(reduction_scope_vars + scope.vars + [result], reduction_builder)
     # ~ node.reduction.emit_cpp(reduction_scope)
@@ -407,4 +415,6 @@ def export_loopexpression_to_cpp(node, scope):
 
 def export_arrayaccess_to_cpp(node, scope):
     (array_src, array_edge), (index_src, index_edge) = node.get_input_nodes()
-    return scope.builder.array_access(resolve(array_edge, scope), resolve(index_edge, scope))
+    return scope.builder.array_access(
+        resolve(array_edge, scope), resolve(index_edge, scope)
+    )
