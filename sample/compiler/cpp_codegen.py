@@ -29,18 +29,18 @@
 # TODO separate scope result variable?
 # TODO move get_idntifier name to scope
 
-CPP_INDENT         = " " * 4
-REDUCTION_FIRST    = True
-OPTIMIZE_CPP       = False
+CPP_INDENT = " " * 4
+REDUCTION_FIRST = True
+OPTIMIZE_CPP = False
 MAIN_FUNCTION_NAME = "sisal_main"
 
 from compiler.cpp_opt import *
 
 from copy import copy
 
-class CppScope:
 
-    def __init__(self, vars_, builder = None):
+class CppScope:
+    def __init__(self, vars_, builder=None):
         self.builder = builder
         self.vars = copy(vars_)
 
@@ -55,7 +55,6 @@ class CppScope:
 
 
 class Type:
-
     def __init__(self):
         pass
 
@@ -64,7 +63,6 @@ class Type:
 
 
 class ArrayType(Type):
-
     def __init__(self, element_type):
         self.element_type = element_type
 
@@ -74,17 +72,16 @@ class ArrayType(Type):
     # indices is ArrayType.indices with some items removed (so we don't have name collisions)
     def print_code(self, name):
 
-        return f"result[\"{name}\"] = iterable_to_json({name});"
+        return f'result["{name}"] = iterable_to_json({name});'
 
         # ~ return f"for(unsigned int {index} = 0; {index} < {name}.size(); ++{index})\n" + \
-               # ~ "{\n" + CPP_INDENT + \
-                   # ~ self.element_type.print_code(str(name) + f"[{index}]") + \
-               # ~ "\n}"
+        # ~ "{\n" + CPP_INDENT + \
+        # ~ self.element_type.print_code(str(name) + f"[{index}]") + \
+        # ~ "\n}"
 
 
 class IntegerType(Type):
-
-    def __init__(self, bit_depth = 64):
+    def __init__(self, bit_depth=64):
         self.bit_depth = bit_depth
 
     def default(self):
@@ -96,14 +93,13 @@ class IntegerType(Type):
         if self.bit_depth == 64:
             return "long long int"
 
-    def print_code(self, name = ""):
-        return f"result[\"{name}\"] = {name};"
+    def print_code(self, name=""):
+        return f'result["{name}"] = {name};'
         # ~ return f"printf(\"%d\", {name});"
 
 
 class RealType(Type):
-
-    def __init__(self, bit_depth = 64):
+    def __init__(self, bit_depth=64):
         self.bit_depth = bit_depth
 
     def default(self):
@@ -115,13 +111,12 @@ class RealType(Type):
         if self.bit_depth == 64:
             return "double"
 
-    def print_code(self, name = "", new_indices = None):
-        return f"result[\"{name}\"] = {name};"
+    def print_code(self, name="", new_indices=None):
+        return f'result["{name}"] = {name};'
         # ~ return f'printf("%f", {name});'
 
 
 class BooleanType(Type):
-
     def __init__(self):
         pass
 
@@ -133,7 +128,6 @@ class BooleanType(Type):
 
 
 class StringType(Type):
-
     def __init__(self, value):
         self.value = value
 
@@ -142,13 +136,11 @@ class StringType(Type):
 
 
 class VoidType(Type):
-
     def __str__(self):
         return "void"
 
 
 class Statement:
-
     def __init__(self):
         self.no_semicolon = False
         return 0
@@ -158,7 +150,6 @@ class Statement:
 
 
 class Assignment(Statement):
-
     def __init__(self, var, value):
         super().__init__()
         self.var = var
@@ -169,7 +160,6 @@ class Assignment(Statement):
 
 
 class Return(Statement):
-
     def __init__(self, object_):
         super().__init__()
         self.object = object_
@@ -178,7 +168,7 @@ class Return(Statement):
         return "return " + str(self.object)
 
 
-class Expression():
+class Expression:
 
     # for id1, id2, id3... identifiers
     num_identifiers = 0
@@ -188,7 +178,7 @@ class Expression():
     names = {}
 
     def get_new_name(self):
-        if (type(self)==Constant):
+        if type(self) == Constant:
             return "const"
         Expression.num_identifiers += 1
         return "id" + str(Expression.num_identifiers)
@@ -201,11 +191,11 @@ class Expression():
             self.name = self.get_new_name()
         else:
             # ~ if name in Expression.names:
-                # ~ Expression.names[name] += 1
-                # ~ self.name = name + str(Expression.names[name])
+            # ~ Expression.names[name] += 1
+            # ~ self.name = name + str(Expression.names[name])
             # ~ else:
-                # ~ Expression.names[name] = 1
-                # ~ self.name = name
+            # ~ Expression.names[name] = 1
+            # ~ self.name = name
             self.name = name
 
     def __str__(self):
@@ -213,8 +203,7 @@ class Expression():
 
 
 class ArrayAccess(Expression):
-
-    def __init__(self, array_object, index_object, name = None):
+    def __init__(self, array_object, index_object, name=None):
         super().__init__(name)
         self.array_object = array_object
         self.index_object = index_object
@@ -223,12 +212,11 @@ class ArrayAccess(Expression):
         self.init_code = f"{self.array_object}[{self.index_object}]"
 
     # ~ def __str__(self):
-        # ~ return f"{self.array_object}[{self.index_object}]"
+    # ~ return f"{self.array_object}[{self.index_object}]"
 
 
 class Variable(Expression):
-
-    def __init__(self, type_, value = None, name = None):
+    def __init__(self, type_, value=None, name=None):
         super().__init__(name)
         self.type = type_
         self.value = value
@@ -236,8 +224,7 @@ class Variable(Expression):
 
 
 class Constant(Expression):
-
-    def __init__(self, value, type_, name = None):
+    def __init__(self, value, type_, name=None):
         super().__init__(name)
         self.value = value
         # ~ if value==3:
@@ -251,12 +238,11 @@ class Constant(Expression):
 
 
 class If(Expression):
-
-    def __init__(self, cond, indent_level, name = None):
+    def __init__(self, cond, indent_level, name=None):
         super().__init__(name)
         self.no_semicolon = True
-        self.cond  = cond
-        self.then  = Block(indent_level + 1)
+        self.cond = cond
+        self.then = Block(indent_level + 1)
         self.else_ = Block(indent_level + 1)
         self.indent_level = indent_level
 
@@ -275,52 +261,66 @@ class If(Expression):
     def __str__(self):
         ind = self.indent_level * CPP_INDENT
         # "" used to contain \n:
-        return f"if({self.cond})\n" + ind +  "{\n" + str(self.then) +\
-                "" + ind +"}\n"+ ind +"else\n" + ind + "{\n" +\
-                str(self.else_) +""+ ind + "}"
+        return (
+            f"if({self.cond})\n"
+            + ind
+            + "{\n"
+            + str(self.then)
+            + ""
+            + ind
+            + "}\n"
+            + ind
+            + "else\n"
+            + ind
+            + "{\n"
+            + str(self.else_)
+            + ""
+            + ind
+            + "}"
+        )
 
 
 # ~ class WhileLoop(Expression):
 
-    # ~ def __init__(self, indent_level = 0, name = None):
-        # ~ super().__init__(name)
-        # ~ self.no_semicolon = True
-        # ~ self.indent_level = indent_level
-        # ~ self.pre_cond = Block(indent_level + 1, name = "precondition")
-        # ~ self.body = Block(indent_level + 1, name = "body")
-        # ~ self.reduction = Block(indent_level + 1, name = "reduction")
+# ~ def __init__(self, indent_level = 0, name = None):
+# ~ super().__init__(name)
+# ~ self.no_semicolon = True
+# ~ self.indent_level = indent_level
+# ~ self.pre_cond = Block(indent_level + 1, name = "precondition")
+# ~ self.body = Block(indent_level + 1, name = "body")
+# ~ self.reduction = Block(indent_level + 1, name = "reduction")
 
-    # ~ def get_pre_cond_builder(self):
-        # ~ return Builder(self.pre_cond)
+# ~ def get_pre_cond_builder(self):
+# ~ return Builder(self.pre_cond)
 
-    # ~ def get_body_builder(self):
-        # ~ return Builder(self.body)
+# ~ def get_body_builder(self):
+# ~ return Builder(self.body)
 
-    # ~ def get_reduction_builder(self):
-        # ~ return Builder(self.reduction)
+# ~ def get_reduction_builder(self):
+# ~ return Builder(self.reduction)
 
-    # ~ def __str__(self):
-        # ~ ind = self.indent_level * CPP_INDENT
-        # ~ cond_code = self.pre_cond.inits[0].init_code
-        # ~ if REDUCTION_FIRST:
-            # ~ return "while( " + cond_code + " )\n" + ind + "{\n" + \
-                    # ~ str(self.reduction) + \
-                    # ~ str(self.body) + ind + \
-                    # ~ "}"
-        # ~ else:
-            # ~ return "while( " + cond_code + " )\n" + ind + "{\n" + \
-                    # ~ str(self.body) + \
-                    # ~ str(self.reduction) + ind + \
-                    # ~ "}"
+# ~ def __str__(self):
+# ~ ind = self.indent_level * CPP_INDENT
+# ~ cond_code = self.pre_cond.inits[0].init_code
+# ~ if REDUCTION_FIRST:
+# ~ return "while( " + cond_code + " )\n" + ind + "{\n" + \
+# ~ str(self.reduction) + \
+# ~ str(self.body) + ind + \
+# ~ "}"
+# ~ else:
+# ~ return "while( " + cond_code + " )\n" + ind + "{\n" + \
+# ~ str(self.body) + \
+# ~ str(self.reduction) + ind + \
+# ~ "}"
+
 
 class LoopExpression(Expression):
-
-    def __init__(self, indent_level = 0, name = None):
+    def __init__(self, indent_level=0, name=None):
         super().__init__(name)
         self.no_semicolon = True
         self.indent_level = indent_level
-        self.range_block = Block(indent_level + 1, name = "range")
-        self.init_block  = Block(0, name = "init")
+        self.range_block = Block(indent_level + 1, name="range")
+        self.init_block = Block(0, name="init")
         # ~ self.pre_cond = Block(indent_level + 1, name = "precondition")
         # ~ self.body = Block(indent_level + 1, name = "body")
         # ~ self.reduction = Block(indent_level + 1, name = "reduction")
@@ -344,27 +344,34 @@ class LoopExpression(Expression):
         ind = self.indent_level * CPP_INDENT
         cond_code = "1"
 
-        return      str(self.init_block) + ind + \
-                    "while( " + cond_code + " )\n" + ind + "{\n" + \
-                        str(self.range_block) + ind + \
-                    "}"
+        return (
+            str(self.init_block)
+            + ind
+            + "while( "
+            + cond_code
+            + " )\n"
+            + ind
+            + "{\n"
+            + str(self.range_block)
+            + ind
+            + "}"
+        )
         # ~ return ""
         # ~ cond_code = self.pre_cond.inits[0].init_code
         # ~ if REDUCTION_FIRST:
-            # ~ return "while( " + cond_code + " )\n" + ind + "{\n" + \
-                    # ~ str(self.reduction) + \
-                    # ~ str(self.body) + ind + \
-                    # ~ "}"
+        # ~ return "while( " + cond_code + " )\n" + ind + "{\n" + \
+        # ~ str(self.reduction) + \
+        # ~ str(self.body) + ind + \
+        # ~ "}"
         # ~ else:
-            # ~ return "while( " + cond_code + " )\n" + ind + "{\n" + \
-                    # ~ str(self.body) + \
-                    # ~ str(self.reduction) + ind + \
-                    # ~ "}"
+        # ~ return "while( " + cond_code + " )\n" + ind + "{\n" + \
+        # ~ str(self.body) + \
+        # ~ str(self.reduction) + ind + \
+        # ~ "}"
 
 
 class CppCode(Expression):
-
-    def __init__(self, code, name = None):
+    def __init__(self, code, name=None):
         super().__init__(name)
         self.no_semicolon = True
         self.code = code
@@ -374,11 +381,10 @@ class CppCode(Expression):
 
 
 class Binary(Expression):
-
-    def __init__(self, left, right, operator, name = None):
+    def __init__(self, left, right, operator, name=None):
         super().__init__(name)
-        self.left     = left
-        self.right    = right
+        self.left = left
+        self.right = right
         self.operator = operator
         if self.operator in ["<=", "<", ">", "==", ">="]:
             self.type = BooleanType()
@@ -387,7 +393,9 @@ class Binary(Expression):
             # TODO write proper type
             if type(self.left.type) == RealType or type(self.right.type) == RealType:
                 self.type = RealType(32)
-            elif type(self.left.type) == ArrayType or type(self.right.type) == ArrayType:
+            elif (
+                type(self.left.type) == ArrayType or type(self.right.type) == ArrayType
+            ):
                 self.type = self.left.type
             else:
                 self.type = IntegerType(32)
@@ -395,27 +403,30 @@ class Binary(Expression):
         self.init_code = f"{str(self.left)} {self.operator} {str(self.right)}"
 
 
-json_pipe_loader = '''\
+json_pipe_loader = """\
 // this code loads JSON input data from file
 // or pipe (depending on code generator configuration)
 Json::Value root;
-std::cin >> root;'''
+std::cin >> root;"""
 
-json_result_printer = '''\
+json_result_printer = """\
 std::cout << result << "\\n";
-std::cout << std::endl;'''
+std::cout << std::endl;"""
+
 
 def unpack_variable(a):
 
     if type(a.type) == ArrayType:
-        init_code =  f"{a.type} {a};\n"
-        init_code += f"for ( unsigned int index = 0; index < root[\"{a}\"].size(); ++index )\n"
+        init_code = f"{a.type} {a};\n"
+        init_code += (
+            f'for ( unsigned int index = 0; index < root["{a}"].size(); ++index )\n'
+        )
         # TODO it's asInt now, make it an arbitrary type!
-        init_code += CPP_INDENT + f"{a}.push_back(root[\"{a}\"][index].asInt());\n"
+        init_code += CPP_INDENT + f'{a}.push_back(root["{a}"][index].asInt());\n'
         return init_code
 
     elif type(a.type) == IntegerType:
-        return f"{a.type} {a} = root[\"{a}\"].asInt();\n"
+        return f'{a.type} {a} = root["{a}"].asInt();\n'
 
 
 def init_arg_loader(args):
@@ -433,71 +444,72 @@ def init_result_printer():
     return result_printer_code
 
 
-def indent_cpp(code, steps = 1):
+def indent_cpp(code, steps=1):
 
     code = code.strip()
-    return CPP_INDENT * steps + code.replace('\n', '\n' + CPP_INDENT * steps)
+    return CPP_INDENT * steps + code.replace("\n", "\n" + CPP_INDENT * steps)
 
 
 class Block:
-
-    def __init__(self, indent_offset = 1, name = None):
+    def __init__(self, indent_offset=1, name=None):
         self.inits = []
         self.statements = []
         self.indent_level = indent_offset
         self.name = name
 
-
-    def add_expression(self, exp, name = None):
+    def add_expression(self, exp, name=None):
         self.statements.append(exp)
-        if type (exp) == Variable:
+        if type(exp) == Variable:
             inits.append(exp)
-
 
     def add_init(self, identifier):
         self.inits.append(identifier)
 
-
     def __str__(self):
 
-        label = "" if self.name == None else CPP_INDENT * self.indent_level + f"// {self.name}:"  + "\n"
+        label = (
+            ""
+            if self.name == None
+            else CPP_INDENT * self.indent_level + f"// {self.name}:" + "\n"
+        )
 
-        inits = "".join(  CPP_INDENT * self.indent_level +
-                            str(s.type) + " "  +
-                            str(s.name) +
-                            ((" = " + str(s.init_code)) if s.init_code not in ["", None] else "") +
-                            ("" if s.no_semicolon else ";") + "\n"
-                            for s in self.inits)
+        inits = "".join(
+            CPP_INDENT * self.indent_level
+            + str(s.type)
+            + " "
+            + str(s.name)
+            + ((" = " + str(s.init_code)) if s.init_code not in ["", None] else "")
+            + ("" if s.no_semicolon else ";")
+            + "\n"
+            for s in self.inits
+        )
 
         # ~ body = "\n".join( CPP_INDENT * self.indent_level +
-                            # ~ str(s) + (";" if type(s) not in [If, WhileLoop] else "") for s in self.statements)
+        # ~ str(s) + (";" if type(s) not in [If, WhileLoop] else "") for s in self.statements)
 
-        body = "\n".join( CPP_INDENT * self.indent_level +
-                            str(s) + ("" if s.no_semicolon else ";") for s in self.statements)
+        body = "\n".join(
+            CPP_INDENT * self.indent_level + str(s) + ("" if s.no_semicolon else ";")
+            for s in self.statements
+        )
         return label + inits + body + "\n"
-
 
     def add_ret(self, object_):
         self.statements.append(Return(object_))
 
-
     def add_if(self, if_):
         self.statements.append(if_)
 
-
     def add_bin(self, bin_):
         self.statements.append(bin_)
-
 
     def add_assignment(self, assignment):
         self.statements.append(assignment)
 
     # ~ def add_while_loop(self, wl):
-        # ~ self.statements.append(wl)
+    # ~ self.statements.append(wl)
 
     def add_loop(self, loop):
         self.statements.append(loop)
-
 
     def add_array_access(self, aa):
         self.statements.append(aa)
@@ -507,18 +519,20 @@ class Function:
 
     functions = {}
 
-    def __init__(self, name, return_type, arguments: "list of (name, type) - tuples", main = False):
-        self.name        = name
+    def __init__(
+        self, name, return_type, arguments: "list of (name, type) - tuples", main=False
+    ):
+        self.name = name
         self.return_type = return_type
-        self.arguments   = []
-        self.statements  = []
-        self.entry_block = Block(name = "entry")
-        self.is_main     = main
+        self.arguments = []
+        self.statements = []
+        self.entry_block = Block(name="entry")
+        self.is_main = main
         Function.functions[name] = self
 
         if not main:
             for index, (name, type_) in enumerate(arguments):
-                argument = Variable (name = name,type_ =  type_)
+                argument = Variable(name=name, type_=type_)
                 self.arguments.append(argument)
         else:
             self.return_type = IntegerType(32)
@@ -544,7 +558,7 @@ class Function:
             arg_text = "int argc, char **argv"
             footer = CPP_INDENT + "return 0;\n"
         else:
-            arg_text = ", ".join([str (a.type) +" "+ str(a) for a in self.arguments])
+            arg_text = ", ".join([str(a.type) + " " + str(a) for a in self.arguments])
 
         text += f"{self.return_type} {self.name}({arg_text})\n"
 
@@ -554,21 +568,28 @@ class Function:
         # this should make name collision prevention code also work
         if self.is_main:
             # add a simple try-catch
-            text += CPP_INDENT + "try\n" + CPP_INDENT +"{\n"
+            text += CPP_INDENT + "try\n" + CPP_INDENT + "{\n"
 
-            #add code that loads arguments
-            args =  Function.functions[MAIN_FUNCTION_NAME].arguments
+            # add code that loads arguments
+            args = Function.functions[MAIN_FUNCTION_NAME].arguments
             text += indent_cpp(init_arg_loader(args), 2) + "\n"
             text += indent_cpp(init_result_printer(), 2) + "\n"
 
             entry_block = str(self.entry_block)
             text += f"{CPP_INDENT + indent_cpp(entry_block)}\n"
             text += indent_cpp(json_result_printer, 2) + "\n"
-            text += CPP_INDENT + "}\n" +\
-                    CPP_INDENT + "catch(int)\n" + CPP_INDENT +\
-                    "{\n" + CPP_INDENT*2 +\
-                        "return 1;\n" + CPP_INDENT +\
-                    "}\n"
+            text += (
+                CPP_INDENT
+                + "}\n"
+                + CPP_INDENT
+                + "catch(int)\n"
+                + CPP_INDENT
+                + "{\n"
+                + CPP_INDENT * 2
+                + "return 1;\n"
+                + CPP_INDENT
+                + "}\n"
+            )
         else:
             text += f"{self.entry_block}"
 
@@ -579,8 +600,7 @@ class Function:
 
 
 class Call(Expression):
-
-    def __init__(self, function, args : "a list of c++ identifiers", name = None):
+    def __init__(self, function, args: "a list of c++ identifiers", name=None):
         super().__init__(name)
         self.function = function
 
@@ -589,44 +609,55 @@ class Call(Expression):
         # TODO probably not the best way to do this:
         if function.name == MAIN_FUNCTION_NAME:
             args = [v.name for v in function.arguments]
-            self.init_code = self.function.name + "(" + ",".join((str(s) for s in args)) + ")"
+            self.init_code = (
+                self.function.name + "(" + ",".join((str(s) for s in args)) + ")"
+            )
         else:
             self.args = args
-            self.init_code = self.function.name + "(" + ",".join((str(s) for s in self.args)) + ")"
+            self.init_code = (
+                self.function.name + "(" + ",".join((str(s) for s in self.args)) + ")"
+            )
 
 
 class BuiltInFunctionCall(Expression):
-    #def __init__(self, name, return_type, arguments: "list of (name, type) - tuples", main = False):
+    # def __init__(self, name, return_type, arguments: "list of (name, type) - tuples", main = False):
     built_ins = dict(
-                      size = Function("size", ArrayType(IntegerType()), arguments = [("array", ArrayType(IntegerType()))])
-                    )
+        size=Function(
+            "size",
+            ArrayType(IntegerType()),
+            arguments=[("array", ArrayType(IntegerType()))],
+        )
+    )
 
-    def __init__(self, function_name, args : "a list of C++ identifiers", name = None):
+    def __init__(self, function_name, args: "a list of C++ identifiers", name=None):
         super().__init__(name)
         callee = BuiltInFunctionCall.built_ins[function_name]
         self.function = BuiltInFunctionCall.built_ins[function_name]
         self.type = callee.return_type
 
         self.args = args
-        self.init_code = self.function.name + "(" + ",".join((str(s) for s in self.args)) + ")"
+        self.init_code = (
+            self.function.name + "(" + ",".join((str(s) for s in self.args)) + ")"
+        )
 
 
 class Builder:
-
     def __init__(self, block):
         self.block = block
 
-    def call(self, function, args, name = None):
+    def call(self, function, args, name=None):
         call = Call(function, args, name)
         self.block.add_init(call)
         return call
 
-    def built_in_call(self, function_name, args, name = None): # "name" is name for defined value, not the function
+    def built_in_call(
+        self, function_name, args, name=None
+    ):  # "name" is name for defined value, not the function
         call = BuiltInFunctionCall(function_name, args, name)
         self.block.add_init(call)
         return call
 
-    def define(self, type_, value = None, name = None):
+    def define(self, type_, value=None, name=None):
         identifier = Variable(type_, value, name)
         self.block.add_init(identifier)
         return identifier
@@ -653,12 +684,12 @@ class Builder:
         return c
 
     # ~ def while_(self):
-        # ~ while_loop = WhileLoop(indent_level = self.block.indent_level)
-        # ~ self.block.add_while_loop(while_loop)
-        # ~ return while_loop
+    # ~ while_loop = WhileLoop(indent_level = self.block.indent_level)
+    # ~ self.block.add_while_loop(while_loop)
+    # ~ return while_loop
 
     def loop(self):
-        loop_ = LoopExpression(indent_level = self.block.indent_level)
+        loop_ = LoopExpression(indent_level=self.block.indent_level)
         self.block.add_loop(loop_)
         return loop_
 
@@ -676,7 +707,8 @@ class Builder:
         for c in code.split("\n"):
             self.block.add_expression(CppCode(c))
 
-header = '''\
+
+header = """\
 #include <stdio.h>
 #include <vector>
 #include <iostream>
@@ -703,15 +735,17 @@ vector<I> operator | (const vector<I>& lhs, const vector<I>& rhs){
 }
 
 //---------------------------------------------------------------------
-'''
+"""
+
 
 class Module:
-
     def __init__(self, name):
         self.name = name
         self.functions = {}
         self.headers = []
-        Module.printf = Function("printf", IntegerType(32), [("number", IntegerType(32))])
+        Module.printf = Function(
+            "printf", IntegerType(32), [("number", IntegerType(32))]
+        )
 
     def add_function(self, function):
         # ~ function.module = self
@@ -724,7 +758,7 @@ class Module:
             self.headers.append(header_name)
 
     def __str__(self):
-        text = "//" +  self.name + "\n"
+        text = "//" + self.name + "\n"
         text += header
         text += "\n\n".join([f"#include <{str(h)}>" for h in self.headers]) + "\n\n"
         text += "\n\n".join([str(f) for name, f in self.functions.items()])
