@@ -319,6 +319,8 @@ class LoopExpression(Expression):
         super().__init__(name)
         self.no_semicolon = True
         self.indent_level = indent_level
+        self.range_block = Block(indent_level + 1, name = "range")
+        self.init_block  = Block(0, name = "init")
         # ~ self.pre_cond = Block(indent_level + 1, name = "precondition")
         # ~ self.body = Block(indent_level + 1, name = "body")
         # ~ self.reduction = Block(indent_level + 1, name = "reduction")
@@ -326,15 +328,27 @@ class LoopExpression(Expression):
     def get_pre_cond_builder(self):
         return Builder(self.pre_cond)
 
+    def get_init_builder(self):
+        return Builder(self.init_block)
+
     def get_body_builder(self):
         return Builder(self.body)
+
+    def get_range_builder(self):
+        return Builder(self.range_block)
 
     def get_reduction_builder(self):
         return Builder(self.reduction)
 
     def __str__(self):
         ind = self.indent_level * CPP_INDENT
-        return ""
+        cond_code = "1"
+
+        return      str(self.init_block) + ind + \
+                    "while( " + cond_code + " )\n" + ind + "{\n" + \
+                        str(self.range_block) + ind + \
+                    "}"
+        # ~ return ""
         # ~ cond_code = self.pre_cond.inits[0].init_code
         # ~ if REDUCTION_FIRST:
             # ~ return "while( " + cond_code + " )\n" + ind + "{\n" + \
@@ -433,13 +447,16 @@ class Block:
         self.indent_level = indent_offset
         self.name = name
 
+
     def add_expression(self, exp, name = None):
         self.statements.append(exp)
         if type (exp) == Variable:
             inits.append(exp)
 
+
     def add_init(self, identifier):
         self.inits.append(identifier)
+
 
     def __str__(self):
 
@@ -457,17 +474,20 @@ class Block:
 
         body = "\n".join( CPP_INDENT * self.indent_level +
                             str(s) + ("" if s.no_semicolon else ";") for s in self.statements)
-
         return label + inits + body + "\n"
+
 
     def add_ret(self, object_):
         self.statements.append(Return(object_))
 
+
     def add_if(self, if_):
         self.statements.append(if_)
 
+
     def add_bin(self, bin_):
         self.statements.append(bin_)
+
 
     def add_assignment(self, assignment):
         self.statements.append(assignment)
@@ -478,9 +498,9 @@ class Block:
     def add_loop(self, loop):
         self.statements.append(loop)
 
+
     def add_array_access(self, aa):
         self.statements.append(aa)
-
 
 
 class Function:

@@ -123,9 +123,7 @@ def parse_json_fields(self, node):
     if ("branches" in node ):     self.branches      = parse_nodes(node["branches"])
     if ("nodes" in node ):        self.nodes         = parse_nodes(node["nodes"])
 
-    if ("range" in node ):
-        print (node["range"])
-        self.range         = parse_node(node["range"])
+    if ("range" in node ):        self.range         = parse_node(node["range"])
 
     # Loop:
 

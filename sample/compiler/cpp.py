@@ -26,7 +26,8 @@ from compiler.cpp_codegen import *
 
 
 type_map = {
-    "integer" : IntegerType(32)
+    "integer" : IntegerType(32),
+    "realv" : RealType(32),
 }
 
 
@@ -298,14 +299,14 @@ def export_reduction_to_cpp(node, scope):
 
     index = node.get_input_edges()[0].from_index
 
-    value = resolve(node.get_input_edges()[1],scope)
+    value = resolve(node.get_input_edges()[1], scope)
 
     if node.operator == "value":
         return scope.builder.assignment(scope.vars[-1], value)
 
     elif node.operator == "sum":
         return scope.builder.assignment(scope.vars[-1],
-                scope.builder.binary(  scope.vars[-1] , value , "+")
+                scope.builder.binary(  scope.vars[-1], value, "+")
             )
 
 
@@ -313,6 +314,37 @@ def export_returns_to_cpp(node, scope):
 
     for result_node, result_edge in node.get_result_nodes():
         return result_node.emit_cpp(scope)
+
+def get_name_by_index(obj, index):
+    return list(obj.keys()[index])
+
+def export_rangegen_to_cpp(node, scope):
+    # ~ for (auto&& element: cont) {
+        # ~ v.append(element);
+    # ~ }
+    # it shouldn't have edges from the outside, only from the inside
+    input_node, edge = node.get_input_nodes()[0]
+
+
+    input_node.emit_cpp(scope)
+    counter = scope.loop_init_builder.define( IntegerType(32), value = 0, name = "counter")
+    scope.builder.cpp_code(counter.name + "++;")
+
+    if input_node.name == "Scatter": #means we can use for-loop
+        type_ = sisal_to_cpp_type(input_node.out_ports[0].type)
+        current_item = scope.builder.define( type_, value = scope.builder.array_access(scope.vars[0], counter) , name = list(node.results.keys())[0])
+
+
+    # ~ scope.add_var_to_front(counter)
+    scope.add_var_to_front(current_item)
+
+
+    return None
+
+
+def export_scatter_to_cpp(node, scope):
+
+    return None
 
 
 def export_loopexpression_to_cpp(node, scope):
@@ -322,7 +354,7 @@ def export_loopexpression_to_cpp(node, scope):
     # the variables we introduce in this loop:
 
     new_vars = []
-    print (node.range)
+    # ~ print (node.range)
     if "init" in node.__dict__:
 
         # put newly defined variables into new vars (we will add them to the scope)
@@ -336,9 +368,16 @@ def export_loopexpression_to_cpp(node, scope):
 
         new_vars = new_vars + scope.vars
 
+
     # make a new scope based on the provided one
     loop_scope_vars = new_vars + scope.get_vars_copy() + [result]
     loop = scope.builder.loop()
+
+    if "range" in node.__dict__:
+        range_builder = loop.get_range_builder()
+        range_scope   = CppScope(loop_scope_vars, range_builder)
+        range_scope.loop_init_builder = loop.get_init_builder()
+        node.range.emit_cpp(range_scope)
 
     # ~ # process pre-condition:
     # ~ if "pre_condition" in node.__dict__:
