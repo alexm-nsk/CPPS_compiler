@@ -40,9 +40,13 @@ from copy import copy
 
 
 class CppScope:
-    def __init__(self, vars_, builder=None):
-        self.builder = builder
-        self.vars = copy(vars_)
+    def __init__(self, vars_=None, builder=None, base_scope=None):
+        if base_scope == None:
+            self.builder = builder
+            self.vars = copy(vars_)
+        else:
+            self.builder = base_scope.builder
+            self.vars = copy(base_scope.vars_)
 
     def add_var_to_front(self, var):
         self.vars.insert(0, var)
@@ -190,13 +194,13 @@ class Expression:
         if not name:
             self.name = self.get_new_name()
         else:
-            # ~ if name in Expression.names:
-            # ~ Expression.names[name] += 1
-            # ~ self.name = name + str(Expression.names[name])
-            # ~ else:
-            # ~ Expression.names[name] = 1
+            if name in Expression.names:
+                self.name = name + str(Expression.names[name])
+                Expression.names[name] += 1
+            else:
+                Expression.names[name] = 1
+                self.name = name
             # ~ self.name = name
-            self.name = name
 
     def __str__(self):
         return self.name
@@ -238,13 +242,14 @@ class Constant(Expression):
 
 
 class If(Expression):
-    def __init__(self, cond, indent_level, name=None):
+    def __init__(self, cond, indent_level, has_else=True, name=None):
         super().__init__(name)
         self.no_semicolon = True
         self.cond = cond
         self.then = Block(indent_level + 1)
         self.else_ = Block(indent_level + 1)
         self.indent_level = indent_level
+        self.has_else = has_else
 
     def get_then(self):
         return self.then
@@ -269,14 +274,14 @@ class If(Expression):
             + ""
             + ind
             + "}\n"
-            + ind
+            + (ind
             + "else\n"
             + ind
             + "{\n"
             + str(self.else_)
             + ""
             + ind
-            + "}"
+            + "}" if not self.else_.is_empty() else "")
         )
 
 
@@ -465,6 +470,12 @@ class Block:
     def add_init(self, identifier):
         self.inits.append(identifier)
 
+    def add_define(self, init):
+        self.statements.append(init)
+
+    def is_empty(self):
+        return not( self.inits or self.statements )
+
     def __str__(self):
 
         label = (
@@ -624,7 +635,7 @@ class BuiltInFunctionCall(Expression):
     built_ins = dict(
         size=Function(
             "size",
-            ArrayType(IntegerType()),
+            IntegerType(),
             arguments=[("array", ArrayType(IntegerType()))],
         )
     )
@@ -657,9 +668,12 @@ class Builder:
         self.block.add_init(call)
         return call
 
-    def define(self, type_, value=None, name=None):
+    def define(self, type_, value=None, init=True, name=None):
         identifier = Variable(type_, value, name)
-        self.block.add_init(identifier)
+        if init:
+            self.block.add_init(identifier)
+        else:
+            self.block.add_define(identifier)
         return identifier
 
     def ret(self, object_):
@@ -674,8 +688,8 @@ class Builder:
         self.block.add_if(if_)
         return if_
 
-    def binary(self, left, right, op):
-        bin_ = Binary(left, right, op)
+    def binary(self, left, right, op, name = None):
+        bin_ = Binary(left, right, op, name)
         self.block.add_init(bin_)
         return bin_
 

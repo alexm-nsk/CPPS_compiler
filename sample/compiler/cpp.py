@@ -65,7 +65,7 @@ def make_cpp_main_function():
 
 
 def export_function_to_cpp(node, scope):
-
+    Expression.names = {}
     # turn function input arguments into c++ arguments
     args = []
     for n, a in enumerate(node.params):
@@ -326,16 +326,23 @@ def get_name_by_index(obj, index):
     return list(obj.keys()[index])
 
 
+def export_scatter_to_cpp(node, scope):
+
+    return None
+
+
 def export_rangegen_to_cpp(node, scope):
-    # ~ for (auto&& element: cont) {
-    # ~ v.append(element);
-    # ~ }
     # it shouldn't have edges from the outside, only from the inside
     input_node, edge = node.get_input_nodes()[0]
 
     input_node.emit_cpp(scope)
     counter = scope.loop_init_builder.define(IntegerType(32), value=0, name="counter")
-    scope.builder.cpp_code(counter.name + "++;")
+
+    boundary = scope.loop_init_builder.built_in_call("size", [scope.vars[0]], name="boundary")
+
+    check = scope.builder.if_(scope.builder.binary(counter, boundary, ">=", name="boundary_reached"))
+    then_builder = check.get_then_builder()
+    then_builder.cpp_code("break;")
 
     if input_node.name == "Scatter":  # means we can use for-loop
         type_ = sisal_to_cpp_type(input_node.out_ports[0].type)
@@ -345,15 +352,8 @@ def export_rangegen_to_cpp(node, scope):
             name=list(node.results.keys())[0],
         )
 
-    # ~ scope.add_var_to_front(counter)
-    scope.add_var_to_front(current_item)
-
-    return None
-
-
-def export_scatter_to_cpp(node, scope):
-
-    return None
+    scope.builder.cpp_code(counter.name + "++;")
+    return [current_item]
 
 
 def export_loopexpression_to_cpp(node, scope):
@@ -385,8 +385,10 @@ def export_loopexpression_to_cpp(node, scope):
         range_builder = loop.get_range_builder()
         range_scope = CppScope(loop_scope_vars, range_builder)
         range_scope.loop_init_builder = loop.get_init_builder()
-        node.range.emit_cpp(range_scope)
+        scope.items = node.range.emit_cpp(range_scope) #it's a list!
 
+    if "reduction" in node.__dict__:
+        pass
     # ~ # process pre-condition:
     # ~ if "pre_condition" in node.__dict__:
     # ~ pre_cond_builder = loop.get_pre_cond_builder()
