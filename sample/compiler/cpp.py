@@ -314,7 +314,9 @@ def export_reduction_to_cpp(node, scope):
     cond = resolve(edge_by_index(input_edges,0), scope)
     print (input_edges[0].to_index)
     print ("value", value, "index", index, "condition", cond)
-
+    check = scope.builder.if_(cond)
+    then_builder = check.get_then_builder()
+    then_builder.cpp_code(str(scope.result) + ".push_back( " + str(value) + " );")
     # ~ if node.operator == "value":
         # ~ return scope.builder.assignment(scope.vars[-1], value)
 
@@ -403,6 +405,7 @@ def export_loopexpression_to_cpp(node, scope):
 
     if "reduction" in node.__dict__:
         reduction_scope = CppScope(reduction_vars, loop.get_reduction_builder())
+        reduction_scope.result = result
         node.reduction.emit_cpp(reduction_scope)
 
     # ~ # process pre-condition:
