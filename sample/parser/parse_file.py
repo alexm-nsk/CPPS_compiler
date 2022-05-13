@@ -399,7 +399,11 @@ class TreeVisitor(NodeVisitor):
 
 
     def visit_equation(self, node, visited_children):
-        return Equation(left = visited_children[0], right = visited_children[4])
+        return Algebraic(location = self.get_location(node),
+                         expression = [visited_children[0],
+                                       Bin(location="N/A", operator="="),
+                                       visited_children[4]])
+        # ~ return Equation(left = visited_children[0], right = visited_children[4])
 
 
     def visit_builtin_call(self, node, visited_children):

@@ -167,7 +167,7 @@ def export_literal_to_cpp(node, scope):
 def export_binary_to_cpp(node, scope):
 
     (left, l_edge), (right, r_edge) = node.get_input_nodes()
-    operator = node.operator
+    operator = node.operator if node.operator != "=" else "=="
 
     lho = resolve(l_edge, scope)
     rho = resolve(r_edge, scope)
@@ -238,10 +238,11 @@ def export_let_to_cpp(node, scope):
     for index, port in enumerate(node.init.out_ports):
         init_values = node.init.get_result_nodes()
         value_node = next(node for node, edge in init_values if edge.to_index == index)
-        if index != 1:
-            calculated_value = value_node.emit_cpp(scope)
-        else:
-            calculated_value = 0
+        calculated_value = value_node.emit_cpp(scope)
+        # ~ if index != 1:
+            # ~ calculated_value = value_node.emit_cpp(scope)
+        # ~ else:
+            # ~ calculated_value = 0
 
         type_ = port.type.emit_cpp()
         # get variable's name from body's parameters:
