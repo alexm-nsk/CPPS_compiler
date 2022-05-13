@@ -182,16 +182,17 @@ def export_condition_to_cpp(node, scope):
 
 
 def export_branch_to_cpp(node, scope):
-    results = node.get_result_nodes()
-    if results != []:
-        ((result, edge),) = node.get_result_nodes()
+    results = resolve(node.get_input_edges()[0], scope)
+    return results
+    # ~ results = node.get_result_nodes()
+    # ~ if results != []:
+        # ~ ((result, edge),) = node.get_result_nodes()
 
-        return result.emit_cpp(scope)
-    else:
-        edges = node.get_input_edges()
-
-        for edge in edges:
-            return scope.vars[edge.from_index]
+        # ~ return result.emit_cpp(scope)
+    # ~ else:
+        # ~ edges = node.get_input_edges()
+        # ~ for edge in edges:
+            # ~ return scope.vars[edge.from_index]
 
 
 def export_functioncall_to_cpp(node, scope):
@@ -228,10 +229,12 @@ def export_builtinfunctioncall_to_cpp(node, scope):
 
 def export_let_to_cpp(node, scope):
     # ~ print (dir (node))
-    result = scope.builder.constant(1, IntegerType())
-
+    # ~ result = scope.builder.constant(1, IntegerType())
+    value_block = Block()
+    #TODO make block after each value!
+    value_builder = Builder(value_block)
     new_vars = []
-    # put newly defined variables into new vars (we will add them to scops)
+    # put newly defined variables into new vars (we will add them to scope)
     for index, port in enumerate(node.init.out_ports):
         init_values = node.init.get_result_nodes()
         value_node = next(node for node, edge in init_values if edge.to_index == index)
@@ -239,21 +242,22 @@ def export_let_to_cpp(node, scope):
             calculated_value = value_node.emit_cpp(scope)
         else:
             calculated_value = 0
-        # ~ print (index, "\n"*2, value_node, "\n"*5)
-        # ~ print (calculated_value)
 
         type_ = port.type.emit_cpp()
         # get variable's name from body's parameters:
         var_name = list(node.body.params.items())[index][0]
         # initialize it:
-        new_variable = scope.builder.define(
+        new_variable = value_builder.define(
             type_, value=calculated_value, name=var_name
         )
         new_vars.append(new_variable)
 
+    scope.builder.add_block(value_block)
     new_vars = new_vars + scope.vars
-
-    return result
+    value_scope = CppScope(new_vars, value_builder)
+    result = node.body.emit_cpp(value_scope)
+    # ~ body
+    return result#
 
 
 def export_if_to_cpp(node, scope):
@@ -276,7 +280,7 @@ def export_if_to_cpp(node, scope):
     else_scope = CppScope(scope.vars, else_)
     else_result = get_branch("Else").emit_cpp(else_scope)
     else_scope.builder.assignment(result, else_result)
-
+    # ~ print (get_branch("Else").name)
     return result
 
 
@@ -298,7 +302,8 @@ def export_body_to_cpp(node, scope):
     for result_node, result_edge in node.get_result_nodes():
         index = result_edge.to_index
         value = result_node.emit_cpp(scope)
-        scope.builder.assignment(scope.vars[index], value)
+        # ~ scope.builder.assignment(scope.vars[index], value)
+        return value
 
 
 def edge_by_index(edges, index):
@@ -308,15 +313,16 @@ def edge_by_index(edges, index):
 
 def export_reduction_to_cpp(node, scope):
     input_edges = node.get_input_edges()
-    index = resolve(edge_by_index(input_edges,1), scope)
+    index = resolve(edge_by_index(input_edges, 1), scope)
     value = resolve(edge_by_index(input_edges, 2), scope)
     # ~ print (value)
     cond = resolve(edge_by_index(input_edges,0), scope)
-    print (input_edges[0].to_index)
-    print ("value", value, "index", index, "condition", cond)
+    # ~ print (input_edges[0].to_index)
+    # ~ print ("value", value, "index", index, "condition", cond)
     check = scope.builder.if_(cond)
     then_builder = check.get_then_builder()
     then_builder.cpp_code(str(scope.result) + ".push_back( " + str(value) + " );")
+    return value
     # ~ if node.operator == "value":
         # ~ return scope.builder.assignment(scope.vars[-1], value)
 
@@ -327,7 +333,7 @@ def export_reduction_to_cpp(node, scope):
 
 
 def export_returns_to_cpp(node, scope):
-    print ("returns")
+    # ~ print ("returns")
     for result_node, result_edge in node.get_result_nodes():
         return result_node.emit_cpp(scope)
 
@@ -373,7 +379,7 @@ def export_rangegen_to_cpp(node, scope):
 
 def export_loopexpression_to_cpp(node, scope):
     # TODO make use of "results" in the nodes
-    result = scope.builder.define(node.out_ports[0].type.emit_cpp(), value=0)
+    result = scope.builder.define(node.out_ports[0].type.emit_cpp())
     # initialize variables from init-node and put them in new scope (at the beginning of the list)
     # the variables we introduce in this loop:
 
