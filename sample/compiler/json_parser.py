@@ -26,13 +26,17 @@ from compiler.nodes import *
 # ~ from compiler.llvm import *
 # ~ from compiler.cpp import *
 
-def compile_to_llvm(json_data):
-    init_llvm()
-    functions = [parse_node (function) for function in json_data["functions"]]
-    print ( create_llvm_module(functions, "module") )
+# ~ def compile_to_llvm(json_data):
+    # ~ init_llvm()
+    # ~ functions = [parse_node (function) for function in json_data["functions"]]
+    # ~ print ( create_llvm_module(functions, "module") )
 
 
 def compile_to_cpp(json_data, name = "module"):
+    Node.nodes = {}
+    Edge.edges = []
+    Edge.edges_from = {}
+    Edge.edges_to   = {}
     module = Module(name)
 
     functions = [parse_node (function) for function in json_data["functions"]]
@@ -51,7 +55,8 @@ def compile_to_cpp(json_data, name = "module"):
             module.add_header(import_)
 
     # ~ module = create_cpp_module(functions, name)
-    print ( module )
+
+    return module
 
 
 def main(args):
