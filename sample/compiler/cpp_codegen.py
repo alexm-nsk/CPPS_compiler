@@ -328,7 +328,7 @@ class LoopExpression(Expression):
         self.init_block = Block(0, name="init")
         # ~ self.pre_cond = Block(indent_level + 1, name = "precondition")
         # ~ self.body = Block(indent_level + 1, name = "body")
-        # ~ self.reduction = Block(indent_level + 1, name = "reduction")
+        self.reduction_block = Block(indent_level + 1, name = "reduction")
 
     def get_pre_cond_builder(self):
         return Builder(self.pre_cond)
@@ -343,7 +343,7 @@ class LoopExpression(Expression):
         return Builder(self.range_block)
 
     def get_reduction_builder(self):
-        return Builder(self.reduction)
+        return Builder(self.reduction_block)
 
     def __str__(self):
         ind = self.indent_level * CPP_INDENT
@@ -358,6 +358,8 @@ class LoopExpression(Expression):
             + ind
             + "{\n"
             + str(self.range_block)
+            + ind
+            + str(self.reduction_block)
             + ind
             + "}"
         )
@@ -472,6 +474,9 @@ class Block:
 
     def add_define(self, init):
         self.statements.append(init)
+
+    def add_block(self, block):
+        self.statements.append(block)
 
     def is_empty(self):
         return not( self.inits or self.statements )
@@ -720,6 +725,10 @@ class Builder:
     def cpp_code(self, code):
         for c in code.split("\n"):
             self.block.add_expression(CppCode(c))
+
+    def add_block(self, block):
+        block.no_semicolon = True
+        self.block.add_block(block)
 
 
 header = """\

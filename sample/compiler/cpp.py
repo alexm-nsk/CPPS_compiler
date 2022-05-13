@@ -301,23 +301,31 @@ def export_body_to_cpp(node, scope):
         scope.builder.assignment(scope.vars[index], value)
 
 
+def edge_by_index(edges, index):
+    for e in edges:
+        if e.to_index == index:
+            return e
+
 def export_reduction_to_cpp(node, scope):
+    input_edges = node.get_input_edges()
+    index = resolve(edge_by_index(input_edges,1), scope)
+    value = resolve(edge_by_index(input_edges, 2), scope)
+    # ~ print (value)
+    cond = resolve(edge_by_index(input_edges,0), scope)
+    print (input_edges[0].to_index)
+    print ("value", value, "index", index, "condition", cond)
 
-    index = node.get_input_edges()[0].from_index
+    # ~ if node.operator == "value":
+        # ~ return scope.builder.assignment(scope.vars[-1], value)
 
-    value = resolve(node.get_input_edges()[1], scope)
-
-    if node.operator == "value":
-        return scope.builder.assignment(scope.vars[-1], value)
-
-    elif node.operator == "sum":
-        return scope.builder.assignment(
-            scope.vars[-1], scope.builder.binary(scope.vars[-1], value, "+")
-        )
+    # ~ elif node.operator == "sum":
+        # ~ return scope.builder.assignment(
+            # ~ scope.vars[-1], scope.builder.binary(scope.vars[-1], value, "+")
+        # ~ )
 
 
 def export_returns_to_cpp(node, scope):
-
+    print ("returns")
     for result_node, result_edge in node.get_result_nodes():
         return result_node.emit_cpp(scope)
 
@@ -353,6 +361,11 @@ def export_rangegen_to_cpp(node, scope):
         )
 
     scope.builder.cpp_code(counter.name + "++;")
+
+    # ~ form_array_block = Block(name = "here we form the array")
+    # ~ form_array_builder = Builder(form_array_block)
+    # ~ scope.builder.add_block(form_array_block)
+
     return [current_item]
 
 
@@ -364,31 +377,34 @@ def export_loopexpression_to_cpp(node, scope):
 
     new_vars = []
     # ~ print (node.range)
-    if "init" in node.__dict__:
+    # ~ if "init" in node.__dict__:
 
-        # put newly defined variables into new vars (we will add them to the scope)
-        for index, port in enumerate(node.init.out_ports):
-            type_ = port.type.emit_cpp()
-            # get variable's name from body's parameters:
-            var_name = list(node.body.params.items())[index][0]
-            # initialize it:
-            new_variable = scope.builder.define(type_, value=0, name=var_name)
-            new_vars.append(new_variable)
+        # ~ # put newly defined variables into new vars (we will add them to the scope)
+        # ~ for index, port in enumerate(node.init.out_ports):
+            # ~ type_ = port.type.emit_cpp()
+            # ~ # get variable's name from body's parameters:
+            # ~ var_name = list(node.body.params.items())[index][0]
+            # ~ # initialize it:
+            # ~ new_variable = scope.builder.define(type_, value=0, name=var_name)
+            # ~ new_vars.append(new_variable)
 
-        new_vars = new_vars + scope.vars
+        # ~ new_vars = new_vars + scope.vars
 
     # make a new scope based on the provided one
     loop_scope_vars = new_vars + scope.get_vars_copy() + [result]
     loop = scope.builder.loop()
 
     if "range" in node.__dict__:
-        range_builder = loop.get_range_builder()
-        range_scope = CppScope(loop_scope_vars, range_builder)
+        range_scope = CppScope(loop_scope_vars, loop.get_range_builder())
         range_scope.loop_init_builder = loop.get_init_builder()
         scope.items = node.range.emit_cpp(range_scope) #it's a list!
 
+    reduction_vars = scope.items + loop_scope_vars
+
     if "reduction" in node.__dict__:
-        pass
+        reduction_scope = CppScope(reduction_vars, loop.get_reduction_builder())
+        node.reduction.emit_cpp(reduction_scope)
+
     # ~ # process pre-condition:
     # ~ if "pre_condition" in node.__dict__:
     # ~ pre_cond_builder = loop.get_pre_cond_builder()
