@@ -751,10 +751,15 @@ Json::Value iterable_to_json(Iterable const& cont) {
 }
 
 template <typename I>
-vector<I> operator | (const vector<I>& lhs, const vector<I>& rhs){
+vector<I> operator || (const vector<I>& lhs, const vector<I>& rhs){
     vector<I> result = lhs;
     result.insert(result.end(), rhs.begin(), rhs.end());
     return result;	// returning the vector "result"
+}
+
+inline int size (vector<int> A)
+{
+    return A.size();
 }
 
 //---------------------------------------------------------------------
