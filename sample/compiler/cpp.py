@@ -65,7 +65,12 @@ def make_cpp_main_function():
 
 
 def export_function_to_cpp(node, scope):
-    Expression.names = {}
+
+    # ~ print (Expression.names)
+    # ~ Expression.names = {}
+    # ~ Expression.num_identifiers = 0
+    Expression.reset_names()
+
     # turn function input arguments into c++ arguments
     args = []
     for n, a in enumerate(node.params):

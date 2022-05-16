@@ -181,6 +181,11 @@ class Expression:
     # see __init__ for details
     names = {}
 
+    @staticmethod
+    def reset_names():
+        Expression.names = {}
+        Expression.num_identifiers = 0
+
     def get_new_name(self):
         if type(self) == Constant:
             return "const"
